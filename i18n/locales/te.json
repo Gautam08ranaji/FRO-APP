@@ -1,0 +1,13 @@
+{
+  "LanguageScreen": {
+    "title": "మీ భాషను ఎంచుకోండి",
+    "subtitle": "మీకు సౌకర్యమైన భాషను ఎంచుకోండి",
+    "continue": "సేవ్ చేసి కొనసాగించండి",
+    "loading": "సేవ్ అవుతోంది..."
+  },
+  "OnboardingScreen": {
+    "welcomeTitle": "అప్‌కు స్వాగతం!",
+    "welcomeSubtitle": "ఇది మీ ఆన్‌బోర్డింగ్ స్క్రీన్.",
+    "getStarted": "ప్రారంభించండి"
+  }
+}

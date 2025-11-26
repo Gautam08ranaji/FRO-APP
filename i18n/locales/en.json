@@ -1,0 +1,76 @@
+{
+  "LanguageScreen": {
+    "title": "Choose Language",
+    "subtitle": "Select the language you are comfortable with",
+    "continue": "Continue",
+    "loading": "Saving..."
+  },
+  "OnboardingScreen": {
+    "title1": "National Senior Citizen",
+    "title2": "Support Center",
+    "chooseLanguage": "Choose Language"
+  },
+  "LoginScreen": {
+    "title": "Login or Register",
+    "subtitle": "Please enter your Mobile/Aadhaar number. We will send you an OTP and you will need to enter it here.",
+    "phoneLabel": "Phone / Aadhaar Number",
+    "placeholder": "Enter 10 or 12 digit number",
+    "enterPhone": "Please enter your phone or Aadhaar number.",
+    "invalidNumber": "Please enter a valid 10-digit phone number or 12-digit Aadhaar number.",
+    "existingUser": "Existing user found. Please enter your password to login.",
+    "password": "Enter your password",
+    "invalidPassword": "Please enter a valid password.",
+    "login": "Login",
+    "loggingIn": "Logging in...",
+    "forgot": "Forgot Password?",
+    "forgotComing": "Password recovery feature is coming soon.",
+    "newUser": "New user found. Let's verify your number.",
+    "sendOtp": "Send OTP",
+    "sendingOtp": "Sending OTP...",
+    "enterOtp": "Enter 6-digit OTP",
+    "otpPlaceholder": "Enter OTP",
+    "invalidOtp": "Please enter a valid 6-digit OTP.",
+    "verifyOtp": "Verify OTP",
+    "continue": "Continue",
+    "otpTitle": "Enter OTP",
+    "otpSentTo": "We have sent a 6-digit OTP to",
+    "resendIn": "Resend OTP in",
+    "resendOtp": "Resend OTP"
+  },
+  "profile":{
+    "title":"Setup Profile",
+    "subtitle":"Your Profile will help us send right  help ",
+    "name":"Full Name",
+    "nameError":"Please enter full name",
+    "dob":"Date of birth",
+    "dobError":"Please select date of birth",
+    "gender":"Select Gender",
+    "genderError":"Please select gender",
+    "emergCont":"Emergency Contact Number",
+    "contError":"Please enter Emergency Contact Number",
+    "button1":"Next step: Address Detials",
+    "title1":"Setup Address",
+    "subtitle":"All your address details have already been fetched from your GPS. You can change them manually if needed. This helps our team send assistance without any delay or errors.",
+    "selectLocation":"Select Location",
+    "state":"Select state",
+    "city":"Select city",
+    "addressdetails":"Address Details",
+    "line1":"Address Line 1 (required)",
+    "line2":"Address Line 2 (optional)",
+    "Landmark":"Landmark & Additional Info",
+    "Landmark1":"Landmark (required)",
+    "additionalInfo":"Additional info (optional)",
+    "stateError":"Please Select State",
+    "cityError":"Please Select City",
+    "addressError":"Please Eenter (Address Line 1)",
+    "landmarkError":"Please Enter Landmark"
+  },
+  "button":{
+    "back":"Back",
+    "continue":"Continue"
+  },
+  "profileSuccess":{
+    "welcome":", welcome",
+    "message":"All details have been successfully collected, and we are preparing them for use."
+  }
+}

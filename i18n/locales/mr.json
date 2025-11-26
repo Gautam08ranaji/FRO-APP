@@ -1,0 +1,13 @@
+{
+  "LanguageScreen": {
+    "title": "आपली भाषा निवडा",
+    "subtitle": "तुमच्या सोयीस्कर भाषेची निवड करा",
+    "continue": "जतन करा आणि पुढे जा",
+    "loading": "जतन करत आहे..."
+  },
+  "OnboardingScreen": {
+    "welcomeTitle": "अॅपमध्ये आपले स्वागत आहे!",
+    "welcomeSubtitle": "हे तुमचे ऑनबोर्डिंग स्क्रीन आहे.",
+    "getStarted": "सुरू करा"
+  }
+}
