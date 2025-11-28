@@ -1,145 +1,282 @@
 import { useTheme } from "@/theme/ThemeContext";
-import React, { PropsWithChildren } from "react";
+import { useRouter } from "expo-router";
+import React from "react";
 import {
-  Image,
+  Dimensions,
   ScrollView,
+  StyleProp,
   StyleSheet,
   Text,
-  TextStyle,
   TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
-import TextTicker from "react-native-text-ticker";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-type BodyLayoutProps = PropsWithChildren<{
-  containerStyle?: ViewStyle;
-  headerStyle?: ViewStyle;
-  marqueeContainerStyle?: ViewStyle;
-  marqueeTextStyle?: TextStyle;
-  scrollContentStyle?: ViewStyle;
-}>;
+const { width } = Dimensions.get("window");
+
+interface BodyLayoutProps {
+  type: "dashboard" | "screen";
+  screenName?: string;
+  children: React.ReactNode;
+
+  /** NEW — accept external style */
+  scrollViewStyle?: StyleProp<ViewStyle>;
+  scrollContentStyle?: StyleProp<ViewStyle>;
+}
 
 export default function BodyLayout({
+  type,
+  screenName,
   children,
-  containerStyle,
-  headerStyle,
-  marqueeContainerStyle,
-  marqueeTextStyle,
-  scrollContentStyle
+  scrollViewStyle,
+  scrollContentStyle,
 }: BodyLayoutProps) {
   const { theme } = useTheme();
+  const router = useRouter();
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: theme.colors.background },
-        containerStyle,
-      ]}
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
     >
-      {/* HEADER */}
-      <View
-        style={[
-          styles.header,
-          { backgroundColor: theme.colors.colorPrimary50 },
-          headerStyle,
-        ]}
-      >
-        <Image
-          source={require("@/assets/images/appIcon.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-
-        <TouchableOpacity
+      {type === "dashboard" ? (
+        <View
           style={[
-            styles.emergencyBtn,
-            { backgroundColor: theme.colors.btnSosBg },
+            styles.dashboardHeader,
+            { backgroundColor: theme.colors.primary },
           ]}
         >
-          <RemixIcon name="alarm-warning-line" size={18} color="#fff" />
-          <Text style={styles.emergencyText}>Emergency</Text>
-        </TouchableOpacity>
-      </View>
+          {/* TOP */}
+          <View style={styles.topRow}>
+            <View>
+              <Text
+                style={[
+                  theme.typography.fontH2,
+                  { color: "#fff", paddingHorizontal: 1 },
+                ]}
+              >
+                नमस्ते, राजेश जी
+              </Text>
 
-      {/* MARQUEE TEXT */}
-      <View
-        style={[
-          styles.marqueeContainer,
-          { backgroundColor: theme.colors.colorPrimary50 },
-          marqueeContainerStyle,
-        ]}
-      >
-        <TextTicker
+              <Text
+                style={[
+                  theme.typography.fontBodySmall,
+                  styles.subId,
+                  { color: "#d9f6f2", fontSize: width * 0.035 },
+                ]}
+              >
+                FRO-14567-001
+              </Text>
+            </View>
+
+            <View style={styles.iconRow}>
+              <TouchableOpacity
+                style={styles.iconCircle}
+                onPress={() => {
+                  router.push("/notification");
+                }}
+              >
+                <RemixIcon name="notification-line" size={22} color="#fff" />
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>3</Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.iconCircle}
+                onPress={() => {
+                  router.push("/escalation");
+                }}
+              >
+                <RemixIcon name="alert-line" size={22} color="#fff" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.iconCircle}>
+                <RemixIcon name="phone-line" size={22} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* BOTTOM */}
+          <View
+            style={[styles.bottomSection, { backgroundColor: "#079f8dff" }]}
+          >
+            <View style={styles.row}>
+              <Text
+                style={[
+                  theme.typography.fontBody,
+                  { color: theme.colors.colorTextInverse },
+                ]}
+              >
+                आज की ड्यूटी
+              </Text>
+
+              <Text
+                style={[
+                  theme.typography.fontBody,
+                  { color: theme.colors.card, paddingHorizontal: 1 },
+                ]}
+              >
+                कुल मामले
+              </Text>
+            </View>
+
+            <View style={styles.row}>
+              <Text
+                style={[
+                  theme.typography.fontH4,
+                  { color: theme.colors.colorTextInverse },
+                ]}
+              >
+                12
+              </Text>
+
+              <Text
+                style={[
+                  theme.typography.fontH4,
+                  { color: theme.colors.colorTextInverse },
+                ]}
+              >
+                04
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View
           style={[
-            styles.marqueeText,
-            { color: theme.colors.colorPrimary700 },
-            marqueeTextStyle,
+            styles.dashboardHeader,
+            {
+              backgroundColor: theme.colors.primary,
+              flexDirection: "row",
+              paddingVertical: 40,
+            },
           ]}
-          duration={8000}
-          loop
-          bounce={false}
-          repeatSpacer={50}
-          marqueeDelay={1000}
         >
-          ⚠️ किसी भी आपातस्थिति में आपातकाल बटन दबाएँ या सीधे 14567 पर कॉल करें।
-        </TextTicker>
-      </View>
+          <TouchableOpacity onPress={() => router.back()}>
+            <RemixIcon
+              name="arrow-left-line"
+              size={26}
+              color={theme.colors.colorBgSurface}
+            />
+          </TouchableOpacity>
 
-      {/* CONTENT */}
+          <Text
+            style={[
+              theme.typography.fontH3,
+              styles.screenTitle,
+              {
+                color: theme.colors.colorBgSurface,
+                fontSize: width * 0.05,
+                paddingHorizontal: 1,
+              },
+            ]}
+          >
+            {screenName}
+          </Text>
+        </View>
+      )}
+
+      {/* BODY */}
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={[styles.bodyContainer, scrollViewStyle]} // ⬅️ external style merged
         contentContainerStyle={[
-          styles.scrollContent,
-          { backgroundColor: theme.colors.colorBgPage },
-          scrollContentStyle,
+          styles.contentPadding,
+          scrollContentStyle, // ⬅️ external style merged
         ]}
       >
         {children}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  safeArea: {
+    flex: 1,
+  },
 
-  header: {
+  dashboardHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    elevation: 3,
+    flexDirection: "column",
+    gap: 16,
+  },
+
+  topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 0,
+    alignItems: "center",
   },
 
-  logo: { width: 140, height: 100 },
+  subId: {
+    marginTop: 2,
+  },
 
-  emergencyBtn: {
+  iconRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginVertical: 30,
-    borderRadius: 8,
+    gap: 10,
   },
 
-  emergencyText: {
+  iconCircle: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    padding: 8,
+    borderRadius: 20,
+    position: "relative",
+  },
+
+  badge: {
+    position: "absolute",
+    top: -6,
+    right: -8,
+    backgroundColor: "red",
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  badgeText: {
     color: "#fff",
-    marginLeft: 6,
-    fontWeight: "600",
+    fontSize: 10,
+    fontWeight: "700",
   },
 
-  marqueeContainer: {
-    paddingHorizontal: 10,
+  bottomSection: {
+    width: "100%",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
   },
 
-  marqueeText: {
-    fontSize: 14,
-    fontWeight: "500",
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 4,
   },
 
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+  screenTitle: {
+    fontWeight: "700",
+    marginLeft: 10,
+  },
+
+  bodyContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 16,
+    marginTop: 10,
+  },
+
+  contentPadding: {
+    paddingBottom: 60,
   },
 });

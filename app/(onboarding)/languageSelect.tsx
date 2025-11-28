@@ -52,7 +52,8 @@ export default function LanguageSelection() {
     setLoading(true);
     try {
       // no more change language here
-      router.push('/(onboarding)/login');
+      // router.push('/(onboarding)/welcomeScreen');
+      router.push('/StatusUpdateScreen');
     } catch (err) {
       console.error('Error changing language:', err);
     } finally {

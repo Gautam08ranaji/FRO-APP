@@ -6,9 +6,12 @@
     "loading": "सहेजा जा रहा है..."
   },
   "OnboardingScreen": {
-    "title1": "राष्ट्रीय वरिष्ठ नागरिक",
-    "title2": "सहायता केंद्र",
-    "chooseLanguage": "भाषा चुनें"
+    
+  "title1": "FRO",
+  "title2": "सेवा प्लेटफ़ॉर्म",
+  "chooseLanguage": "भाषा चुनें"
+
+
   },
 
   "LoginScreen": {

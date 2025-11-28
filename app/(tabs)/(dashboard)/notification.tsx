@@ -1,0 +1,165 @@
+import BodyLayout from "@/components/layout/BodyLayout";
+import { useTheme } from "@/theme/ThemeContext";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import RemixIcon, { IconName } from "react-native-remix-icon";
+
+export default function NotificationScreen() {
+  const { theme } = useTheme();
+
+  interface NotificationType {
+    id: number;
+    icon: IconName;
+    iconBg: string;
+    title: string;
+    subtitle: string;
+    time: string;
+    isNew: boolean;
+  }
+
+  const notifications: NotificationType[] = [
+    {
+      id: 1,
+      icon: "file-copy-line",
+      iconBg: "#1976D2",
+      title: "आपको नया मामला सौंपा गया है",
+      subtitle: "टिकट नंबर: TKT-14567-001",
+      time: "5 मिनट पहले",
+      isNew: true,
+    },
+    {
+      id: 2,
+      icon: "error-warning-line",
+      iconBg: "#E65100",
+      title: "टिकट TKT-14567-003 अपडेट हुआ है",
+      subtitle: "वरिष्ठ नागरिक ने नया संदेश भेजा है",
+      time: "1 घंटे पहले",
+      isNew: true,
+    },
+    {
+      id: 3,
+      icon: "message-2-line",
+      iconBg: "#2E7D32",
+      title: "सुपरवाइज़र ने टिप्पणी जोड़ी है",
+      subtitle: "टिकट TKT-14567-002 पर नई टिप्पणी",
+      time: "2 घंटे पहले",
+      isNew: false,
+    },
+  ];
+
+  return (
+    <BodyLayout screenName="नोटिफिकेशन" type="screen">
+      <View style={styles.container}>
+        {notifications.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            activeOpacity={0.8}
+            style={[
+              styles.card,
+              {
+                backgroundColor: theme.colors.colorBgSurface,
+                borderLeftWidth: item.isNew ? 4 : 0,
+                borderLeftColor: item.isNew ? "#2E7D32" : "transparent",
+              },
+            ]}
+          >
+            {/* 🔥 ROW: ICON | TITLE | DOT */}
+            <View style={styles.topRow}>
+              <View
+                style={[
+                  styles.iconBox,
+                  { backgroundColor: item.iconBg  },
+                ]}
+              >
+                <RemixIcon name={item.icon} size={24} color={    "#FFFFFF"    }/>
+              </View>
+
+              <Text
+                style={[
+                  styles.title,
+                  { color: theme.colors.colorTextPrimary },
+                ]}
+              >
+                {item.title}
+              </Text>
+
+              {item.isNew && <View style={styles.dot} />}
+            </View>
+
+            {/* Subtitle */}
+            <Text style={[styles.subtitle, styles.indented]}>
+              {item.subtitle}
+            </Text>
+
+            {/* Time */}
+            <Text style={[styles.time, styles.indented]}>{item.time}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </BodyLayout>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+
+  card: {
+    padding: 16,
+    marginBottom: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 0.6,
+    borderColor: "#E6E6E6",
+  },
+
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  iconBox: {
+    width: 45,
+    height: 45,
+    borderRadius: 45,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+    
+  },
+
+  title: {
+    flex: 1,           // 🔥 pushes dot to the right
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  dot: {
+    width: 10,
+    height: 10,
+    backgroundColor: "#2E7D32",
+    borderRadius: 10,
+    marginLeft: 10,
+  },
+
+  indented: {
+    marginLeft: 57,    // aligns subtitle/time under the title, not icon
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
+    marginTop: 4,
+  },
+
+  time: {
+    fontSize: 12,
+    color: "#999",
+  },
+});

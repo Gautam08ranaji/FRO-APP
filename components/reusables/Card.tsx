@@ -14,17 +14,19 @@ import {
 
 type CardProps = {
   title?: string;
+  titleColor?: string; // ⭐ NEW PROP
   children?: React.ReactNode;
   backgroundColor?: string;
   gradientColors?: [ColorValue, ColorValue, ...ColorValue[]];
   shadowColor?: string;
   style?: StyleProp<ViewStyle>;
   cardStyle?: StyleProp<ViewStyle>;
-  onPress?: () => void; // ✅ onPress support added
+  onPress?: () => void;
 };
 
 export default function Card({
   title,
+  titleColor, // ⭐ NEW
   children,
   backgroundColor,
   gradientColors,
@@ -35,13 +37,18 @@ export default function Card({
 }: CardProps) {
   const { theme } = useTheme();
 
-  // Select wrapper: TouchableOpacity or View
+  // Wrapper component (TouchableOpacity if pressable)
   const Wrapper = onPress ? TouchableOpacity : View;
 
   const cardContent = (
     <>
       {title && (
-        <Text style={[styles.title, { color: theme.colors.inputText }]}>
+        <Text
+          style={[
+            styles.title,
+            { color: titleColor || theme.colors.inputText }, // ⭐ APPLIED HERE
+          ]}
+        >
           {title}
         </Text>
       )}
@@ -82,7 +89,7 @@ export default function Card({
 const styles = StyleSheet.create({
   wrapper: {
     width: "100%",
-    maxWidth: 360,
+    maxWidth: 380,
     alignSelf: "center",
     borderRadius: 20,
     marginTop: 15,
@@ -100,7 +107,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
     padding: 16,
-    minHeight: 220,
+    minHeight: 80,
   },
   title: {
     fontSize: 18,

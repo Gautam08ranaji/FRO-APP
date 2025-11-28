@@ -10,7 +10,7 @@ export const typography = {
 
   fontBodyLarge: { fontSize: 18, fontWeight: '400', lineHeight: 28 },
   fontBody: { fontSize: 16, fontWeight: '400', lineHeight: 24 },
-  fontBodySmall: { fontSize: 14, fontWeight: '400', lineHeight: 20 },
+  fontBodySmall: { fontSize: 14, fontWeight: '400', lineHeight: 24 },
   fontCaption: { fontSize: 13, fontWeight: '400', lineHeight: 18 },
 
   fontButtonLarge: { fontSize: 18, fontWeight: '600', lineHeight: 24 },
