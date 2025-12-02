@@ -10,67 +10,124 @@
     "title2": "Support Center",
     "chooseLanguage": "Choose Language"
   },
-  "LoginScreen": {
-    "title": "Login or Register",
-    "subtitle": "Please enter your Mobile/Aadhaar number. We will send you an OTP and you will need to enter it here.",
-    "phoneLabel": "Phone / Aadhaar Number",
-    "placeholder": "Enter 10 or 12 digit number",
-    "enterPhone": "Please enter your phone or Aadhaar number.",
-    "invalidNumber": "Please enter a valid 10-digit phone number or 12-digit Aadhaar number.",
-    "existingUser": "Existing user found. Please enter your password to login.",
-    "password": "Enter your password",
-    "invalidPassword": "Please enter a valid password.",
-    "login": "Login",
-    "loggingIn": "Logging in...",
-    "forgot": "Forgot Password?",
-    "forgotComing": "Password recovery feature is coming soon.",
-    "newUser": "New user found. Let's verify your number.",
+  "login": {
+    "title": "Login",
+    "subtitle": "Enter your officer ID and mobile number.",
+    "officerId": "Officer ID",
+    "officerIdPlaceholder": "Enter your officer code",
+    "mobile": "Mobile Number",
     "sendOtp": "Send OTP",
-    "sendingOtp": "Sending OTP...",
-    "enterOtp": "Enter 6-digit OTP",
-    "otpPlaceholder": "Enter OTP",
-    "invalidOtp": "Please enter a valid 6-digit OTP.",
-    "verifyOtp": "Verify OTP",
-    "continue": "Continue",
-    "otpTitle": "Enter OTP",
-    "otpSentTo": "We have sent a 6-digit OTP to",
-    "resendIn": "Resend OTP in",
+    "forgotPassword": "Forgot password?",
+    "contactSupervisor": "Contact Supervisor"
+  },
+  "onboarding": {
+  "step1Title": "Receive new cases instantly",
+  "step1Subtitle": "View all newly assigned cases here.",
+
+  "step2Title": "Navigate to location easily",
+  "step2Subtitle": "Use GPS to navigate directly to the citizen's location.",
+
+  "step3Title": "Update case status",
+  "step3Subtitle": "Complete the case by adding photos, notes and evidence.",
+
+  "prev": "Previous",
+  "next": "Next",
+  "gotoDashboard": "Go to Dashboard"
+}
+,
+  "otp": {
+    "enterOtp": "Enter OTP",
+    "sentTo": "We have sent a 6-digit OTP to",
+    "verify": "Verify",
+    "resendAfter": "seconds left",
     "resendOtp": "Resend OTP"
   },
-  "profile":{
-    "title":"Setup Profile",
-    "subtitle":"Your Profile will help us send right  help ",
-    "name":"Full Name",
-    "nameError":"Please enter full name",
-    "dob":"Date of birth",
-    "dobError":"Please select date of birth",
-    "gender":"Select Gender",
-    "genderError":"Please select gender",
-    "emergCont":"Emergency Contact Number",
-    "contError":"Please enter Emergency Contact Number",
-    "button1":"Next step: Address Detials",
-    "title1":"Setup Address",
-    "subtitle":"All your address details have already been fetched from your GPS. You can change them manually if needed. This helps our team send assistance without any delay or errors.",
-    "selectLocation":"Select Location",
-    "state":"Select state",
-    "city":"Select city",
-    "addressdetails":"Address Details",
-    "line1":"Address Line 1 (required)",
-    "line2":"Address Line 2 (optional)",
-    "Landmark":"Landmark & Additional Info",
-    "Landmark1":"Landmark (required)",
-    "additionalInfo":"Additional info (optional)",
-    "stateError":"Please Select State",
-    "cityError":"Please Select City",
-    "addressError":"Please Eenter (Address Line 1)",
-    "landmarkError":"Please Enter Landmark"
+ "profileSteps": {
+  "step1Title": "Officer Details",
+  "fullName": "Full Name",
+  "enterFullName": "Enter your full name",
+  "position": "Position",
+  "empCode": "Employee Code",
+
+  "step2Title": "Your Work Area",
+  "step2Description": "Choose your work area so appropriate cases can be assigned.",
+  "state": "State",
+  "enterState": "Enter state",
+  "district": "District",
+  "enterDistrict": "Enter district",
+  "block": "Block / Police Station",
+  "enterBlock": "Enter block / police station",
+  "teamLead": "Team Leader Name",
+
+  "step3Title": "Contact Details",
+  "mobile": "Mobile Number",
+  "enterMobile": "Enter mobile number",
+  "email": "Email (optional)",
+  "enterEmail": "Enter email",
+
+  "mobileRequired": "Please enter mobile number",
+  "mobileInvalid": "Enter a valid 10-digit mobile number",
+  "emailInvalid": "Enter valid email",
+
+  "next": "Next",
+  "submit": "Submit"
+}
+,
+  "button": {
+    "back": "Back",
+    "continue": "Continue"
   },
-  "button":{
-    "back":"Back",
-    "continue":"Continue"
+  "profileSuccess": {
+    "welcome": ", welcome",
+    "message": "All details have been successfully collected, and we are preparing them for use."
   },
-  "profileSuccess":{
-    "welcome":", welcome",
-    "message":"All details have been successfully collected, and we are preparing them for use."
-  }
+  "welcome": {
+    "title": "Welcome, Field Response Officer",
+    "subtitle": "This app is used to view, update, and provide assistance for the cases assigned to you.",
+    "login": "Login",
+    "aboutApp": "Learn about the app"
+  },
+  "home": {
+  "casesOverview": "Case Overview",
+
+  "newCases": "New Cases",
+  "approvedCases": "Approved Cases",
+  "onTheWay": "On The Way",
+  "working": "In Progress",
+  "followup": "Follow-Up",
+  "closedCases": "Closed Cases",
+
+  "todayDuty": "Today's Duty",
+  "totalCases": "Total Cases",
+  "highPriority": "High Priority Cases:",
+  "quickActions": "Quick Actions",
+  "addNewCase": "Add New Case",
+  "viewMap": "View Map"
+},
+"escalation": {
+  "screenTitle": "Send Escalation",
+
+  "warningText": "⚠️ Use escalation only for serious cases. Your supervisor will be notified immediately.",
+
+  "chooseReason": "Select Reason",
+  "reasonPlaceholder": "Select reason",
+  "notesLabel": "Add Notes",
+  "notesPlaceholder": "Write here...",
+  "uploadLabel": "Add Photo / Document",
+  "uploadText": "Upload File",
+  "fileSelected": "File Selected ✓",
+
+  "camera": "📷 Camera",
+  "gallery": "🖼️ Gallery",
+  "cancel": "Cancel",
+
+  "submitEscalation": "Submit Escalation",
+
+  "reason1": "Emergency situation",
+  "reason2": "Reason unclear",
+  "reason3": "No cooperation",
+  "reason4": "Delay in treatment"
+}
+
+
 }

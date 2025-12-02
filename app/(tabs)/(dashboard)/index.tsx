@@ -3,6 +3,7 @@ import Card from "@/components/reusables/Card";
 import ReusableButton from "@/components/reusables/ReusableButton";
 import ReusableCard from "@/components/reusables/ReusableCard";
 import { useTheme } from "@/theme/ThemeContext";
+import { router } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
@@ -14,73 +15,123 @@ export default function HomeScreen() {
 
   return (
     <BodyLayout type="dashboard">
+
+      {/* Heading */}
       <Text
-        style={[theme.typography.fontH2, { color: theme.colors.colorPrimary600 }]}
+        style={[
+          theme.typography.fontH2,
+          { color: theme.colors.colorPrimary600 },
+        ]}
       >
-        मामलों का विवरण
+        {t("home.casesOverview")}
       </Text>
 
+      {/* ROW 1 */}
       <View style={styles.row}>
         <ReusableCard
           icon="file-list-3-line"
           count={12}
-          title="नए मामले"
+          title={t("home.newCases")}
           bg={theme.colors.colorBgPage}
           iconBg={theme.colors.validationInfoText}
           countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/(complaints)",
+              params: { filter: "new" },
+            })
+          }
         />
+
         <ReusableCard
           icon="folder-check-line"
           count={12}
-          title="नए मामले"
+          title={t("home.approvedCases")}
           bg={theme.colors.colorBgPage}
           iconBg="#00C950"
-           countColor={theme.colors.colorPrimary600}
+          countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/(complaints)",
+              params: { filter: "approved" },
+            })
+          }
         />
       </View>
+
+      {/* ROW 2 */}
       <View style={styles.row}>
         <ReusableCard
           icon="arrow-right-box-line"
           count={12}
-          title="नए मामले"
+          title={t("home.onTheWay")}
           bg={theme.colors.colorBgPage}
           iconBg="#AD46FF"
-           countColor={theme.colors.colorPrimary600}
+          countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/(complaints)",
+              params: { filter: "onway" },
+            })
+          }
         />
+
         <ReusableCard
           icon="time-line"
           count={12}
-          title="नए मामले"
+          title={t("home.working")}
           bg={theme.colors.colorBgPage}
           iconBg="#FF6900"
-           countColor={theme.colors.colorPrimary600}
+          countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/(complaints)",
+              params: { filter: "working" },
+            })
+          }
         />
       </View>
+
+      {/* ROW 3 */}
       <View style={styles.row}>
         <ReusableCard
           icon="group-line"
           count={12}
-          title="नए मामले"
+          title={t("home.followup")}
           bg={theme.colors.colorBgPage}
           iconBg="#F0B100"
-           countColor={theme.colors.colorPrimary600}
+          countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/(complaints)",
+              params: { filter: "followup" },
+            })
+          }
         />
+
         <ReusableCard
           icon="close-circle-line"
           count={12}
-          title="नए मामले"
+          title={t("home.closedCases")}
           bg={theme.colors.colorBgPage}
           iconBg="#6A7282"
-           countColor={theme.colors.colorPrimary600}
+          countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/(complaints)",
+              params: { filter: "closed" },
+            })
+          }
         />
       </View>
 
+      {/* BOTTOM INFO CARD */}
       <View
         style={[
           styles.bottomSection,
@@ -91,19 +142,19 @@ export default function HomeScreen() {
           <Text
             style={[
               theme.typography.fontBodyLarge,
-              { color: theme.colors.colorTextSecondary, paddingHorizontal: 1 },
+              { color: theme.colors.colorTextSecondary },
             ]}
           >
-            आज की ड्यूटी
+            {t("home.todayDuty")}
           </Text>
 
           <Text
             style={[
               theme.typography.fontBodyLarge,
-              { color: theme.colors.colorPrimary600, paddingHorizontal: 1 },
+              { color: theme.colors.colorPrimary600 },
             ]}
           >
-            कुल मामले
+            {t("home.totalCases")}
           </Text>
         </View>
 
@@ -114,7 +165,7 @@ export default function HomeScreen() {
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            उच्च प्राथमिकता मामले:
+            {t("home.highPriority")}
           </Text>
 
           <Text
@@ -128,8 +179,9 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {/* QUICK ACTION CARD */}
       <Card
-        title="त्वरित कार्रवाई"
+        title={t("home.quickActions")}
         cardStyle={{
           height: 140,
           backgroundColor: theme.colors.colorBgPage,
@@ -140,27 +192,27 @@ export default function HomeScreen() {
           type="double"
           buttons={[
             {
-              title: "नया मामला जोड़ें",
+              title: t("home.addNewCase"),
               containerStyle: {
                 backgroundColor: theme.colors.colorBgPage,
                 borderWidth: 1,
                 borderColor: theme.colors.colorPrimary600,
               },
-              textStyle: { color: theme.colors.colorPrimary600,paddingHorizontal:1 },
-              onPress: () => console.log("Cancel"),
+              textStyle: {
+                color: theme.colors.colorPrimary600,
+              },
+              onPress: () => console.log("new case"),
             },
             {
-              title: "मैप देखें",
+              title: t("home.viewMap"),
               containerStyle: {
-                backgroundColor:  theme.colors.colorBgPage,
+                backgroundColor: theme.colors.colorBgPage,
                 borderWidth: 1,
                 borderColor: theme.colors.colorPrimary600,
               },
               textStyle: {
                 color: theme.colors.colorPrimary600,
-                paddingHorizontal: 1,
               },
-              // route: "/next",
             },
           ]}
         />
@@ -169,7 +221,7 @@ export default function HomeScreen() {
   );
 }
 
-/* ---------------- STYLES (UNCHANGED) ---------------- */
+/* ---------------- STYLES ---------------- */
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
@@ -185,11 +237,5 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     elevation: 1,
     marginTop: 30,
-  },
-
-  rowText: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 4,
   },
 });

@@ -1,6 +1,7 @@
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next"; // 👈 added
 import {
   ScrollView,
   StyleSheet,
@@ -14,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const { theme } = useTheme();
+  const { t } = useTranslation(); // 👈 i18n hook
 
   const [officerId, setOfficerId] = useState("");
   const [phone, setPhone] = useState("");
@@ -23,6 +25,7 @@ export default function LoginScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView contentContainerStyle={styles.inner}>
+        
         {/* Top Icon */}
         <View style={styles.iconWrapper}>
           <RemixIcon
@@ -40,7 +43,7 @@ export default function LoginScreen() {
             { color: theme.colors.primary },
           ]}
         >
-          लॉगिन करें
+          {t("login.title")}
         </Text>
 
         {/* Subtitle */}
@@ -51,7 +54,7 @@ export default function LoginScreen() {
             { color: theme.colors.colorTextSecondary },
           ]}
         >
-          अपना ऑफिसर आईडी और मोबाइल नंबर दर्ज करें।
+          {t("login.subtitle")}
         </Text>
 
         {/* Officer ID */}
@@ -63,7 +66,7 @@ export default function LoginScreen() {
               { color: theme.colors.text },
             ]}
           >
-            ऑफिसर आईडी
+            {t("login.officerId")}
           </Text>
 
           <TextInput
@@ -75,7 +78,7 @@ export default function LoginScreen() {
                 color: theme.colors.text,
               },
             ]}
-            placeholder="अपना ऑफिसर कोड दर्ज करें"
+            placeholder={t("login.officerIdPlaceholder")}
             placeholderTextColor={theme.colors.inputPlaceholder}
             value={officerId}
             onChangeText={setOfficerId}
@@ -91,7 +94,7 @@ export default function LoginScreen() {
               { color: theme.colors.text },
             ]}
           >
-            मोबाइल नंबर
+            {t("login.mobile")}
           </Text>
 
           <TextInput
@@ -118,12 +121,7 @@ export default function LoginScreen() {
             styles.button,
             { backgroundColor: theme.colors.btnPrimaryBg },
           ]}
-          
-            onPress={()=>{
-              // console.log("hii");
-              
-              router.push('/(onboarding)/otpVerify')
-            }}
+          onPress={() => router.push("/(onboarding)/otpVerify")}
         >
           <Text
             style={[
@@ -131,15 +129,22 @@ export default function LoginScreen() {
               styles.buttonText,
               { color: theme.colors.btnPrimaryText },
             ]}
-
           >
-            OTP भेजें
+            {t("login.sendOtp")}
           </Text>
         </TouchableOpacity>
 
         {/* Forgot Password */}
-        <TouchableOpacity style={{flexDirection:"row",justifyContent:"center",marginTop:20,gap:10,alignSelf:"center"}}>
-           <RemixIcon
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 20,
+            gap: 10,
+            alignSelf: "center",
+          }}
+        >
+          <RemixIcon
             name="question-line"
             size={18}
             color={theme.colors.btnPrimaryBg}
@@ -147,17 +152,24 @@ export default function LoginScreen() {
           <Text
             style={[
               theme.typography.fontBodySmall,
-              
-              { color: theme.colors.primary ,},
+              { color: theme.colors.primary },
             ]}
           >
-            पासवर्ड भूल गए?
+            {t("login.forgotPassword")}
           </Text>
         </TouchableOpacity>
 
         {/* Contact Supervisor */}
-        <TouchableOpacity style={{flexDirection:"row",justifyContent:"center",marginTop:20,gap:10,alignSelf:"center",marginLeft:10}}>
-           <RemixIcon
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 20,
+            gap: 10,
+            alignSelf: "center",
+          }}
+        >
+          <RemixIcon
             name="phone-line"
             size={18}
             color={theme.colors.btnPrimaryBg}
@@ -165,13 +177,13 @@ export default function LoginScreen() {
           <Text
             style={[
               theme.typography.fontBodySmall,
-              
-              { color: theme.colors.primary,},
+              { color: theme.colors.primary },
             ]}
           >
-            सुपरवाइज़र से संपर्क करें
+            {t("login.contactSupervisor")}
           </Text>
         </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -179,7 +191,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  inner: { padding: 20, paddingTop:0 },
+  inner: { padding: 20, paddingTop: 0 },
 
   iconWrapper: {
     width: 70,
@@ -188,11 +200,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#E5F4EE",
     alignItems: "center",
     justifyContent: "center",
-    // marginTop: 40,
     marginBottom: 20,
   },
 
-  title: { marginTop: 20,  },
+  title: { marginTop: 20 },
   subtitle: { marginTop: 10, width: "100%" },
 
   inputWrapper: { width: "100%", marginTop: 35 },
@@ -216,6 +227,4 @@ const styles = StyleSheet.create({
   },
 
   buttonText: { fontSize: 16, fontWeight: "600" },
-
-  
 });

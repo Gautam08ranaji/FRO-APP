@@ -24,27 +24,24 @@ export default function EscalationScreen() {
   const [notes, setNotes] = useState("");
   const [focusField, setFocusField] = useState("");
 
-  // ✅ Correct TS type for selected file
   const [file, setFile] = useState<ImagePicker.ImagePickerAsset | null>(null);
 
   const reasons = [
-    "आपातकालीन स्थिति",
-    "कारण स्पष्ट नहीं",
-    "सहयोग प्राप्त नहीं",
-    "इलाज में देरी",
+    t("escalation.reason1"),
+    t("escalation.reason2"),
+    t("escalation.reason3"),
+    t("escalation.reason4"),
   ];
 
-  // 🔥 Button active only when required fields filled
   const isFormValid = selectedReason !== "" && notes.trim() !== "";
 
-  // 📸 Pick Image/Document
   const openUploadPicker = async () => {
-    Alert.alert("फाइल अपलोड", "एक विकल्प चुनें", [
+    Alert.alert(t("escalation.uploadLabel"), t("escalation.uploadText"), [
       {
-        text: "📷 कैमरा",
+        text: t("escalation.camera"),
         onPress: async () => {
           const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ correct for your SDK
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 0.7,
           });
 
@@ -52,23 +49,24 @@ export default function EscalationScreen() {
         },
       },
       {
-        text: "🖼️ गैलरी",
+        text: t("escalation.gallery"),
         onPress: async () => {
           const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ correct
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 0.7,
           });
 
           if (!result.canceled) setFile(result.assets[0]);
         },
       },
-      { text: "रद्द करें", style: "cancel" },
+      { text: t("escalation.cancel"), style: "cancel" },
     ]);
   };
 
   return (
-    <BodyLayout type="screen" screenName="एस्केलेशन भेजें">
-      {/* 🚨 Warning */}
+    <BodyLayout type="screen" screenName={t("escalation.screenTitle")}>
+
+      {/* Warning */}
       <Card
         mode="contained"
         style={[
@@ -80,22 +78,20 @@ export default function EscalationScreen() {
         ]}
       >
         <Text style={[theme.typography.fontBody, styles.warningText]}>
-          ⚠️ एस्केलेशन केवल गंभीर मामलों के लिए उपयोग करें। आपका सुपरवाइज़र
-          तुरंत सूचित किया जाएगा।
+          {t("escalation.warningText")}
         </Text>
       </Card>
 
-      {/* MAIN CARD */}
+      {/* Main Card */}
       <Card
         style={[styles.mainCard, { backgroundColor: theme.colors.colorBgPage }]}
       >
-        {/* DROPDOWN */}
-        <Text
-          style={[styles.label, { color: theme.colors.colorTextSecondary }]}
-        >
-          कारण चुनें
+        {/* Dropdown Label */}
+        <Text style={[styles.label, { color: theme.colors.colorTextSecondary }]}>
+          {t("escalation.chooseReason")}
         </Text>
 
+        {/* Dropdown Trigger */}
         <TouchableOpacity
           onPress={() => {
             setDropdownOpen(!dropdownOpen);
@@ -118,7 +114,7 @@ export default function EscalationScreen() {
                 : theme.colors.colorOverlay,
             }}
           >
-            {selectedReason || "कारण चुनें"}
+            {selectedReason || t("escalation.reasonPlaceholder")}
           </Text>
 
           <RemixIcon
@@ -128,6 +124,7 @@ export default function EscalationScreen() {
           />
         </TouchableOpacity>
 
+        {/* Dropdown List */}
         {dropdownOpen && (
           <View
             style={[
@@ -161,19 +158,17 @@ export default function EscalationScreen() {
 
         <Divider style={{ marginVertical: 14 }} />
 
-        {/* NOTES */}
-        <Text
-          style={[styles.label, { color: theme.colors.colorTextSecondary }]}
-        >
-          नोट्स जोड़ें
+        {/* Notes */}
+        <Text style={[styles.label, { color: theme.colors.colorTextSecondary }]}>
+          {t("escalation.notesLabel")}
         </Text>
 
         <TextInput
           multiline
-          placeholder="यहां लिखें..."
+          placeholder={t("escalation.notesPlaceholder")}
           placeholderTextColor={theme.colors.colorOverlay}
           value={notes}
-          onChangeText={(text) => setNotes(text)}
+          onChangeText={setNotes}
           onFocus={() => setFocusField("notes")}
           onBlur={() => setFocusField("")}
           style={[
@@ -191,14 +186,13 @@ export default function EscalationScreen() {
 
         <Divider style={{ marginVertical: 14 }} />
 
-        {/* FILE UPLOAD */}
-        <Text
-          style={[styles.label, { color: theme.colors.colorTextSecondary }]}
-        >
-          फोटो / दस्तावेज़ जोड़ें
+        {/* Upload */}
+        <Text style={[styles.label, { color: theme.colors.colorTextSecondary }]}>
+          {t("escalation.uploadLabel")}
         </Text>
 
         <TouchableOpacity
+          onPress={openUploadPicker}
           style={[
             styles.uploadBox,
             {
@@ -206,7 +200,6 @@ export default function EscalationScreen() {
               borderColor: theme.colors.colorOverlay,
             },
           ]}
-          onPress={openUploadPicker}
         >
           <RemixIcon
             name="upload-2-line"
@@ -216,14 +209,14 @@ export default function EscalationScreen() {
           <Text
             style={[styles.uploadText, { color: theme.colors.colorOverlay }]}
           >
-            {file ? "फाइल चुनी गई ✓" : "फाइल अपलोड करें"}
+            {file ? t("escalation.fileSelected") : t("escalation.uploadText")}
           </Text>
         </TouchableOpacity>
       </Card>
 
-      {/* BUTTON ENABLED ONLY WHEN VALID */}
+      {/* Submit Button */}
       <ReusableButton
-        title="एस्केलेशन सबमिट करें"
+        title={t("escalation.submitEscalation")}
         containerStyle={{
           backgroundColor: isFormValid
             ? theme.colors.colorPrimary600
@@ -290,7 +283,6 @@ const styles = StyleSheet.create({
   uploadBox: {
     borderWidth: 2,
     borderStyle: "dashed",
-
     borderRadius: 10,
     paddingVertical: 40,
     alignItems: "center",

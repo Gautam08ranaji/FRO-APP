@@ -1,11 +1,13 @@
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 
 export default function OnboardingSteps() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
 
   const steps: {
@@ -18,22 +20,22 @@ export default function OnboardingSteps() {
     {
       id: 1,
       icon: "file-list-3-line",
-      title: "नए मामले तुरंत प्राप्त करें",
-      subtitle: "आपको सौंपे गए सभी नए मामले यहाँ देखें।",
+      title: t("onboarding.step1Title"),
+      subtitle: t("onboarding.step1Subtitle"),
       singleButton: false,
     },
     {
       id: 2,
       icon: "arrow-right-box-line",
-      title: "लोकेशन पर आसानी से जाएँ",
-      subtitle: "GPS से सीधे नागरिक के स्थान पर नेविगेट करें।",
+      title: t("onboarding.step2Title"),
+      subtitle: t("onboarding.step2Subtitle"),
       singleButton: false,
     },
     {
       id: 3,
       icon: "checkbox-circle-fill",
-      title: "मामले की स्थिति अपडेट करें",
-      subtitle: "फ़ोटो, नोट्स और सबूत जोड़कर मामला पूरा करें।",
+      title: t("onboarding.step3Title"),
+      subtitle: t("onboarding.step3Subtitle"),
       singleButton: true,
     },
   ];
@@ -42,13 +44,16 @@ export default function OnboardingSteps() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.colorBgSurface }]}
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.colorBgSurface }
+      ]}
     >
       {/* Icon */}
       <View
         style={[
           styles.iconWrapper,
-          { backgroundColor: theme.colors.btnSecondaryBg },
+          { backgroundColor: theme.colors.btnSecondaryBg }
         ]}
       >
         <RemixIcon
@@ -60,25 +65,20 @@ export default function OnboardingSteps() {
 
       {/* Title */}
       <Text
-        style={{
-          fontSize: 20,
-          fontWeight: "600",
-          color: theme.colors.colorPrimary600,
-          marginBottom: 10,
-          textAlign: "center",
-        }}
+        style={[
+          styles.title,
+          { color: theme.colors.colorPrimary600 }
+        ]}
       >
         {current.title}
       </Text>
 
       {/* Subtitle */}
       <Text
-        style={{
-          fontSize: 14,
-          textAlign: "center",
-          color: theme.colors.colorTextSecondary,
-          marginBottom: 25,
-        }}
+        style={[
+          styles.subtitle,
+          { color: theme.colors.colorTextSecondary }
+        ]}
       >
         {current.subtitle}
       </Text>
@@ -92,9 +92,7 @@ export default function OnboardingSteps() {
               styles.indicator,
               {
                 backgroundColor:
-                  step === i
-                    ? theme.colors.btnPrimaryBg
-                    : theme.colors.border,
+                  step === i ? theme.colors.btnPrimaryBg : theme.colors.border,
               },
             ]}
           />
@@ -107,13 +105,13 @@ export default function OnboardingSteps() {
           {/* Previous */}
           <TouchableOpacity
             disabled={step === 1}
-            onPress={() => setStep(step - 1)}
+            onPress={() => step > 1 && setStep(step - 1)}
             style={[
               styles.prevBtn,
               {
                 borderColor: theme.colors.colorPrimary600,
                 opacity: step === 1 ? 0.4 : 1,
-                backgroundColor:theme.colors.colorBgPage
+                backgroundColor: theme.colors.colorBgPage,
               },
             ]}
           >
@@ -121,10 +119,15 @@ export default function OnboardingSteps() {
               name="arrow-left-s-line"
               size={18}
               color={theme.colors.colorPrimary600}
-              style={{ marginRight: 6 }}
+              style={styles.iconLeft}
             />
-            <Text style={{ color: theme.colors.colorPrimary600, fontSize: 16 }}>
-              पिछला
+            <Text
+              style={[
+                styles.prevText,
+                { color: theme.colors.colorPrimary600 }
+              ]}
+            >
+              {t("onboarding.prev")}
             </Text>
           </TouchableOpacity>
 
@@ -133,32 +136,39 @@ export default function OnboardingSteps() {
             onPress={() => step < 3 && setStep(step + 1)}
             style={[
               styles.nextBtn,
-              { backgroundColor: theme.colors.colorPrimary600 },
+              { backgroundColor: theme.colors.colorPrimary600 }
             ]}
           >
-            <Text style={{ color: theme.colors.colorBgPage, fontSize: 16, marginRight: 6 }}>
-              अगला
+            <Text
+              style={[
+                styles.nextText,
+                { color: theme.colors.colorBgPage }
+              ]}
+            >
+              {t("onboarding.next")}
             </Text>
-            <RemixIcon name="arrow-right-s-line" size={18} color={theme.colors.colorBgPage} />
+            <RemixIcon
+              name="arrow-right-s-line"
+              size={18}
+              color={theme.colors.colorBgPage}
+            />
           </TouchableOpacity>
         </View>
       ) : (
         <TouchableOpacity
           style={[
             styles.fullBtn,
-            { backgroundColor: theme.colors.colorPrimary600 },
+            { backgroundColor: theme.colors.colorPrimary600 }
           ]}
           onPress={() => router.push("/(tabs)/(dashboard)")}
         >
           <Text
-            style={{
-              textAlign: "center",
-              color: theme.colors.colorBgPage,
-              fontSize: 18,
-              fontWeight: "600",
-            }}
+            style={[
+              styles.fullBtnText,
+              { color: theme.colors.colorBgPage }
+            ]}
           >
-            डैशबोर्ड पर जाएँ
+            {t("onboarding.gotoDashboard")}
           </Text>
         </TouchableOpacity>
       )}
@@ -183,6 +193,19 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
 
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+
+  subtitle: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 25,
+  },
+
   indicatorRow: {
     flexDirection: "row",
     gap: 8,
@@ -198,7 +221,7 @@ const styles = StyleSheet.create({
   buttonRow: {
     width: "100%",
     flexDirection: "row",
-    justifyContent: "space-evenly",
+    justifyContent: "space-between",
   },
 
   prevBtn: {
@@ -218,9 +241,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  iconLeft: { marginRight: 6 },
+
+  prevText: { fontSize: 16 },
+
+  nextText: {
+    marginRight: 6,
+    fontSize: 16,
+  },
+
   fullBtn: {
     width: "100%",
     paddingVertical: 16,
     borderRadius: 10,
+  },
+
+  fullBtnText: {
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "600",
   },
 });

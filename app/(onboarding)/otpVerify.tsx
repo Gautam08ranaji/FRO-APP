@@ -1,6 +1,7 @@
 import { useTheme } from "@/theme/ThemeContext";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next"; // 👈 added
 import {
   Keyboard,
   SafeAreaView,
@@ -15,14 +16,14 @@ import RemixIcon from "react-native-remix-icon";
 export default function OtpVerificationScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const { t } = useTranslation(); // 👈 i18n hook
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
 
-  // Accept TextInput OR null
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
-  /* ---------------- TIMER ---------------- */
+  /* TIMER */
   useEffect(() => {
     if (timer === 0) return;
     const id = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -48,32 +49,32 @@ export default function OtpVerificationScreen() {
 
   const handleVerify = () => {
     Keyboard.dismiss();
-    router.push('/(onboarding)/profile')
+    router.push("/(onboarding)/profile");
   };
 
   const handleResend = () => {
     if (timer > 0) return;
     setTimer(30);
-    // TODO: trigger resend API call
+    // API call to resend
   };
 
-  /* ---------------- MAIN OTP SCREEN ---------------- */
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.colorBgPage }]}
     >
-      {/* HEADER */}
+      {/* HEADER ICON */}
       <View style={styles.iconWrapper}>
         <RemixIcon name="shield-line" size={28} color={theme.colors.btnPrimaryBg} />
       </View>
 
+      {/* HEADER TEXT */}
       <View style={styles.header}>
         <Text style={[styles.headingHindi, { color: theme.colors.colorPrimary700 }]}>
-          OTP दर्ज करें
+          {t("otp.enterOtp")}
         </Text>
 
         <Text style={[styles.subtitle, { color: theme.colors.colorTextSecondary }]}>
-          हमने 6-अंकों का OTP भेजा है +91-XXXXXXXXXX पर
+          {t("otp.sentTo")} +91-XXXXXXXXXX
         </Text>
       </View>
 
@@ -82,9 +83,7 @@ export default function OtpVerificationScreen() {
         {Array.from({ length: 3 }).map((_, index) => (
           <TextInput
             key={index}
-            ref={(r) => {
-              inputRefs.current[index] = r;
-            }}
+            ref={(r) => (inputRefs.current[index] = r)}
             style={[
               styles.otpInput,
               {
@@ -109,9 +108,7 @@ export default function OtpVerificationScreen() {
           return (
             <TextInput
               key={index}
-              ref={(r) => {
-                inputRefs.current[index] = r;
-              }}
+              ref={(r) => (inputRefs.current[index] = r)}
               style={[
                 styles.otpInput,
                 {
@@ -136,24 +133,28 @@ export default function OtpVerificationScreen() {
         style={[styles.verifyButton, { backgroundColor: theme.colors.btnPrimaryBg }]}
         onPress={handleVerify}
       >
-        <Text style={[styles.verifyText, { color: theme.colors.colorBgSurface}]}>
-          सत्यापित करें
+        <Text style={[styles.verifyText, { color: theme.colors.colorBgSurface }]}>
+          {t("otp.verify")}
         </Text>
-        <RemixIcon name="arrow-right-line" size={20} color={theme.colors.colorBgSurface} />
+        <RemixIcon
+          name="arrow-right-line"
+          size={20}
+          color={theme.colors.colorBgSurface}
+        />
       </TouchableOpacity>
 
-      {/* RESEND OTP */}
+      {/* RESEND */}
       <View style={styles.resendWrapper}>
         {timer > 0 ? (
           <Text style={{ color: theme.colors.colorTextSecondary }}>
-            {timer} सेकंड बाद{" "}
+            {timer} {t("otp.resendAfter")}{" "}
             <Text style={{ color: theme.colors.colorPrimary700, fontWeight: "700" }}>
-              फिर से OTP भेजें
+              {t("otp.resendOtp")}
             </Text>
           </Text>
         ) : (
           <Text style={{ color: theme.colors.colorTextSecondary }}>
-            30 सेकंड बाद{" "}
+            30 {t("otp.resendAfter")}{" "}
             <Text
               onPress={handleResend}
               style={{
@@ -162,7 +163,7 @@ export default function OtpVerificationScreen() {
                 textDecorationLine: "underline",
               }}
             >
-              फिर से OTP भेजें
+              {t("otp.resendOtp")}
             </Text>
           </Text>
         )}
@@ -188,11 +189,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     marginBottom: 4,
-  },
-  headingEnglish: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 12,
   },
   subtitle: {
     fontSize: 14,

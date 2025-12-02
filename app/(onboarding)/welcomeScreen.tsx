@@ -1,6 +1,7 @@
 import { useTheme } from "@/theme/ThemeContext";
 import { useRouter } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next"; // 👈 added
 import {
   SafeAreaView,
   StyleSheet,
@@ -23,6 +24,7 @@ export default function OtpSuccessScreen({
 }: Props) {
   const { theme } = useTheme();
   const router = useRouter();
+  const { t } = useTranslation(); // 👈 i18n hook
   const { width, height } = useWindowDimensions();
 
   // Responsive circle & tick size
@@ -43,7 +45,7 @@ export default function OtpSuccessScreen({
     >
       <View style={styles.flexCenter}>
         <View style={[styles.cardWrapper, { maxWidth: 520 }]}>
-
+          
           {/* Success Circle */}
           <View
             style={[
@@ -72,10 +74,10 @@ export default function OtpSuccessScreen({
             style={[
               theme.typography.fontH2,
               styles.title,
-              { color: theme.colors.btnPrimaryBg ,paddingHorizontal:1 },
+              { color: theme.colors.btnPrimaryBg, paddingHorizontal: 1 },
             ]}
           >
-            {title ?? "स्वागत है, फील्ड रिस्पॉन्स ऑफिसर"}
+            {title ?? t("welcome.title")}
           </Text>
 
           {/* Subtitle */}
@@ -86,8 +88,7 @@ export default function OtpSuccessScreen({
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            {subtitle ??
-              "आपको सौंपे गए मामलों को देखने, अपडेट करने और सहायता प्रदान करने के लिए इस ऐप का उपयोग किया जाता है।"}
+            {subtitle ?? t("welcome.subtitle")}
           </Text>
 
           {/* Primary Button */}
@@ -101,10 +102,10 @@ export default function OtpSuccessScreen({
             <Text
               style={[
                 theme.typography.fontButton,
-                { color: theme.colors.btnPrimaryText ,paddingHorizontal:1},
+                { color: theme.colors.btnPrimaryText, paddingHorizontal: 1 },
               ]}
             >
-              लॉगिन करें
+              {t("welcome.login")}
             </Text>
           </TouchableOpacity>
 
@@ -116,9 +117,10 @@ export default function OtpSuccessScreen({
                 { color: theme.colors.btnPrimaryBg, textAlign: "center" },
               ]}
             >
-              ऐप के बारे में जानें
+              {t("welcome.aboutApp")}
             </Text>
           </TouchableOpacity>
+
         </View>
       </View>
     </SafeAreaView>
