@@ -38,7 +38,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="(complaints)"
         options={{
-          title: 'complaints',
+          title: 'Cases',
           tabBarIcon: ({ color }) =>
             <RemixIcon name="customer-service-line" size={28} color={color} />
         }}
