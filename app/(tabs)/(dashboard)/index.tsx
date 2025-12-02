@@ -15,7 +15,7 @@ export default function HomeScreen() {
   return (
     <BodyLayout type="dashboard">
       <Text
-        style={[theme.typography.fontH2, { color: theme.colors.btnPrimaryBg }]}
+        style={[theme.typography.fontH2, { color: theme.colors.colorPrimary600 }]}
       >
         मामलों का विवरण
       </Text>
@@ -25,15 +25,19 @@ export default function HomeScreen() {
           icon="file-list-3-line"
           count={12}
           title="नए मामले"
-          bg="#FFFFFF"
-          iconBg="#2B7FFF"
+          bg={theme.colors.colorBgPage}
+          iconBg={theme.colors.validationInfoText}
+          countColor={theme.colors.colorPrimary600}
+          titleColor={theme.colors.colorTextSecondary}
         />
         <ReusableCard
           icon="folder-check-line"
           count={12}
           title="नए मामले"
-          bg="#FFFFFF"
+          bg={theme.colors.colorBgPage}
           iconBg="#00C950"
+           countColor={theme.colors.colorPrimary600}
+          titleColor={theme.colors.colorTextSecondary}
         />
       </View>
       <View style={styles.row}>
@@ -41,15 +45,19 @@ export default function HomeScreen() {
           icon="arrow-right-box-line"
           count={12}
           title="नए मामले"
-          bg="#FFFFFF"
+          bg={theme.colors.colorBgPage}
           iconBg="#AD46FF"
+           countColor={theme.colors.colorPrimary600}
+          titleColor={theme.colors.colorTextSecondary}
         />
         <ReusableCard
           icon="time-line"
           count={12}
           title="नए मामले"
-          bg="#FFFFFF"
+          bg={theme.colors.colorBgPage}
           iconBg="#FF6900"
+           countColor={theme.colors.colorPrimary600}
+          titleColor={theme.colors.colorTextSecondary}
         />
       </View>
       <View style={styles.row}>
@@ -57,29 +65,33 @@ export default function HomeScreen() {
           icon="group-line"
           count={12}
           title="नए मामले"
-          bg="#FFFFFF"
+          bg={theme.colors.colorBgPage}
           iconBg="#F0B100"
+           countColor={theme.colors.colorPrimary600}
+          titleColor={theme.colors.colorTextSecondary}
         />
         <ReusableCard
           icon="close-circle-line"
           count={12}
           title="नए मामले"
-          bg="#FFFFFF"
+          bg={theme.colors.colorBgPage}
           iconBg="#6A7282"
+           countColor={theme.colors.colorPrimary600}
+          titleColor={theme.colors.colorTextSecondary}
         />
       </View>
 
       <View
         style={[
           styles.bottomSection,
-          { backgroundColor: theme.colors.colorBgSurface },
+          { backgroundColor: theme.colors.colorBgPage },
         ]}
       >
         <View style={styles.row}>
           <Text
             style={[
               theme.typography.fontBodyLarge,
-              { color: theme.colors.colorTextPrimary,paddingHorizontal:1 },
+              { color: theme.colors.colorTextSecondary, paddingHorizontal: 1 },
             ]}
           >
             आज की ड्यूटी
@@ -88,7 +100,7 @@ export default function HomeScreen() {
           <Text
             style={[
               theme.typography.fontBodyLarge,
-              { color: theme.colors.colorPrimary500, paddingHorizontal: 1 },
+              { color: theme.colors.colorPrimary600, paddingHorizontal: 1 },
             ]}
           >
             कुल मामले
@@ -99,7 +111,7 @@ export default function HomeScreen() {
           <Text
             style={[
               theme.typography.fontH4,
-              { color: theme.colors.colorTextPrimary },
+              { color: theme.colors.colorTextSecondary },
             ]}
           >
             उच्च प्राथमिकता मामले:
@@ -116,20 +128,38 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <Card title="त्वरित कार्रवाई" cardStyle={{height:140,backgroundColor:theme.colors.colorBgSurface }} titleColor={theme.colors.btnPrimaryBg}   >
+      <Card
+        title="त्वरित कार्रवाई"
+        cardStyle={{
+          height: 140,
+          backgroundColor: theme.colors.colorBgPage,
+        }}
+        titleColor={theme.colors.btnPrimaryBg}
+      >
         <ReusableButton
           type="double"
           buttons={[
             {
               title: "नया मामला जोड़ें",
-              containerStyle: { backgroundColor: "#EDEDED" ,borderWidth:1 , borderColor:theme.colors.btnPrimaryBg },
-              textStyle: { color: theme.colors.btnPrimaryBg },
+              containerStyle: {
+                backgroundColor: theme.colors.colorBgPage,
+                borderWidth: 1,
+                borderColor: theme.colors.colorPrimary600,
+              },
+              textStyle: { color: theme.colors.colorPrimary600,paddingHorizontal:1 },
               onPress: () => console.log("Cancel"),
             },
             {
               title: "मैप देखें",
-               containerStyle: { backgroundColor: "#EDEDED" ,borderWidth:1 , borderColor:theme.colors.btnPrimaryBg },
-              textStyle: { color: theme.colors.btnPrimaryBg ,paddingHorizontal:1 },
+              containerStyle: {
+                backgroundColor:  theme.colors.colorBgPage,
+                borderWidth: 1,
+                borderColor: theme.colors.colorPrimary600,
+              },
+              textStyle: {
+                color: theme.colors.colorPrimary600,
+                paddingHorizontal: 1,
+              },
               // route: "/next",
             },
           ]}

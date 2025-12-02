@@ -51,9 +51,9 @@ export default function LanguageSelection() {
   const handleContinue = async (lang: string) => {
     setLoading(true);
     try {
-      // no more change language here
-      // router.push('/(onboarding)/welcomeScreen');
-      router.push('/StatusUpdateScreen');
+ 
+      // router.push('/(tabs)/(dashboard)');
+      router.push('/welcomeScreen');
     } catch (err) {
       console.error('Error changing language:', err);
     } finally {

@@ -59,11 +59,11 @@ export default function NotificationScreen() {
               {
                 backgroundColor: theme.colors.colorBgSurface,
                 borderLeftWidth: item.isNew ? 4 : 0,
-                borderLeftColor: item.isNew ? "#2E7D32" : "transparent",
+                borderLeftColor: item.isNew ? theme.colors.colorPrimary600 : "transparent",
               },
             ]}
           >
-            {/* 🔥 ROW: ICON | TITLE | DOT */}
+           
             <View style={styles.topRow}>
               <View
                 style={[
@@ -71,7 +71,7 @@ export default function NotificationScreen() {
                   { backgroundColor: item.iconBg  },
                 ]}
               >
-                <RemixIcon name={item.icon} size={24} color={    "#FFFFFF"    }/>
+                <RemixIcon name={item.icon} size={24} color={    theme.colors.colorBgPage   }/>
               </View>
 
               <Text

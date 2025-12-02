@@ -1,4 +1,5 @@
 import { useTheme } from "@/theme/ThemeContext";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   SafeAreaView,
@@ -10,7 +11,7 @@ import {
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
-/* ---------------- ERROR TYPE FIX ---------------- */
+/* ---------------- ERROR TYPE ---------------- */
 interface ErrorState {
   mobile?: string;
   email?: string;
@@ -34,19 +35,22 @@ export default function MultiStepScreen() {
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
 
-  /* ---------------- VALIDATION ERRORS ---------------- */
   const [errors, setErrors] = useState<ErrorState>({});
 
   const validateStep3 = () => {
     let temp: ErrorState = {};
 
-    if (!mobile.trim()) {
+    const cleanMobile = mobile.replace(/\D/g, "");
+
+    if (!cleanMobile) {
       temp.mobile = "कृपया मोबाइल नंबर दर्ज करें";
-    } else if (!/^[6-9]\d{9}$/.test(mobile)) {
+    } else if (!/^[6-9]\d{9}$/.test(cleanMobile)) {
       temp.mobile = "मान्य 10 अंकों का मोबाइल नंबर दर्ज करें";
     }
 
-    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email)) {
+    const cleanEmail = email.trim();
+
+    if (cleanEmail && !/^\S+@\S+\.\S+$/.test(cleanEmail)) {
       temp.email = "वैध ईमेल दर्ज करें";
     }
 
@@ -56,15 +60,11 @@ export default function MultiStepScreen() {
 
   const handleNext = () => {
     if (currentStep === 3) {
-      if (validateStep3()) {
-        alert("All steps completed!");
-      }
-      return;
+      router.push("/educationScreen");
     }
     setCurrentStep(currentStep + 1);
   };
 
-  /* ---------------- STEP INDICATOR ---------------- */
   const renderStepIndicator = () => (
     <View
       style={{
@@ -82,14 +82,19 @@ export default function MultiStepScreen() {
               height: 34,
               borderRadius: 17,
               backgroundColor:
-                currentStep >= step ? theme.colors.btnPrimaryBg : "#EAEAEA",
+                currentStep >= step
+                  ? theme.colors.btnPrimaryBg
+                  : theme.colors.inputBorder,
               justifyContent: "center",
               alignItems: "center",
             }}
           >
             <Text
               style={{
-                color: currentStep >= step ? "#fff" : "#777",
+                color:
+                  currentStep >= step
+                    ? theme.colors.colorBgPage
+                    : theme.colors.colorTextSecondary,
                 fontWeight: "700",
               }}
             >
@@ -103,7 +108,9 @@ export default function MultiStepScreen() {
                 width: 40,
                 height: 2,
                 backgroundColor:
-                  currentStep > step ? theme.colors.btnPrimaryBg : "#D6D6D6",
+                  currentStep > step
+                    ? theme.colors.btnPrimaryBg
+                    : theme.colors.inputBorder,
                 marginHorizontal: 6,
               }}
             />
@@ -138,7 +145,6 @@ export default function MultiStepScreen() {
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: 16,
-                // alignSelf: "center",
               }}
             >
               <RemixIcon
@@ -152,56 +158,62 @@ export default function MultiStepScreen() {
               style={{
                 fontSize: 20,
                 fontWeight: "700",
-                color: theme.colors.colorPrimary700,
+                color: theme.colors.colorTextSecondary,
                 marginBottom: 16,
               }}
             >
               अधिकारी विवरण
             </Text>
 
-            <Text style={{ marginBottom: 6 }}>पूरा नाम</Text>
+            <Text style={{ marginBottom: 6 ,color:theme.colors.colorTextSecondary }}>पूरा नाम</Text>
             <TextInput
               placeholder="अपना नाम लिखें"
               value={fullName}
               onChangeText={setFullName}
+              placeholderTextColor={theme.colors.colorOverlay}
               style={{
                 borderWidth: 1,
                 borderColor: theme.colors.inputBorder,
-                backgroundColor: theme.colors.inputBg,
+                backgroundColor: theme.colors.colorBgPage,
                 height: 48,
                 borderRadius: 12,
                 paddingHorizontal: 12,
                 marginBottom: 18,
+                color:theme.colors.colorTextSecondary 
               }}
             />
 
-            <Text style={{ marginBottom: 6 }}>पद</Text>
+            <Text style={{ marginBottom: 6 ,color:theme.colors.colorTextSecondary }}>पद</Text>
             <TextInput
               value={position}
               editable={false}
+              placeholderTextColor={theme.colors.colorOverlay}
               style={{
                 borderWidth: 1,
                 borderColor: theme.colors.inputBorder,
-                backgroundColor: theme.colors.inputBg,
+                backgroundColor: theme.colors.colorBgPage,
                 height: 48,
                 borderRadius: 12,
                 paddingHorizontal: 12,
                 marginBottom: 18,
+                color:theme.colors.colorTextSecondary 
               }}
             />
 
-            <Text style={{ marginBottom: 6 }}>कर्मचारी कोड</Text>
+            <Text style={{ marginBottom: 6,color:theme.colors.colorTextSecondary  }}>कर्मचारी कोड</Text>
             <TextInput
               value={empCode}
               editable={false}
+              placeholderTextColor={theme.colors.colorOverlay}
               style={{
                 borderWidth: 1,
                 borderColor: theme.colors.inputBorder,
-                backgroundColor: theme.colors.inputBg,
+                backgroundColor: theme.colors.colorBgPage,
                 height: 48,
                 borderRadius: 12,
                 paddingHorizontal: 12,
                 marginBottom: 30,
+                color:theme.colors.colorTextSecondary 
               }}
             />
           </>
@@ -219,7 +231,6 @@ export default function MultiStepScreen() {
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: 16,
-                // alignSelf: "center",
               }}
             >
               <RemixIcon
@@ -250,66 +261,74 @@ export default function MultiStepScreen() {
               कृपया अपना कार्यक्षेत्र चुनें ताकि आपको सही मामले भेजे जा सकें।
             </Text>
 
-            <Text style={{ marginBottom: 6 }}>राज्य</Text>
+            <Text style={{ marginBottom: 6 ,color:theme.colors.colorTextSecondary }}>राज्य</Text>
             <TextInput
               value={state}
               onChangeText={setState}
               placeholder="राज्य दर्ज करें"
+              placeholderTextColor={theme.colors.colorOverlay}
               style={{
                 borderWidth: 1,
                 borderColor: theme.colors.inputBorder,
-                backgroundColor: theme.colors.inputBg,
+                backgroundColor: theme.colors.colorBgPage,
                 height: 48,
                 borderRadius: 12,
                 paddingHorizontal: 12,
                 marginBottom: 18,
+                color:theme.colors.colorTextSecondary 
               }}
             />
 
-            <Text style={{ marginBottom: 6 }}>ज़िला</Text>
+            <Text style={{ marginBottom: 6,color:theme.colors.colorTextSecondary  }}>ज़िला</Text>
             <TextInput
               value={district}
               onChangeText={setDistrict}
+              placeholderTextColor={theme.colors.colorOverlay}
               placeholder="ज़िला दर्ज करें"
               style={{
                 borderWidth: 1,
                 borderColor: theme.colors.inputBorder,
-                backgroundColor: theme.colors.inputBg,
+                backgroundColor: theme.colors.colorBgPage,
                 height: 48,
                 borderRadius: 12,
                 paddingHorizontal: 12,
                 marginBottom: 18,
+                color:theme.colors.colorTextSecondary 
               }}
             />
 
-            <Text style={{ marginBottom: 6 }}>ब्लॉक / थाना</Text>
+            <Text style={{ marginBottom: 6,color:theme.colors.colorTextSecondary  }}>ब्लॉक / थाना</Text>
             <TextInput
               value={block}
               onChangeText={setBlock}
+              placeholderTextColor={theme.colors.colorOverlay}
               placeholder="ब्लॉक / थाना दर्ज करें"
               style={{
                 borderWidth: 1,
                 borderColor: theme.colors.inputBorder,
-                backgroundColor: theme.colors.inputBg,
+                backgroundColor: theme.colors.colorBgPage,
                 height: 48,
                 borderRadius: 12,
                 paddingHorizontal: 12,
                 marginBottom: 18,
+                color:theme.colors.colorTextSecondary 
               }}
             />
 
-            <Text style={{ marginBottom: 6 }}>टीम लीडर का नाम</Text>
+            <Text style={{ marginBottom: 6 ,color:theme.colors.colorTextSecondary }}>टीम लीडर का नाम</Text>
             <TextInput
               value={teamLead}
               editable={false}
+              placeholderTextColor={theme.colors.colorOverlay}
               style={{
                 borderWidth: 1,
                 borderColor: theme.colors.inputBorder,
-                backgroundColor: theme.colors.inputBg,
+                backgroundColor: theme.colors.colorBgPage,
                 height: 48,
                 borderRadius: 12,
                 paddingHorizontal: 12,
                 marginBottom: 30,
+                color:theme.colors.colorTextSecondary 
               }}
             />
           </>
@@ -327,7 +346,7 @@ export default function MultiStepScreen() {
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: 16,
-                // alignSelf: "center",
+                
               }}
             >
               <RemixIcon
@@ -348,20 +367,23 @@ export default function MultiStepScreen() {
               संपर्क विवरण
             </Text>
 
-            {/* Mobile */}
-            <Text style={{ marginBottom: 6 }}>मोबाइल नंबर</Text>
+            {/* MOBILE */}
+            <Text style={{ marginBottom: 6 ,color:theme.colors.colorTextSecondary }}>मोबाइल नंबर</Text>
             <TextInput
               placeholder="मोबाइल नंबर दर्ज करें"
-              keyboardType="numeric"
+              keyboardType="number-pad"
+              placeholderTextColor={theme.colors.colorOverlay}
               value={mobile}
-              onChangeText={setMobile}
+              maxLength={10}
+              onChangeText={(text) => setMobile(text.replace(/\D/g, ""))}
               style={{
                 borderWidth: 1,
                 borderColor: errors.mobile ? "red" : theme.colors.inputBorder,
-                backgroundColor: theme.colors.inputBg,
+                backgroundColor: theme.colors.colorBgPage,
                 height: 48,
                 borderRadius: 12,
                 paddingHorizontal: 12,
+                color:theme.colors.colorTextSecondary 
               }}
             />
             {errors.mobile && (
@@ -370,28 +392,29 @@ export default function MultiStepScreen() {
               </Text>
             )}
 
-            {/* Email */}
-            <Text style={{ marginBottom: 6, marginTop: 18 }}>
+            {/* EMAIL */}
+            <Text style={{ marginBottom: 6, marginTop: 18 ,color:theme.colors.colorTextSecondary }}>
               ईमेल (वैकल्पिक)
             </Text>
             <TextInput
               placeholder="ईमेल दर्ज करें"
               keyboardType="email-address"
+              placeholderTextColor={theme.colors.colorOverlay}
+              autoCapitalize="none"
               value={email}
               onChangeText={setEmail}
               style={{
                 borderWidth: 1,
                 borderColor: errors.email ? "red" : theme.colors.inputBorder,
-                backgroundColor: theme.colors.inputBg,
+                backgroundColor: theme.colors.colorBgPage,
                 height: 48,
                 borderRadius: 12,
                 paddingHorizontal: 12,
+                color:theme.colors.colorTextSecondary 
               }}
             />
             {errors.email && (
-              <Text style={{ color: "red", marginTop: 4 }}>
-                {errors.email}
-              </Text>
+              <Text style={{ color: "red", marginTop: 4 }}>{errors.email}</Text>
             )}
           </>
         )}
@@ -401,8 +424,8 @@ export default function MultiStepScreen() {
           onPress={handleNext}
           style={{
             backgroundColor: theme.colors.btnPrimaryBg,
-            paddingVertical: 16,
             borderRadius: 30,
+            paddingVertical: 16,
             justifyContent: "center",
             alignItems: "center",
             marginTop: 32,
@@ -410,7 +433,7 @@ export default function MultiStepScreen() {
         >
           <Text
             style={{
-              color: theme.colors.btnPrimaryText,
+              color: theme.colors.colorBgPage,
               fontWeight: "700",
               fontSize: 16,
             }}

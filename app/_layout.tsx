@@ -1,50 +1,38 @@
 // app/_layout.tsx
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Platform, StatusBar as RNStatusBar, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import React, { useCallback, useEffect, useState } from "react";
+import { Platform, StatusBar as RNStatusBar } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-// 🧩 App Providers
-import { CameraPermissionProvider } from '@/hooks/CameraPermissionProvider';
-import { LocationProvider } from '@/hooks/LocationContext';
+import { CameraPermissionProvider } from "@/hooks/CameraPermissionProvider";
+import { LocationProvider } from "@/hooks/LocationContext";
+import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 
-// 🟩 Sahara Theme System
-import { ThemeProvider, useTheme } from '@/theme/ThemeContext';
-
-// ✅ Keep splash visible until we’re ready
 SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
-  initialRouteName: '(onboarding)',
+  initialRouteName: "(onboarding)",
 };
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
 
-  // Simulate loading (you can await fonts/theme initialization here)
   useEffect(() => {
     async function prepare() {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } finally {
-        setAppIsReady(true);
-      }
+      await new Promise((r) => setTimeout(r, 1000));
+      setAppIsReady(true);
     }
     prepare();
   }, []);
 
   const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
-      await SplashScreen.hideAsync();
-    }
+    if (appIsReady) await SplashScreen.hideAsync();
   }, [appIsReady]);
 
-  if (!appIsReady) {
-    return null; // 👈 keep splash visible until ready
-  }
+  if (!appIsReady) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
@@ -61,40 +49,38 @@ export default function RootLayout() {
   );
 }
 
-/**
- * 🧭 Themed Stack that uses our ThemeContext
- * (Expo Router already handles NavigationContainer)
- */
 function ThemedStack() {
   const { theme, isDarkMode } = useTheme();
 
+  // Always set status bar background + icon color
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      RNStatusBar.setBackgroundColor(theme.colors.btnPrimaryBg);
+      RNStatusBar.setBarStyle(isDarkMode ? "light-content" : "dark-content");
+    }
+  }, [theme, isDarkMode]);
+
   return (
     <>
-      {Platform.OS === 'android' && (
-        <View
-          style={{
-            height: RNStatusBar.currentHeight,
-            backgroundColor: theme.colors.background,
-          }}
-        />
-      )}
+     
 
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: theme.colors.background },
+          
         }}
       >
-        <Stack.Screen name="(onboarding)/index" /> {/* ✅ Make sure your onboarding screen is here */}
+        <Stack.Screen name="(onboarding)/index" />
         <Stack.Screen name="(onboarding)/login" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: 'modal', title: 'Modal' }}
-        />
+        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
       </Stack>
 
-      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+      <StatusBar
+        style={isDarkMode ? "light" : "dark"}
+        translucent={false}                     // ✔ Prevents overlap
+        backgroundColor={theme.colors.colorAccent500}  // ✔ Same static color
+      />
     </>
   );
 }

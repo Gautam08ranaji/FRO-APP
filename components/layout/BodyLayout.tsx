@@ -21,7 +21,7 @@ interface BodyLayoutProps {
   screenName?: string;
   children: React.ReactNode;
 
-  /** NEW — accept external style */
+  
   scrollViewStyle?: StyleProp<ViewStyle>;
   scrollContentStyle?: StyleProp<ViewStyle>;
 }
@@ -44,16 +44,16 @@ export default function BodyLayout({
         <View
           style={[
             styles.dashboardHeader,
-            { backgroundColor: theme.colors.primary },
+            { backgroundColor: theme.colors.colorPrimary600,paddingVertical:24 },
           ]}
         >
-          {/* TOP */}
+         
           <View style={styles.topRow}>
             <View>
               <Text
                 style={[
                   theme.typography.fontH2,
-                  { color: "#fff", paddingHorizontal: 1 },
+                  { color: theme.colors.colorBgPage, paddingHorizontal: 1 },
                 ]}
               >
                 नमस्ते, राजेश जी
@@ -63,7 +63,7 @@ export default function BodyLayout({
                 style={[
                   theme.typography.fontBodySmall,
                   styles.subId,
-                  { color: "#d9f6f2", fontSize: width * 0.035 },
+                  { color: theme.colors.colorBgPage, fontSize: width * 0.035 },
                 ]}
               >
                 FRO-14567-001
@@ -72,41 +72,41 @@ export default function BodyLayout({
 
             <View style={styles.iconRow}>
               <TouchableOpacity
-                style={styles.iconCircle}
+                style={[styles.iconCircle,{backgroundColor:theme.colors.colorBgSurface}]}
                 onPress={() => {
                   router.push("/notification");
                 }}
               >
-                <RemixIcon name="notification-line" size={22} color="#fff" />
+                <RemixIcon name="notification-line" size={22} color={theme.colors.colorPrimary600} />
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>3</Text>
                 </View>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.iconCircle}
+                 style={[styles.iconCircle,{backgroundColor:theme.colors.colorBgSurface}]}
                 onPress={() => {
                   router.push("/escalation");
                 }}
               >
-                <RemixIcon name="alert-line" size={22} color="#fff" />
+                <RemixIcon name="alert-line" size={22} color={theme.colors.colorPrimary600} />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.iconCircle}>
-                <RemixIcon name="phone-line" size={22} color="#fff" />
+              <TouchableOpacity  style={[styles.iconCircle,{backgroundColor:theme.colors.colorBgSurface}]}>
+                <RemixIcon name="phone-line" size={22} color={theme.colors.colorPrimary600} />
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* BOTTOM */}
+          
           <View
-            style={[styles.bottomSection, { backgroundColor: "#079f8dff" }]}
+            style={[styles.bottomSection, { backgroundColor: theme.colors.colorPrimary50 }]}
           >
             <View style={styles.row}>
               <Text
                 style={[
                   theme.typography.fontBody,
-                  { color: theme.colors.colorTextInverse },
+                  { color: theme.colors.colorPrimary600 },
                 ]}
               >
                 आज की ड्यूटी
@@ -115,7 +115,7 @@ export default function BodyLayout({
               <Text
                 style={[
                   theme.typography.fontBody,
-                  { color: theme.colors.card, paddingHorizontal: 1 },
+                  { color: theme.colors.colorPrimary600, paddingHorizontal: 1 },
                 ]}
               >
                 कुल मामले
@@ -126,7 +126,7 @@ export default function BodyLayout({
               <Text
                 style={[
                   theme.typography.fontH4,
-                  { color: theme.colors.colorTextInverse },
+                  { color: theme.colors.colorPrimary600 },
                 ]}
               >
                 12
@@ -135,7 +135,7 @@ export default function BodyLayout({
               <Text
                 style={[
                   theme.typography.fontH4,
-                  { color: theme.colors.colorTextInverse },
+                  { color: theme.colors.colorPrimary600 },
                 ]}
               >
                 04
@@ -148,9 +148,9 @@ export default function BodyLayout({
           style={[
             styles.dashboardHeader,
             {
-              backgroundColor: theme.colors.primary,
+              backgroundColor: theme.colors.colorPrimary600,
               flexDirection: "row",
-              paddingVertical: 40,
+              paddingVertical: 20,
             },
           ]}
         >
@@ -158,7 +158,7 @@ export default function BodyLayout({
             <RemixIcon
               name="arrow-left-line"
               size={26}
-              color={theme.colors.colorBgSurface}
+              color={theme.colors.colorBgPage}
             />
           </TouchableOpacity>
 
@@ -167,7 +167,7 @@ export default function BodyLayout({
               theme.typography.fontH3,
               styles.screenTitle,
               {
-                color: theme.colors.colorBgSurface,
+                color: theme.colors.colorBgPage,
                 fontSize: width * 0.05,
                 paddingHorizontal: 1,
               },
@@ -178,13 +178,13 @@ export default function BodyLayout({
         </View>
       )}
 
-      {/* BODY */}
+      
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={[styles.bodyContainer, scrollViewStyle]} // ⬅️ external style merged
+        style={[styles.bodyContainer, scrollViewStyle,{backgroundColor:theme.colors.colorBgSurface}]} 
         contentContainerStyle={[
           styles.contentPadding,
-          scrollContentStyle, // ⬅️ external style merged
+          scrollContentStyle, 
         ]}
       >
         {children}
@@ -200,10 +200,9 @@ const styles = StyleSheet.create({
 
   dashboardHeader: {
     paddingHorizontal: 16,
-    paddingVertical: 24,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    elevation: 3,
+    elevation: 1,
     flexDirection: "column",
     gap: 16,
   },
@@ -225,7 +224,7 @@ const styles = StyleSheet.create({
   },
 
   iconCircle: {
-    backgroundColor: "rgba(255,255,255,0.15)",
+    // backgroundColor: "rgba(255,255,255,0.15)",
     padding: 8,
     borderRadius: 20,
     position: "relative",
@@ -269,7 +268,6 @@ const styles = StyleSheet.create({
 
   bodyContainer: {
     flex: 1,
-    backgroundColor: "#fff",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     padding: 16,

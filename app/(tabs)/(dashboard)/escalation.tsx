@@ -5,12 +5,12 @@ import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Card, Divider } from "react-native-paper";
 import RemixIcon from "react-native-remix-icon";
@@ -39,10 +39,7 @@ export default function EscalationScreen() {
 
   // 📸 Pick Image/Document
   const openUploadPicker = async () => {
-  Alert.alert(
-    "फाइल अपलोड",
-    "एक विकल्प चुनें",
-    [
+    Alert.alert("फाइल अपलोड", "एक विकल्प चुनें", [
       {
         text: "📷 कैमरा",
         onPress: async () => {
@@ -66,25 +63,38 @@ export default function EscalationScreen() {
         },
       },
       { text: "रद्द करें", style: "cancel" },
-    ]
-  );
-};
-
+    ]);
+  };
 
   return (
-    <BodyLayout type="dashboard">
+    <BodyLayout type="screen" screenName="एस्केलेशन भेजें">
       {/* 🚨 Warning */}
-      <Card mode="contained" style={styles.warningCard}>
+      <Card
+        mode="contained"
+        style={[
+          styles.warningCard,
+          {
+            backgroundColor: theme.colors.colorWarning100,
+            borderColor: theme.colors.colorWarning100,
+          },
+        ]}
+      >
         <Text style={[theme.typography.fontBody, styles.warningText]}>
-          ⚠️ एस्केलेशन केवल गंभीर मामलों के लिए उपयोग करें।
-          आपका सुपरवाइज़र तुरंत सूचित किया जाएगा।
+          ⚠️ एस्केलेशन केवल गंभीर मामलों के लिए उपयोग करें। आपका सुपरवाइज़र
+          तुरंत सूचित किया जाएगा।
         </Text>
       </Card>
 
       {/* MAIN CARD */}
-      <Card style={styles.mainCard}>
+      <Card
+        style={[styles.mainCard, { backgroundColor: theme.colors.colorBgPage }]}
+      >
         {/* DROPDOWN */}
-        <Text style={styles.label}>कारण चुनें</Text>
+        <Text
+          style={[styles.label, { color: theme.colors.colorTextSecondary }]}
+        >
+          कारण चुनें
+        </Text>
 
         <TouchableOpacity
           onPress={() => {
@@ -95,23 +105,39 @@ export default function EscalationScreen() {
             styles.dropdown,
             {
               borderColor:
-                focusField === "dropdown" ? "#16A34A" : "#D1D5DB",
+                focusField === "dropdown"
+                  ? theme.colors.colorPrimary600
+                  : theme.colors.colorOverlay,
             },
           ]}
         >
-          <Text style={{ color: selectedReason ? "#111" : "#6B7280" }}>
+          <Text
+            style={{
+              color: selectedReason
+                ? theme.colors.colorTextSecondary
+                : theme.colors.colorOverlay,
+            }}
+          >
             {selectedReason || "कारण चुनें"}
           </Text>
 
           <RemixIcon
             name={dropdownOpen ? "arrow-up-s-line" : "arrow-down-s-line"}
             size={20}
-            color="#6B7280"
+            color={theme.colors.colorOverlay}
           />
         </TouchableOpacity>
 
         {dropdownOpen && (
-          <View style={styles.dropdownList}>
+          <View
+            style={[
+              styles.dropdownList,
+              {
+                backgroundColor: theme.colors.colorBgSurface,
+                borderColor: theme.colors.colorOverlay,
+              },
+            ]}
+          >
             {reasons.map((reason, index) => (
               <TouchableOpacity
                 key={index}
@@ -120,9 +146,14 @@ export default function EscalationScreen() {
                   setDropdownOpen(false);
                   setFocusField("");
                 }}
-                style={styles.dropdownItem}
+                style={[
+                  styles.dropdownItem,
+                  { borderColor: theme.colors.colorOverlay },
+                ]}
               >
-                <Text>{reason}</Text>
+                <Text style={{ color: theme.colors.colorTextSecondary }}>
+                  {reason}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -131,11 +162,16 @@ export default function EscalationScreen() {
         <Divider style={{ marginVertical: 14 }} />
 
         {/* NOTES */}
-        <Text style={styles.label}>नोट्स जोड़ें</Text>
+        <Text
+          style={[styles.label, { color: theme.colors.colorTextSecondary }]}
+        >
+          नोट्स जोड़ें
+        </Text>
 
         <TextInput
           multiline
           placeholder="यहां लिखें..."
+          placeholderTextColor={theme.colors.colorOverlay}
           value={notes}
           onChangeText={(text) => setNotes(text)}
           onFocus={() => setFocusField("notes")}
@@ -144,7 +180,11 @@ export default function EscalationScreen() {
             styles.notesBox,
             {
               borderColor:
-                focusField === "notes" ? "#16A34A" : "#D1D5DB",
+                focusField === "notes"
+                  ? theme.colors.colorPrimary600
+                  : theme.colors.colorOverlay,
+              backgroundColor: theme.colors.colorBgSurface,
+              color: theme.colors.colorTextSecondary,
             },
           ]}
         />
@@ -152,11 +192,30 @@ export default function EscalationScreen() {
         <Divider style={{ marginVertical: 14 }} />
 
         {/* FILE UPLOAD */}
-        <Text style={styles.label}>फोटो / दस्तावेज़ जोड़ें</Text>
+        <Text
+          style={[styles.label, { color: theme.colors.colorTextSecondary }]}
+        >
+          फोटो / दस्तावेज़ जोड़ें
+        </Text>
 
-        <TouchableOpacity style={styles.uploadBox} onPress={openUploadPicker}>
-          <RemixIcon name="upload-2-line" size={40} color={"#6B7280"} />
-          <Text style={styles.uploadText}>
+        <TouchableOpacity
+          style={[
+            styles.uploadBox,
+            {
+              backgroundColor: theme.colors.colorBgSurface,
+              borderColor: theme.colors.colorOverlay,
+            },
+          ]}
+          onPress={openUploadPicker}
+        >
+          <RemixIcon
+            name="upload-2-line"
+            size={40}
+            color={theme.colors.colorOverlay}
+          />
+          <Text
+            style={[styles.uploadText, { color: theme.colors.colorOverlay }]}
+          >
             {file ? "फाइल चुनी गई ✓" : "फाइल अपलोड करें"}
           </Text>
         </TouchableOpacity>
@@ -166,10 +225,14 @@ export default function EscalationScreen() {
       <ReusableButton
         title="एस्केलेशन सबमिट करें"
         containerStyle={{
-          backgroundColor: isFormValid ? theme.colors.primary : "#D1D5DC",
+          backgroundColor: isFormValid
+            ? theme.colors.colorPrimary600
+            : theme.colors.colorOverlay,
         }}
         textStyle={{
-          color: isFormValid ? "#FFF" : "#6A7282",
+          color: isFormValid
+            ? theme.colors.colorTextSecondary
+            : theme.colors.colorOverlay,
         }}
         disabled={!isFormValid}
       />
@@ -179,8 +242,6 @@ export default function EscalationScreen() {
 
 const styles = StyleSheet.create({
   warningCard: {
-    backgroundColor: "#FEFCE8",
-    borderColor: "#FACC15",
     borderWidth: 1,
     padding: 10,
     borderRadius: 10,
@@ -193,13 +254,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
     padding: 16,
     borderRadius: 12,
-    backgroundColor: "#FFFFFF",
     elevation: 1,
   },
   label: {
     fontSize: 14,
     marginBottom: 6,
-    color: "#111",
   },
 
   dropdown: {
@@ -213,14 +272,11 @@ const styles = StyleSheet.create({
   dropdownList: {
     marginTop: 6,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
     borderRadius: 8,
-    backgroundColor: "#FFFFFF",
   },
   dropdownItem: {
     padding: 12,
     borderBottomWidth: 1,
-    borderColor: "#E5E7EB",
   },
 
   notesBox: {
@@ -229,20 +285,17 @@ const styles = StyleSheet.create({
     padding: 12,
     height: 100,
     textAlignVertical: "top",
-    backgroundColor: "#FFF",
   },
 
   uploadBox: {
     borderWidth: 2,
     borderStyle: "dashed",
-    borderColor: "#9CA3AF",
+
     borderRadius: 10,
     paddingVertical: 40,
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
   },
   uploadText: {
-    color: "#6B7280",
     marginTop: 8,
   },
 });

@@ -1,12 +1,12 @@
 import { useTheme } from "@/theme/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import type { IconName } from "react-native-remix-icon";
 import RemixIcon from "react-native-remix-icon";
 
 interface Props {
   visible: boolean;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: IconName;
   title: string;
   description?: string;
 
@@ -18,12 +18,12 @@ interface Props {
 
   confirmColor?: string; // optional override
   cancelColor?: string;
-  subtitleColor?: string
+  subtitleColor?: string;
 }
 
 export default function ConfirmationAlert({
   visible,
-  icon = "alert-circle-outline",
+  icon,
   title,
   description,
   confirmText,
@@ -39,7 +39,7 @@ export default function ConfirmationAlert({
   // Default colors from theme if not passed
   const finalConfirmColor = confirmColor || theme.colors.btnSosBg;
   const finalCancelColor = cancelColor || theme.colors.colorBgPage;
-  const finalDescriptionColor = subtitleColor || theme.colors.btnSosBg
+  const finalDescriptionColor = subtitleColor || theme.colors.btnSosBg;
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -47,14 +47,17 @@ export default function ConfirmationAlert({
         <View
           style={[
             styles.container,
-            { backgroundColor: theme.colors.colorBgSurface,
-              borderWidth:2,
-              borderColor:finalConfirmColor
-             },
+            {
+              backgroundColor: theme.colors.colorBgSurface,
+              borderWidth: 2,
+              borderColor: finalConfirmColor,
+            },
           ]}
         >
           {/* Icon */}
-          <RemixIcon name="alarm-warning-line" size={40} color={finalConfirmColor} />
+          {icon && (
+            <RemixIcon name={icon} size={40} color={finalConfirmColor} />
+          )}
 
           {/* Title */}
           <Text
@@ -73,7 +76,7 @@ export default function ConfirmationAlert({
               style={[
                 styles.description,
                 theme.typography.fontBody,
-                { color: finalDescriptionColor},
+                { color: finalDescriptionColor },
               ]}
             >
               {description}
@@ -83,10 +86,7 @@ export default function ConfirmationAlert({
           {/* Confirm Button */}
           <TouchableOpacity
             onPress={onConfirm}
-            style={[
-              styles.confirmBtn,
-              { backgroundColor: finalConfirmColor },
-            ]}
+            style={[styles.confirmBtn, { backgroundColor: finalConfirmColor }]}
           >
             <Text
               style={[
@@ -104,9 +104,10 @@ export default function ConfirmationAlert({
             onPress={onCancel}
             style={[
               styles.cancelBtn,
-              { backgroundColor: finalCancelColor ,
-                borderColor:finalConfirmColor,
-                borderWidth:1
+              {
+                backgroundColor: finalCancelColor,
+                borderColor: finalConfirmColor,
+                borderWidth: 1,
               },
             ]}
           >

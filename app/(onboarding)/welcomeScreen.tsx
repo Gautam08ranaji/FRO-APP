@@ -1,21 +1,18 @@
-import ReusableButton from "@/components/reusables/ReusableButton";
 import { useTheme } from "@/theme/ThemeContext";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    View,
-    useWindowDimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
 
 type Props = {
-  /** Called when user taps the button. If omitted the screen will navigate to the profile tab. */
   onContinue?: () => void;
-  /** Optional title to show on the main heading (in Hindi by default) */
   title?: string;
-  /** Optional subtitle shown below the heading */
   subtitle?: string;
 };
 
@@ -28,12 +25,9 @@ export default function OtpSuccessScreen({
   const router = useRouter();
   const { width, height } = useWindowDimensions();
 
-  // Responsive sizes based on screen dimensions
-  const containerPadding = Math.max(16, Math.min(32, width * 0.06));
-  const circleSize = Math.round(Math.min(width, height) * 0.22); // 22% of smaller axis
-  const checkFontSize = Math.round(circleSize * 0.44); // checkmark size relative to circle
-  const titleFontSize = Math.round(Math.min(22, width * 0.055));
-  const subtitleFontSize = Math.round(Math.min(16, width * 0.038));
+  // Responsive circle & tick size
+  const circleSize = Math.min(width, height) * 0.22;
+  const checkFontSize = circleSize * 0.46;
 
   const handleContinue = () => {
     if (onContinue) return onContinue();
@@ -44,23 +38,16 @@ export default function OtpSuccessScreen({
     <SafeAreaView
       style={[
         styles.safeArea,
-        {
-          backgroundColor: theme.colors.colorBgPage,
-          paddingHorizontal: containerPadding,
-        },
+        { backgroundColor: theme.colors.colorBgPage, paddingHorizontal: width * 0.06 },
       ]}
     >
-      <View style={styles.outerCenter}>
-        <View
-          style={[
-            styles.inner,
-            // keep items centered and constrained so the UI stays in the middle
-            { maxWidth: 520, width: "100%" },
-          ]}
-        >
+      <View style={styles.flexCenter}>
+        <View style={[styles.cardWrapper, { maxWidth: 520 }]}>
+
+          {/* Success Circle */}
           <View
             style={[
-              styles.tickWrapper,
+              styles.circle,
               {
                 width: circleSize,
                 height: circleSize,
@@ -70,55 +57,69 @@ export default function OtpSuccessScreen({
             ]}
           >
             <Text
-              style={[
-                theme.typography.fontH1,
-                { fontSize: checkFontSize, color: theme.colors.btnPrimaryBg },
-              ]}
+              style={{
+                fontSize: checkFontSize,
+                color: theme.colors.btnPrimaryBg,
+                fontWeight: "bold",
+              }}
             >
               ✓
             </Text>
           </View>
 
+          {/* Title */}
           <Text
             style={[
               theme.typography.fontH2,
               styles.title,
-              { color: theme.colors.btnPrimaryBg, fontSize: titleFontSize },
+              { color: theme.colors.btnPrimaryBg ,paddingHorizontal:1 },
             ]}
           >
             {title ?? "स्वागत है, फील्ड रिस्पॉन्स ऑफिसर"}
           </Text>
+
+          {/* Subtitle */}
           <Text
             style={[
-              theme.typography.fontLink,
-              styles.title,
-              { color: theme.colors.colorTextSecondary,  },
+              theme.typography.fontBody,
+              styles.subtitle,
+              { color: theme.colors.colorTextSecondary },
             ]}
           >
-            आपको सौंपे गए मामलों को देखने, अपडेट करने और सहायता प्रदान करने के
-            लिए इस ऐप का उपयोग किया जाता है।{" "}
+            {subtitle ??
+              "आपको सौंपे गए मामलों को देखने, अपडेट करने और सहायता प्रदान करने के लिए इस ऐप का उपयोग किया जाता है।"}
           </Text>
 
-
-          <View style={{ width: "100%", marginTop: 28 }}>
-            <ReusableButton
-              title={"लॉगिन करें"}
-              onPress={handleContinue}
-            />
-          </View>
-          
-        </View>
-                 <Text
+          {/* Primary Button */}
+          <TouchableOpacity
+            onPress={handleContinue}
+            style={[
+              styles.primaryButton,
+              { backgroundColor: theme.colors.btnPrimaryBg },
+            ]}
+          >
+            <Text
               style={[
-                ,
-                {
-                  color: theme.colors.btnPrimaryBg,
-                  fontSize: subtitleFontSize,
-                },
+                theme.typography.fontButton,
+                { color: theme.colors.btnPrimaryText ,paddingHorizontal:1},
+              ]}
+            >
+              लॉगिन करें
+            </Text>
+          </TouchableOpacity>
+
+          {/* Bottom Link */}
+          <TouchableOpacity style={{ marginTop: 28 }}>
+            <Text
+              style={[
+                theme.typography.fontLink,
+                { color: theme.colors.btnPrimaryBg, textAlign: "center" },
               ]}
             >
               ऐप के बारे में जानें
             </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -127,30 +128,36 @@ export default function OtpSuccessScreen({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingTop: 16,
+    paddingTop: 20,
   },
-  outerCenter: {
+  flexCenter: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  inner: {
+  cardWrapper: {
     alignItems: "center",
-    justifyContent: "center",
-    // no negative margins — rely on flexbox centering
     paddingVertical: 24,
+    width: "100%",
   },
-  tickWrapper: {
+  circle: {
     justifyContent: "center",
     alignItems: "center",
   },
   title: {
-    textAlign: "center",
     marginTop: 20,
-    
+    textAlign: "center",
   },
   subtitle: {
     marginTop: 12,
     textAlign: "center",
+    paddingHorizontal: 8,
+  },
+  primaryButton: {
+    width: "100%",
+    alignItems: "center",
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginTop: 20,
   },
 });

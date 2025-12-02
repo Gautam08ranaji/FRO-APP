@@ -301,6 +301,10 @@ export default function StatusUpdateScreen() {
                     borderColor: colors.colorAccent500,
                   },
                 ]}
+
+                onPress={()=>{
+                  router.push('/AddVoiceScreen')
+                }}
               >
                 <View style={styles.actionContentAlt}>
                   <RemixIcon

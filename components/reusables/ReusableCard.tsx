@@ -9,6 +9,8 @@ interface Props {
     bg?: string;
     iconBg?: string
     iconColor?: string
+    countColor?:string
+    titleColor?:string
     onPress?: () => void;
 }
 
@@ -19,6 +21,8 @@ export default function ReusableCard({
     bg = "#FFFFFF",
     iconBg = "#2F80ED20",
     iconColor = "#FFFFFF",
+    countColor,
+    titleColor,
     onPress,
 }: Props) {
     return (
@@ -50,12 +54,12 @@ export default function ReusableCard({
                     <RemixIcon name={icon as any} size={30} color={iconColor} />
                 </View>
 
-                <Text style={{ fontSize: 22, fontWeight: "600", color: "#0E7355" }}>
+                <Text style={{ fontSize: 22, fontWeight: "600", color: countColor }}>
                     {count}
                 </Text>
             </View>
 
-            <Text style={{ marginTop: 10, fontSize: 20, color: "#1A1A1A" }}>
+            <Text style={{ marginTop: 10, fontSize: 20, color: titleColor }}>
                 {title}
             </Text>
         </TouchableOpacity>

@@ -63,7 +63,7 @@ export default function OnboardingSteps() {
         style={{
           fontSize: 20,
           fontWeight: "600",
-          color: theme.colors.btnPrimaryBg,
+          color: theme.colors.colorPrimary600,
           marginBottom: 10,
           textAlign: "center",
         }}
@@ -111,18 +111,19 @@ export default function OnboardingSteps() {
             style={[
               styles.prevBtn,
               {
-                borderColor: theme.colors.btnPrimaryBg,
+                borderColor: theme.colors.colorPrimary600,
                 opacity: step === 1 ? 0.4 : 1,
+                backgroundColor:theme.colors.colorBgPage
               },
             ]}
           >
             <RemixIcon
               name="arrow-left-s-line"
               size={18}
-              color={theme.colors.btnPrimaryBg}
+              color={theme.colors.colorPrimary600}
               style={{ marginRight: 6 }}
             />
-            <Text style={{ color: theme.colors.btnPrimaryBg, fontSize: 16 }}>
+            <Text style={{ color: theme.colors.colorPrimary600, fontSize: 16 }}>
               पिछला
             </Text>
           </TouchableOpacity>
@@ -132,27 +133,27 @@ export default function OnboardingSteps() {
             onPress={() => step < 3 && setStep(step + 1)}
             style={[
               styles.nextBtn,
-              { backgroundColor: theme.colors.btnPrimaryBg },
+              { backgroundColor: theme.colors.colorPrimary600 },
             ]}
           >
-            <Text style={{ color: "#fff", fontSize: 16, marginRight: 6 }}>
+            <Text style={{ color: theme.colors.colorBgPage, fontSize: 16, marginRight: 6 }}>
               अगला
             </Text>
-            <RemixIcon name="arrow-right-s-line" size={18} color="#fff" />
+            <RemixIcon name="arrow-right-s-line" size={18} color={theme.colors.colorBgPage} />
           </TouchableOpacity>
         </View>
       ) : (
         <TouchableOpacity
           style={[
             styles.fullBtn,
-            { backgroundColor: theme.colors.primary },
+            { backgroundColor: theme.colors.colorPrimary600 },
           ]}
           onPress={() => router.push("/(tabs)/(dashboard)")}
         >
           <Text
             style={{
               textAlign: "center",
-              color: "#fff",
+              color: theme.colors.colorBgPage,
               fontSize: 18,
               fontWeight: "600",
             }}

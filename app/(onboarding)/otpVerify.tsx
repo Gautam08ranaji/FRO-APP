@@ -49,8 +49,6 @@ export default function OtpVerificationScreen() {
   const handleVerify = () => {
     Keyboard.dismiss();
     router.push('/(onboarding)/profile')
-    // TODO: Verify OTP with API before navigating
-    // Example: router.push("/(tabs)/(profile)");
   };
 
   const handleResend = () => {
@@ -138,10 +136,10 @@ export default function OtpVerificationScreen() {
         style={[styles.verifyButton, { backgroundColor: theme.colors.btnPrimaryBg }]}
         onPress={handleVerify}
       >
-        <Text style={[styles.verifyText, { color: theme.colors.btnPrimaryText }]}>
+        <Text style={[styles.verifyText, { color: theme.colors.colorBgSurface}]}>
           सत्यापित करें
         </Text>
-        <RemixIcon name="arrow-right-line" size={20} color="#FFFFFF" />
+        <RemixIcon name="arrow-right-line" size={20} color={theme.colors.colorBgSurface} />
       </TouchableOpacity>
 
       {/* RESEND OTP */}

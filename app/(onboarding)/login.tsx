@@ -120,7 +120,7 @@ export default function LoginScreen() {
           ]}
           
             onPress={()=>{
-              console.log("hii");
+              // console.log("hii");
               
               router.push('/(onboarding)/otpVerify')
             }}
