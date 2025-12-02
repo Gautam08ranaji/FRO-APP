@@ -1,6 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import { Audio } from "expo-av";
+import { t } from "i18next";
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import RemixIcon from "react-native-remix-icon";
@@ -107,7 +108,7 @@ export default function VoiceNoteScreen() {
   }, [sound]);
 
   return (
-    <BodyLayout type="screen" screenName="वॉइस नोट रिकॉर्ड करें">
+    <BodyLayout type="screen" screenName={t("voiceNote.screenTitle")}>
       {/* TOP CARD */}
       <View
         style={[
@@ -138,7 +139,7 @@ export default function VoiceNoteScreen() {
 
         
         <Text style={styles.subtitle}>
-          {recording ? "रिकॉर्डिंग चल रही है..." : "रिकॉर्ड करने के लिए तैयार"}
+          {recording ? t("voiceNote.recording") : t("voiceNote.ready")}
         </Text>
       </View>
 
@@ -160,7 +161,7 @@ export default function VoiceNoteScreen() {
           color="#fff"
         />
         <Text style={styles.recordBtnText}>
-          {recording ? "रिकॉर्ड रोकें" : "रिकॉर्ड शुरू करें"}
+          {recording ? t("voiceNote.stop") : t("voiceNote.start")}
         </Text>
       </TouchableOpacity>
 
@@ -187,7 +188,7 @@ export default function VoiceNoteScreen() {
                 { color: colors.colorAccent500 },
               ]}
             >
-              {isPlaying ? "Pause" : "Play"}
+              {isPlaying ?  t("voiceNote.pause") : t("voiceNote.play")}
             </Text>
           </TouchableOpacity>
         </View>

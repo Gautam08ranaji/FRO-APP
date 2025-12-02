@@ -3,6 +3,7 @@ import ReusableButton from "@/components/reusables/ReusableButton";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   StyleSheet,
@@ -21,18 +22,14 @@ export default function StatusUpdateScreen() {
   const { theme } = useTheme();
   const colors = theme.colors;
   const typo = theme.typography;
+  const { t } = useTranslation();
 
   const [notes, setNotes] = useState("");
   const [step, setStep] = useState<StepId>(1);
 
- 
   const renderStepIndicator = (id: StepId) => {
     const isCompleted = id < step;
     const isActive = id === step;
-
-    const circleBg = isCompleted
-      ? colors.colorPrimary600
-      : colors.colorPrimary500 + "22";
 
     return (
       <TouchableOpacity
@@ -41,18 +38,18 @@ export default function StatusUpdateScreen() {
         style={[
           styles.stepCircle,
           {
-            backgroundColor: circleBg,
-            borderColor: isActive ? colors.colorPrimary500 : "transparent",
-          },
+            backgroundColor: isCompleted
+              ? colors.colorPrimary600
+              : colors.colorPrimary500 + "22",
+            borderColor: isActive ? colors.colorPrimary500 : "transparent"
+          }
         ]}
         activeOpacity={0.7}
       >
         <Text
           style={[
             styles.stepText,
-            {
-              color: isCompleted ? "#fff" : colors.colorPrimary500,
-            },
+            { color: isCompleted ? "#fff" : colors.colorPrimary500 }
           ]}
         >
           {id}
@@ -64,24 +61,23 @@ export default function StatusUpdateScreen() {
   return (
     <BodyLayout
       type="screen"
-      screenName="स्थिति अपडेट करें"
+      screenName={t("statusUpdate.screenTitle")}
       scrollContentStyle={{ paddingHorizontal: 0 }}
     >
       <View style={styles.container}>
-        {/* STEP TABS */}
+
+        {/* Steps Row */}
         <View style={styles.stepsRow}>
           {[1, 2, 3, 4, 5].map((id) => renderStepIndicator(id as StepId))}
         </View>
 
-        {/* ---------------------- */}
-        {/* STEP UI */}
-        {/* ---------------------- */}
+        {/* STEP 1 */}
         {step === 1 && (
           <View style={styles.stepHolder}>
             <View
               style={[
                 styles.iconWrapper,
-                { backgroundColor: colors.colorPrimary500 + "22" },
+                { backgroundColor: colors.colorPrimary500 + "22" }
               ]}
             >
               <RemixIcon
@@ -92,31 +88,29 @@ export default function StatusUpdateScreen() {
             </View>
 
             <Text style={[styles.title, { color: colors.colorPrimary500 }]}>
-              मामला स्वीकृत
+              {t("statusUpdate.step1Title")}
             </Text>
 
             <Text style={[styles.subtitle, { color: colors.colorTextSecondary }]}>
-              मामला स्वीकार करें और आगे बढ़ें
+              {t("statusUpdate.step1Subtitle")}
             </Text>
 
             <TouchableOpacity
-              style={[
-                styles.primaryBtn,
-                { backgroundColor: colors.btnPrimaryBg },
-              ]}
+              style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
               onPress={() => setStep(2)}
             >
-              <Text style={styles.primaryBtnText}>मामला स्वीकार करें</Text>
+              <Text style={styles.primaryBtnText}>{t("statusUpdate.acceptCase")}</Text>
             </TouchableOpacity>
           </View>
         )}
 
+        {/* STEP 2 */}
         {step === 2 && (
           <View style={styles.stepHolder}>
             <View
               style={[
                 styles.iconWrapper,
-                { backgroundColor: colors.validationInfoText + "22" },
+                { backgroundColor: colors.validationInfoText + "22" }
               ]}
             >
               <RemixIcon
@@ -127,42 +121,40 @@ export default function StatusUpdateScreen() {
             </View>
 
             <Text style={[styles.title, { color: colors.validationInfoText }]}>
-              मैं रास्ते में हूँ
+              {t("statusUpdate.step2Title")}
             </Text>
 
             <Text style={[styles.subtitle, { color: colors.colorTextSecondary }]}>
-              आपका लोकेशन साझा किया जा रहा है।
+              {t("statusUpdate.step2Subtitle")}
             </Text>
 
             <View
               style={[
                 styles.info,
-                { backgroundColor: colors.validationInfoText + "22" },
+                { backgroundColor: colors.validationInfoText + "22" }
               ]}
             >
               <Text style={[typo.fontToast, { color: colors.validationInfoText }]}>
-                📍 आपकी लाइव लोकेशन ट्रैक की जा रही है
+                {t("statusUpdate.locationTracking")}
               </Text>
             </View>
 
             <TouchableOpacity
-              style={[
-                styles.primaryBtn,
-                { backgroundColor: colors.btnPrimaryBg },
-              ]}
+              style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
               onPress={() => setStep(3)}
             >
-              <Text style={styles.primaryBtnText}>स्थिति अपडेट करें</Text>
+              <Text style={styles.primaryBtnText}>{t("statusUpdate.updateStatus")}</Text>
             </TouchableOpacity>
           </View>
         )}
 
+        {/* STEP 3 */}
         {step === 3 && (
           <View style={styles.stepHolder}>
             <View
               style={[
                 styles.iconWrapper,
-                { backgroundColor: colors.colorError400 + "22" },
+                { backgroundColor: colors.colorError400 + "22" }
               ]}
             >
               <RemixIcon
@@ -173,42 +165,40 @@ export default function StatusUpdateScreen() {
             </View>
 
             <Text style={[styles.title, { color: colors.colorError400 }]}>
-              स्थल पर पहुँच गए?
+              {t("statusUpdate.step3Title")}
             </Text>
 
             <Text style={[styles.subtitle, { color: colors.colorTextSecondary }]}>
-              कृपया पुष्टि करें और कार्य शुरू करें।
+              {t("statusUpdate.step3Subtitle")}
             </Text>
 
             <TouchableOpacity
-              style={[
-                styles.primaryBtn,
-                { backgroundColor: colors.btnPrimaryBg },
-              ]}
+              style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
               onPress={() => setStep(4)}
             >
-              <Text style={styles.primaryBtnText}>हाँ, पहुँच गया</Text>
+              <Text style={styles.primaryBtnText}>{t("statusUpdate.step3Yes")}</Text>
             </TouchableOpacity>
 
             <ReusableButton
-              title="नहीं, पता नहीं मिला"
+              title={t("statusUpdate.step3No")}
               containerStyle={{
                 width: "100%",
                 backgroundColor: colors.colorBgSurface,
                 borderColor: colors.colorAccent500,
-                borderWidth: 1,
+                borderWidth: 1
               }}
               textStyle={{ color: colors.colorAccent500 }}
             />
           </View>
         )}
 
+        {/* STEP 4 */}
         {step === 4 && (
           <View style={styles.stepHolder}>
             <View
               style={[
                 styles.iconWrapper,
-                { backgroundColor: colors.validationInfoText + "22" },
+                { backgroundColor: colors.validationInfoText + "22" }
               ]}
             >
               <RemixIcon
@@ -219,53 +209,50 @@ export default function StatusUpdateScreen() {
             </View>
 
             <Text style={[styles.title, { color: colors.colorPrimary500 }]}>
-              क्या वरिष्ठ नागरिक से संपर्क हुआ?
+              {t("statusUpdate.step4Title")}
             </Text>
 
-           
-
             <TouchableOpacity
-              style={[
-                styles.primaryBtn,
-                { backgroundColor: colors.btnPrimaryBg },
-              ]}
+              style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
               onPress={() => setStep(5)}
             >
-              <Text style={styles.primaryBtnText}>हाँ</Text>
+              <Text style={styles.primaryBtnText}>{t("statusUpdate.step4Yes")}</Text>
             </TouchableOpacity>
 
-            <ReusableButton title="नहीं" containerStyle={{ width: "100%" ,backgroundColor:colors.colorBgSurface,borderWidth:1,borderColor:colors.colorPrimary500}}
-            textStyle={{color:colors.colorPrimary500}}
-            onPress={()=>{
-              setStep(3)
-            }}
+            <ReusableButton
+              title={t("statusUpdate.step4No")}
+              containerStyle={{
+                width: "100%",
+                backgroundColor: colors.colorBgSurface,
+                borderWidth: 1,
+                borderColor: colors.colorPrimary500
+              }}
+              textStyle={{ color: colors.colorPrimary500 }}
+              onPress={() => setStep(3)}
             />
           </View>
         )}
 
+        {/* STEP 5 */}
         {step === 5 && (
           <View style={styles.stepHolder}>
             <Text
               style={[
                 typo.fontToast,
-                { color: colors.colorPrimary500, alignSelf: "flex-start" },
+                { color: colors.colorPrimary500, alignSelf: "flex-start" }
               ]}
             >
-              किए गए कार्य का विवरण
+              {t("statusUpdate.step5Title")}
             </Text>
 
             <TextInput
               multiline
-              placeholder="यहां लिखें..."
+              placeholder={t("statusUpdate.notesPlaceholder")}
               value={notes}
               onChangeText={setNotes}
-              style={[
-                styles.notesBox,
-                { borderColor: colors.colorPrimary500 },
-              ]}
+              style={[styles.notesBox, { borderColor: colors.colorPrimary500 }]}
             />
 
-            {/* ACTION ROW */}
             <View style={styles.actionRow}>
               <TouchableOpacity
                 style={[
@@ -273,21 +260,17 @@ export default function StatusUpdateScreen() {
                   {
                     backgroundColor: colors.colorBgSurface,
                     borderWidth: 1,
-                    borderColor: colors.colorPrimary500,
-                  },
+                    borderColor: colors.colorPrimary500
+                  }
                 ]}
-                onPress={()=>{
-                  router.push('/AddPhotoScreen')
+                onPress={() => {
+                  router.push("/AddPhotoScreen");
                 }}
               >
                 <View style={styles.actionContent}>
-                  <RemixIcon
-                    name="camera-line"
-                    size={18}
-                    color={colors.colorPrimary500}
-                  />
+                  <RemixIcon name="camera-line" size={18} color={colors.colorPrimary500} />
                   <Text style={[typo.fontToast, { color: colors.colorPrimary500 }]}>
-                    फ़ोटो
+                    {t("statusUpdate.uploadPhoto")}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -298,31 +281,26 @@ export default function StatusUpdateScreen() {
                   {
                     backgroundColor: colors.colorBgSurface,
                     borderWidth: 1,
-                    borderColor: colors.colorAccent500,
-                  },
+                    borderColor: colors.colorAccent500
+                  }
                 ]}
-
-                onPress={()=>{
-                  router.push('/AddVoiceScreen')
+                onPress={() => {
+                  router.push("/AddVoiceScreen");
                 }}
               >
-                <View style={styles.actionContentAlt}>
-                  <RemixIcon
-                    name="mic-line"
-                    size={18}
-                    color={colors.colorAccent500}
-                  />
+                <View style={styles.actionContent}>
+                  <RemixIcon name="mic-line" size={18} color={colors.colorAccent500} />
                   <Text style={[typo.fontToast, { color: colors.colorAccent500 }]}>
-                    वॉइस नोट
+                    {t("statusUpdate.uploadVoice")}
                   </Text>
                 </View>
               </TouchableOpacity>
             </View>
 
-            <ReusableButton title="सेव करें और अपडेट करें" containerStyle={{ width: "100%" }} 
-            onPress={ ()=>{
-              setStep(1)
-            }}
+            <ReusableButton
+              title={t("statusUpdate.saveAndUpdate")}
+              containerStyle={{ width: "100%" }}
+              onPress={() => setStep(1)}
             />
           </View>
         )}
@@ -330,6 +308,8 @@ export default function StatusUpdateScreen() {
     </BodyLayout>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {

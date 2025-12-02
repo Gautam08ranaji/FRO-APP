@@ -1,12 +1,13 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import RemixIcon from "react-native-remix-icon";
@@ -14,10 +15,11 @@ import RemixIcon from "react-native-remix-icon";
 export default function AddPhotoScreen() {
   const { theme } = useTheme();
   const colors = theme.colors;
+  const { t } = useTranslation();
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // 📸 Camera open
+  // 📸 Camera
   const openCamera = async () => {
     const result = await launchCamera({
       mediaType: "photo",
@@ -29,7 +31,7 @@ export default function AddPhotoScreen() {
     }
   };
 
-  // 🖼️ Gallery open
+  // 🖼️ Gallery
   const openGallery = async () => {
     const result = await launchImageLibrary({
       mediaType: "photo",
@@ -44,7 +46,7 @@ export default function AddPhotoScreen() {
   return (
     <BodyLayout
       type="screen"
-      screenName="फोटो जोड़ें"
+      screenName={t("addPhoto.screenTitle")}
       scrollContentStyle={{ paddingHorizontal: 20 }}
     >
       {/* Camera Button */}
@@ -53,36 +55,34 @@ export default function AddPhotoScreen() {
         onPress={openCamera}
       >
         <RemixIcon name="camera-line" size={20} color="#fff" />
-        <Text style={styles.primaryBtnText}>कैमरा खोलें</Text>
+        <Text style={styles.primaryBtnText}>{t("addPhoto.openCamera")}</Text>
       </TouchableOpacity>
 
       {/* Gallery Button */}
       <TouchableOpacity
         style={[
           styles.outlineBtn,
-          {
-            borderColor: colors.btnPrimaryBg,
-          },
+          { borderColor: colors.btnPrimaryBg },
         ]}
         onPress={openGallery}
       >
         <RemixIcon name="image-line" size={20} color={colors.btnPrimaryBg} />
         <Text style={[styles.outlineBtnText, { color: colors.btnPrimaryBg }]}>
-          गैलरी से चुनें
+          {t("addPhoto.chooseGallery")}
         </Text>
       </TouchableOpacity>
 
       {/* Selected Photo */}
       <Text style={[styles.sectionTitle, { color: colors.colorTextPrimary }]}>
-        चुनी गई फोटो
+        {t("addPhoto.selectedPhoto")}
       </Text>
 
-      <View style={styles.previewBox}>
+      <View style={[styles.previewBox, { backgroundColor: colors.colorBgSurface }]}>
         {selectedImage ? (
           <Image source={{ uri: selectedImage }} style={styles.previewImage} />
         ) : (
           <View style={styles.placeholder}>
-            <RemixIcon name="image-line" size={36} color="#69A297" />
+            <RemixIcon name="image-line" size={36} color={colors.colorOverlay} />
           </View>
         )}
       </View>
@@ -94,7 +94,7 @@ export default function AddPhotoScreen() {
           console.log("Saving image:", selectedImage);
         }}
       >
-        <Text style={styles.primaryBtnText}>फोटो सेव करें</Text>
+        <Text style={styles.primaryBtnText}>{t("addPhoto.savePhoto")}</Text>
       </TouchableOpacity>
     </BodyLayout>
   );
@@ -140,16 +140,17 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     borderRadius: 12,
-    backgroundColor: "#E4EFE7",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 30,
   },
+
   previewImage: {
     width: "100%",
     height: "100%",
     borderRadius: 12,
   },
+
   placeholder: {
     justifyContent: "center",
     alignItems: "center",

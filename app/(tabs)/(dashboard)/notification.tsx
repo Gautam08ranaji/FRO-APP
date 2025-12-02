@@ -1,11 +1,13 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 
 export default function NotificationScreen() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   interface NotificationType {
     id: number;
@@ -22,33 +24,35 @@ export default function NotificationScreen() {
       id: 1,
       icon: "file-copy-line",
       iconBg: "#1976D2",
-      title: "आपको नया मामला सौंपा गया है",
-      subtitle: "टिकट नंबर: TKT-14567-001",
-      time: "5 मिनट पहले",
+      title: t("notifications.newCaseAssigned"),
+      subtitle: `${t("notifications.ticketNumber")} TKT-14567-001`,
+      time: `5 ${t("notifications.minAgo")}`,
       isNew: true,
     },
     {
       id: 2,
       icon: "error-warning-line",
       iconBg: "#E65100",
-      title: "टिकट TKT-14567-003 अपडेट हुआ है",
-      subtitle: "वरिष्ठ नागरिक ने नया संदेश भेजा है",
-      time: "1 घंटे पहले",
+      title: t("notifications.ticketUpdated"),
+      subtitle: t("notifications.newMessage"),
+      time: `1 ${t("notifications.hourAgo")}`,
       isNew: true,
     },
     {
       id: 3,
       icon: "message-2-line",
       iconBg: "#2E7D32",
-      title: "सुपरवाइज़र ने टिप्पणी जोड़ी है",
-      subtitle: "टिकट TKT-14567-002 पर नई टिप्पणी",
-      time: "2 घंटे पहले",
+      title: t("notifications.supervisorComment"),
+      subtitle: `${t("notifications.ticketNumber")} TKT-14567-002 • ${t(
+        "notifications.newComment"
+      )}`,
+      time: `2 ${t("notifications.hourAgo")}`,
       isNew: false,
     },
   ];
 
   return (
-    <BodyLayout screenName="नोटिफिकेशन" type="screen">
+    <BodyLayout screenName={t("notifications.screenTitle")} type="screen">
       <View style={styles.container}>
         {notifications.map((item) => (
           <TouchableOpacity
@@ -59,21 +63,28 @@ export default function NotificationScreen() {
               {
                 backgroundColor: theme.colors.colorBgSurface,
                 borderLeftWidth: item.isNew ? 4 : 0,
-                borderLeftColor: item.isNew ? theme.colors.colorPrimary600 : "transparent",
+                borderLeftColor: item.isNew
+                  ? theme.colors.colorPrimary600
+                  : "transparent",
               },
             ]}
           >
-           
             <View style={styles.topRow}>
+              {/* Icon */}
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: item.iconBg  },
+                  { backgroundColor: item.iconBg },
                 ]}
               >
-                <RemixIcon name={item.icon} size={24} color={    theme.colors.colorBgPage   }/>
+                <RemixIcon
+                  name={item.icon}
+                  size={24}
+                  color={theme.colors.colorBgPage}
+                />
               </View>
 
+              {/* Title */}
               <Text
                 style={[
                   styles.title,
@@ -130,11 +141,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
-    
   },
 
   title: {
-    flex: 1,           // 🔥 pushes dot to the right
+    flex: 1,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -148,7 +158,7 @@ const styles = StyleSheet.create({
   },
 
   indented: {
-    marginLeft: 57,    // aligns subtitle/time under the title, not icon
+    marginLeft: 57,
   },
 
   subtitle: {

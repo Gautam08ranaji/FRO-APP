@@ -1,18 +1,20 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
-import React, { JSX } from "react";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 
-export default function StartNavigationScreen(): JSX.Element {
+export default function StartNavigationScreen() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const colors = theme.colors;
 
   return (
     <BodyLayout
       type="screen"
-      screenName="लोकेशन पर जाएँ"
+      screenName={t("navigation.screenTitle")}
       scrollContentStyle={{ paddingHorizontal: 0 }}
     >
       {/* MAP PREVIEW */}
@@ -20,9 +22,9 @@ export default function StartNavigationScreen(): JSX.Element {
         style={[
           styles.mapBox,
           {
-            backgroundColor: colors.btnPrimaryBg + "22", // 13% transparent
-            borderColor: colors.colorBorder,
-          },
+            backgroundColor: colors.btnPrimaryBg + "22",
+            borderColor: colors.colorBorder
+          }
         ]}
       >
         <RemixIcon
@@ -38,12 +40,12 @@ export default function StartNavigationScreen(): JSX.Element {
           styles.card,
           {
             backgroundColor: colors.colorBgSurface,
-            borderColor: colors.colorBorder,
-          },
+            borderColor: colors.colorBorder
+          }
         ]}
       >
         <Text style={[styles.name, { color: colors.colorTextPrimary }]}>
-          रामलाल शर्मा
+          {t("navigation.name")}
         </Text>
 
         {/* Distance */}
@@ -54,7 +56,7 @@ export default function StartNavigationScreen(): JSX.Element {
             color={colors.colorTextSecondary}
           />
           <Text style={[styles.rowText, { color: colors.colorTextSecondary }]}>
-            दूरी: 2.3 km
+            {t("navigation.distance")}: {t("navigation.distanceValue")}
           </Text>
         </View>
 
@@ -66,26 +68,24 @@ export default function StartNavigationScreen(): JSX.Element {
             color={colors.colorTextSecondary}
           />
           <Text style={[styles.rowText, { color: colors.colorTextSecondary }]}>
-            अनुमानित समय: 8 मिनट
+            {t("navigation.eta")}: {t("navigation.etaValue")}
           </Text>
         </View>
 
         {/* Address */}
         <Text style={[styles.label, { color: colors.colorTextSecondary }]}>
-          पता:
+          {t("navigation.address")}:
         </Text>
 
         <Text style={[styles.address, { color: colors.colorTextPrimary }]}>
-          123, गांधी नगर, सेक्टर 5, मुंबई, महाराष्ट्र - 400001
+          {t("navigation.fullAddress")}
         </Text>
       </View>
 
       {/* OPEN GOOGLE MAPS */}
       <TouchableOpacity
         style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
-        onPress={()=>{
-          router.push('/StatusUpdateScreen')
-        }}
+        onPress={() => router.push("/StatusUpdateScreen")}
       >
         <RemixIcon
           name={"navigation-fill" as IconName}
@@ -94,7 +94,7 @@ export default function StartNavigationScreen(): JSX.Element {
           style={{ marginRight: 6 }}
         />
         <Text style={[styles.primaryBtnText, { color: colors.btnPrimaryText }]}>
-          Google Maps में खोलें
+          {t("navigation.openMaps")}
         </Text>
       </TouchableOpacity>
 
@@ -104,14 +104,12 @@ export default function StartNavigationScreen(): JSX.Element {
           styles.secondaryBtn,
           {
             borderColor: colors.btnSecondaryBorder,
-            backgroundColor: colors.colorBgSurface,
-          },
+            backgroundColor: colors.colorBgSurface
+          }
         ]}
       >
-        <Text
-          style={[styles.secondaryBtnText, { color: colors.colorPrimary500 }]}
-        >
-          मैं रास्ते में हूँ
+        <Text style={[styles.secondaryBtnText, { color: colors.colorPrimary500 }]}>
+          {t("navigation.onTheWay")}
         </Text>
       </TouchableOpacity>
     </BodyLayout>
@@ -125,43 +123,43 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 12,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   card: {
     borderRadius: 16,
     padding: 16,
     marginTop: 18,
-    borderWidth: 1,
+    borderWidth: 1
   },
 
   name: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 10,
+    marginBottom: 10
   },
 
   row: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: 6
   },
 
   rowText: {
     marginLeft: 6,
-    fontSize: 14,
+    fontSize: 14
   },
 
   label: {
     marginTop: 12,
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: "500"
   },
 
   address: {
     marginTop: 4,
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 20
   },
 
   primaryBtn: {
@@ -170,12 +168,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 22,
+    marginTop: 22
   },
 
   primaryBtnText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "600"
   },
 
   secondaryBtn: {
@@ -184,11 +182,11 @@ const styles = StyleSheet.create({
     borderWidth: 1.6,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 14,
+    marginTop: 14
   },
 
   secondaryBtnText: {
     fontSize: 16,
-    fontWeight: "600",
-  },
+    fontWeight: "600"
+  }
 });

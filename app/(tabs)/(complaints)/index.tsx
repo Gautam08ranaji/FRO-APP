@@ -2,6 +2,7 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   ScrollView,
@@ -17,17 +18,16 @@ const { width } = Dimensions.get("window");
 export default function CasesScreen() {
   const { theme } = useTheme();
   const params = useLocalSearchParams();
+  const { t } = useTranslation();
 
-  // --------------------------
-  // 👉 Filters (Tabs)
-  // --------------------------
+  // ---------------------- i18n Tabs ----------------------
   const tabs = [
-    { label: "नए", key: "new" },
-    { label: "स्वीकृत", key: "approved" },
-    { label: "रास्ते में", key: "onway" },
-    { label: "कार्य जारी", key: "working" },
-    { label: "फॉलो-अप", key: "followup" },
-    { label: "बंद-मामले", key: "closed" },
+    { label: t("cases.tabNew"), key: "new" },
+    { label: t("cases.tabApproved"), key: "approved" },
+    { label: t("cases.tabOnWay"), key: "onway" },
+    { label: t("cases.tabWorking"), key: "working" },
+    { label: t("cases.tabFollowup"), key: "followup" },
+    { label: t("cases.tabClosed"), key: "closed" },
   ];
 
   const initialTabIndex = tabs.findIndex((t) => t.key === params.filter);
@@ -35,19 +35,16 @@ export default function CasesScreen() {
     initialTabIndex !== -1 ? initialTabIndex : 0
   );
 
-  // -------------------------
-  // 👉 Auto-scroll refs (No Hook-in-loop)
-  // -------------------------
   const scrollRef = useRef<ScrollView>(null);
-const tabRefs = useRef<(View | null)[]>([]);
+  const tabRefs = useRef<(View | null)[]>([]);
 
-  // Update tab when filter param changes
+  // Update active tab on filter param change
   useEffect(() => {
     const index = tabs.findIndex((t) => t.key === params.filter);
     if (index !== -1) setActiveTab(index);
   }, [params.filter]);
 
-  // Scroll selected tab to center
+  // Auto scroll tabs
   useEffect(() => {
     const tabEl = tabRefs.current[activeTab];
     const scrollEl = scrollRef.current;
@@ -55,7 +52,7 @@ const tabRefs = useRef<(View | null)[]>([]);
     if (tabEl && scrollEl) {
       (tabEl as any).measureLayout(
         scrollEl as any,
-        (x: number, y: number, w: number) => {
+        (x: number) => {
           scrollEl.scrollTo({ x: x - width / 3, animated: true });
         },
         () => {}
@@ -63,9 +60,7 @@ const tabRefs = useRef<(View | null)[]>([]);
     }
   }, [activeTab]);
 
-  // --------------------------
-  // 👉 Data
-  // --------------------------
+  // ---------------------- Sample Data ----------------------
   const data = [
     {
       name: "रामलाल शर्मा",
@@ -73,9 +68,9 @@ const tabRefs = useRef<(View | null)[]>([]);
       category: "स्वास्थ्य सहायता",
       ticket: "TKT-14567-001",
       distance: "2.3 km",
-      time: "10 मिनट पहले मिला",
+      time: `10 ${t("cases.timeMinutesAgo")}`,
       status: "new",
-      tag: "नया",
+      tag: t("cases.tabNew"),
     },
     {
       name: "सीता देवी",
@@ -83,9 +78,9 @@ const tabRefs = useRef<(View | null)[]>([]);
       category: "पेंशन सहायता",
       ticket: "TKT-14567-002",
       distance: "5.1 km",
-      time: "25 मिनट पहले मिला",
+      time: `25 ${t("cases.timeMinutesAgo")}`,
       status: "new",
-      tag: "नया",
+      tag: t("cases.tabNew"),
     },
     {
       name: "गोपाल कृष्ण",
@@ -93,9 +88,9 @@ const tabRefs = useRef<(View | null)[]>([]);
       category: "कानूनी सहायता",
       ticket: "TKT-14567-003",
       distance: "1.8 km",
-      time: "1 घंटे पहले मिला",
+      time: `1 ${t("cases.timeHoursAgo")}`,
       status: "approved",
-      tag: "स्वीकृत",
+      tag: t("cases.tabApproved"),
     },
     {
       name: "अजय वर्मा",
@@ -103,9 +98,9 @@ const tabRefs = useRef<(View | null)[]>([]);
       category: "स्वास्थ्य सहायता",
       ticket: "TKT-14567-004",
       distance: "3.6 km",
-      time: "40 मिनट पहले मिला",
+      time: `40 ${t("cases.timeMinutesAgo")}`,
       status: "onway",
-      tag: "रास्ते में",
+      tag: t("cases.tabOnWay"),
     },
     {
       name: "मोहन लाल",
@@ -113,9 +108,9 @@ const tabRefs = useRef<(View | null)[]>([]);
       category: "कानूनी सहायता",
       ticket: "TKT-14567-005",
       distance: "1.3 km",
-      time: "2 घंटे पहले मिला",
+      time: `2 ${t("cases.timeHoursAgo")}`,
       status: "working",
-      tag: "कार्य जारी",
+      tag: t("cases.tabWorking"),
     },
     {
       name: "गीता देवी",
@@ -123,9 +118,9 @@ const tabRefs = useRef<(View | null)[]>([]);
       category: "पेंशन सहायता",
       ticket: "TKT-14567-006",
       distance: "4.1 km",
-      time: "3 घंटे पहले मिला",
+      time: `3 ${t("cases.timeHoursAgo")}`,
       status: "followup",
-      tag: "फॉलो-अप",
+      tag: t("cases.tabFollowup"),
     },
   ];
 
@@ -133,8 +128,8 @@ const tabRefs = useRef<(View | null)[]>([]);
   const filteredData = data.filter((item) => item.status === selectedFilterKey);
 
   return (
-    <BodyLayout type="screen" screenName="मामले">
-      
+    <BodyLayout type="screen" screenName={t("cases.screenTitle")}>
+
       {/* FILTER TABS */}
       <ScrollView
         ref={scrollRef}
@@ -142,39 +137,36 @@ const tabRefs = useRef<(View | null)[]>([]);
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.tabContainer}
       >
-       {tabs.map((tab, index) => (
-  <TouchableOpacity
-    key={index}
-    ref={(el) => {
-      tabRefs.current[index] = el;
-    }}
-    onPress={() => setActiveTab(index)}
-    activeOpacity={0.8}
-    style={[
-      styles.tab,
-      { backgroundColor: theme.colors.colorBgPage },
-      activeTab === index && {
-        backgroundColor: theme.colors.colorPrimary600,
-      },
-    ]}
-  >
-    <Text
-      style={[
-        styles.tabText,
-        { color: theme.colors.colorTextSecondary },
-        activeTab === index && { color: theme.colors.colorBgPage },
-      ]}
-    >
-      {tab.label}
-    </Text>
-  </TouchableOpacity>
-))}
-
+        {tabs.map((tab, index) => (
+          <TouchableOpacity
+            key={index}
+            ref={(el) => (tabRefs.current[index] = el)}
+            onPress={() => setActiveTab(index)}
+            activeOpacity={0.8}
+            style={[
+              styles.tab,
+              { backgroundColor: theme.colors.colorBgPage },
+              activeTab === index && {
+                backgroundColor: theme.colors.colorPrimary600,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                { color: theme.colors.colorTextSecondary },
+                activeTab === index && { color: theme.colors.colorBgPage },
+              ]}
+            >
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
 
-      {/* LIST */}
+      {/* CASE LIST */}
       {filteredData.length === 0 ? (
-        <Text style={styles.noData}>कोई मामला उपलब्ध नहीं</Text>
+        <Text style={styles.noData}>{t("cases.noCases")}</Text>
       ) : (
         filteredData.map((item, idx) => (
           <View
@@ -206,13 +198,15 @@ const tabRefs = useRef<(View | null)[]>([]);
             </View>
 
             <Text style={[styles.cardText, { color: theme.colors.colorTextSecondary }]}>
-              उम्र: {item.age}
+              {t("cases.age")}: {item.age}
             </Text>
+
             <Text style={[styles.cardText, { color: theme.colors.colorTextSecondary }]}>
-              शिकायत श्रेणी: {item.category}
+              {t("cases.category")}: {item.category}
             </Text>
+
             <Text style={[styles.cardText, { color: theme.colors.colorTextSecondary }]}>
-              टिकट नंबर: {item.ticket}
+              {t("cases.ticket")}: {item.ticket}
             </Text>
 
             <View style={styles.metaRow}>
@@ -222,8 +216,10 @@ const tabRefs = useRef<(View | null)[]>([]);
                   size={16}
                   color={theme.colors.colorTextSecondary}
                 />
-                <Text style={[styles.metaText, { color: theme.colors.colorTextSecondary }]}>
-                  {item.distance} दूर
+                <Text
+                  style={[styles.metaText, { color: theme.colors.colorTextSecondary }]}
+                >
+                  {item.distance} {t("cases.away")}
                 </Text>
               </View>
 
@@ -233,7 +229,9 @@ const tabRefs = useRef<(View | null)[]>([]);
                   size={16}
                   color={theme.colors.colorTextSecondary}
                 />
-                <Text style={[styles.metaText, { color: theme.colors.colorTextSecondary }]}>
+                <Text
+                  style={[styles.metaText, { color: theme.colors.colorTextSecondary }]}
+                >
                   {item.time}
                 </Text>
               </View>
@@ -247,8 +245,13 @@ const tabRefs = useRef<(View | null)[]>([]);
               ]}
               onPress={() => router.push("/CaseDetailScreen")}
             >
-              <Text style={[styles.actionBtnText, { color: theme.colors.colorBgPage }]}>
-                मामला देखें
+              <Text
+                style={[
+                  styles.actionBtnText,
+                  { color: theme.colors.colorBgPage },
+                ]}
+              >
+                {t("cases.viewCase")}
               </Text>
             </TouchableOpacity>
           </View>

@@ -127,7 +127,147 @@
   "reason2": "Reason unclear",
   "reason3": "No cooperation",
   "reason4": "Delay in treatment"
+},
+"notifications": {
+  "screenTitle": "Notifications",
+
+  "newCaseAssigned": "A new case has been assigned to you",
+  "ticketUpdated": "Ticket has been updated",
+  "supervisorComment": "Supervisor added a comment",
+
+  "ticketNumber": "Ticket Number:",
+  "newMessage": "Senior citizen sent a new message",
+  "newComment": "New comment",
+
+  "minAgo": "minutes ago",
+  "hourAgo": "hours ago"
+},
+"cases": {
+  "screenTitle": "Cases",
+
+  "tabNew": "New",
+  "tabApproved": "Approved",
+  "tabOnWay": "On The Way",
+  "tabWorking": "In Progress",
+  "tabFollowup": "Follow-Up",
+  "tabClosed": "Closed",
+
+  "noCases": "No cases available",
+
+  "age": "Age",
+  "category": "Category",
+  "ticket": "Ticket No.",
+  "away": "away",
+  "viewCase": "View Case",
+
+  "timeMinutesAgo": "minutes ago",
+  "timeHoursAgo": "hours ago"
+},
+"caseDetail": {
+  "screenTitle": "Ticket No: {{ticket}}",
+
+  "elderDetails": "Elder Details",
+  "name": "Name",
+  "age": "Age",
+  "gender": "Gender",
+  "phone": "Phone Number",
+  "emergency": "Emergency Contact",
+
+  "complaintInfo": "Complaint Info",
+  "category": "Category",
+  "details": "Details",
+  "attachments": "Attachments",
+
+  "location": "Location",
+  "address": "Address",
+  "startNavigation": "Start Navigation",
+
+  "timeline": "Timeline",
+
+  "actions": "Actions",
+  "updateStatus": "Update Status",
+  "addPhoto": "Add Photo/Video",
+  "addNote": "Add Note",
+  "addVoice": "Add Voice Note",
+  "scheduleFollowup": "Schedule Follow-Up",
+  "closeCase": "Close Case",
+
+  "genderMale": "Male",
+  "years": "years",
+
+  "steps": {
+    "registered": "Complaint Registered",
+    "assigned": "Assigned to FRO",
+    "approved": "Approved",
+    "onway": "On The Way",
+    "arrived": "Arrived on Location",
+    "working": "Work in Progress"
+  }
+},
+"navigation": {
+  "screenTitle": "Go to Location",
+  "distance": "Distance",
+  "eta": "Estimated Time",
+  "address": "Address",
+  "openMaps": "Open in Google Maps",
+  "onTheWay": "I am on the way",
+
+  "name": "Ramlal Sharma",
+  "distanceValue": "2.3 km",
+  "etaValue": "8 minutes",
+  "fullAddress": "123, Gandhi Nagar, Sector 5, Mumbai, Maharashtra - 400001"
+},
+"statusUpdate": {
+  "screenTitle": "Update Status",
+
+  "step1Title": "Case Approved",
+  "step1Subtitle": "Accept the case and continue",
+  "acceptCase": "Accept Case",
+
+  "step2Title": "I'm on the way",
+  "step2Subtitle": "Your location is being shared.",
+  "locationTracking": "📍 Your live location is being tracked",
+  "updateStatus": "Update Status",
+
+  "step3Title": "Have you reached the location?",
+  "step3Subtitle": "Please confirm and start work.",
+  "step3Yes": "Yes, reached",
+  "step3No": "No, could not find address",
+
+  "step4Title": "Did you contact the senior citizen?",
+  "step4Yes": "Yes",
+  "step4No": "No",
+
+  "step5Title": "Details of work done",
+  "notesPlaceholder": "Write here...",
+  "uploadPhoto": "Photo",
+  "uploadVoice": "Voice Note",
+  "saveAndUpdate": "Save & Update"
+},
+"addPhoto": {
+  "screenTitle": "Add Photo",
+  "openCamera": "Open Camera",
+  "chooseGallery": "Choose from Gallery",
+  "selectedPhoto": "Selected Photo",
+  "savePhoto": "Save Photo"
+},
+"voiceNote": {
+  "screenTitle": "Record Voice Note",
+  "recording": "Recording...",
+  "ready": "Ready to record",
+  "start": "Start Recording",
+  "stop": "Stop Recording",
+  "savedNote": "Recorded Voice Note",
+  "play": "Play",
+  "pause": "Pause"
 }
+
+
+
+
+
+
+
 
 
 }

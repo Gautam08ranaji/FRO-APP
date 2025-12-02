@@ -2,6 +2,7 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React, { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Animated,
   Easing,
@@ -14,20 +15,23 @@ import RemixIcon from "react-native-remix-icon";
 
 export default function CaseDetailScreen() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
+
+  const ticketNo = "TKT-14567-001";
 
   /** -------------------------------
-   * AMAZON / FLIPKART STYLE TRACKER
+   * AMAZON / FLIPKART STYLE TRACKER (i18n)
    --------------------------------*/
   const steps = [
-    { title: "शिकायत दर्ज हुई", time: "10:30 AM" },
-    { title: "FRO को सौंपा गया", time: "10:45 AM" },
-    { title: "स्वीकृत" },
-    { title: "रास्ते में" },
-    { title: "स्थान पर पहुँचे" },
-    { title: "कार्य जारी" },
+    { title: t("caseDetail.steps.registered"), time: "10:30 AM" },
+    { title: t("caseDetail.steps.assigned"), time: "10:45 AM" },
+    { title: t("caseDetail.steps.approved") },
+    { title: t("caseDetail.steps.onway") },
+    { title: t("caseDetail.steps.arrived") },
+    { title: t("caseDetail.steps.working") }
   ];
 
-  const completedSteps = 3; // how many steps are completed
+  const completedSteps = 3;
 
   const animatedProgress = useRef(new Animated.Value(0)).current;
 
@@ -35,57 +39,75 @@ export default function CaseDetailScreen() {
     Animated.timing(animatedProgress, {
       toValue: completedSteps,
       duration: 4800,
-      delay:2000,
+      delay: 2000,
       easing: Easing.out(Easing.exp),
-      useNativeDriver: false,
+      useNativeDriver: false
     }).start();
   }, []);
 
   return (
-    <BodyLayout type="screen" screenName="टिकट नंबर: TKT-14567-001">
-
+    <BodyLayout
+      type="screen"
+      screenName={t("caseDetail.screenTitle", { ticket: ticketNo })}
+    >
       {/* --------------- ELDER DETAILS CARD --------------- */}
       <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
         <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
-          Elder Details
+          {t("caseDetail.elderDetails")}
         </Text>
 
         <View style={styles.row}>
-          <View style={[styles.avatarBox,{backgroundColor:theme.colors.colorPrimary50}]}>
+          <View style={[styles.avatarBox, { backgroundColor: theme.colors.colorPrimary50 }]}>
             <RemixIcon name="user-3-line" size={40} color={theme.colors.colorPrimary600} />
           </View>
 
           <View style={{ marginLeft: 12 }}>
             <View style={styles.keyValueRow}>
-              <Text style={[styles.labelKey,{color:theme.colors.colorTextSecondary}]}>नाम:</Text>
-              <Text style={[styles.labelValue,{color:theme.colors.colorTextSecondary}]}>रामलाल शर्मा</Text>
+              <Text style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}>
+                {t("caseDetail.name")}:
+              </Text>
+              <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
+                रामलाल शर्मा
+              </Text>
             </View>
 
             <View style={styles.keyValueRow}>
-              <Text style={[styles.labelKey,{color:theme.colors.colorTextSecondary}]}>उम्र:</Text>
-              <Text style={[styles.labelValue,{color:theme.colors.colorTextSecondary}]}>72 वर्ष</Text>
+              <Text style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}>
+                {t("caseDetail.age")}:
+              </Text>
+              <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
+                72 {t("caseDetail.years")}
+              </Text>
             </View>
 
             <View style={styles.keyValueRow}>
-              <Text style={[styles.labelKey,{color:theme.colors.colorTextSecondary}]}>लिंग:</Text>
-              <Text style={[styles.labelValue,{color:theme.colors.colorTextSecondary}]}>पुरुष</Text>
+              <Text style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}>
+                {t("caseDetail.gender")}:
+              </Text>
+              <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
+                {t("caseDetail.genderMale")}
+              </Text>
             </View>
           </View>
         </View>
 
         <View style={{ marginTop: 14 }}>
           <View style={styles.keyValueRow}>
-              <Text style={[styles.labelKey,{color:theme.colors.colorTextSecondary}]}>
-              फ़ोन नंबर:</Text>
-              <Text style={[styles.labelValue,{color:theme.colors.colorTextSecondary}]}>
-              +91-9876543210</Text>
+            <Text style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}>
+              {t("caseDetail.phone")}:
+            </Text>
+            <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
+              +91-9876543210
+            </Text>
           </View>
 
           <View style={styles.keyValueRow}>
-              <Text style={[styles.labelKey,{color:theme.colors.colorTextSecondary}]}>
-              आपातकालीन संपर्क:</Text>
-              <Text style={[styles.labelValue,{color:theme.colors.colorTextSecondary}]}>
-              +91-9876543 / 211</Text>
+            <Text style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}>
+              {t("caseDetail.emergency")}:
+            </Text>
+            <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
+              +91-9876543 / 211
+            </Text>
           </View>
         </View>
       </View>
@@ -93,42 +115,47 @@ export default function CaseDetailScreen() {
       {/* COMPLAINT INFO */}
       <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
         <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
-          Complaint Info
+          {t("caseDetail.complaintInfo")}
         </Text>
 
-        <View>
-          <Text style={[styles.labelKey,{color:theme.colors.colorTextSecondary}]}>
-            शिकायत श्रेणी:</Text>
-          <Text style={[styles.labelValue,{color:theme.colors.colorTextSecondary}]}>
-            स्वास्थ्य सहायता</Text>
-        </View>
-
-        <Text style={[styles.labelKey, { marginTop: 12 ,color:theme.colors.colorTextSecondary}]}>विवरण:</Text>
-        <Text style={[styles.labelValue,{color:theme.colors.colorTextSecondary}]}>
-          बुजुर्ग को चलने में कठिनाई हो रही है, और नजदीकी हॉस्पिटल तक ले जाने
-          में मदद चाहिए। नियमित चेकअप के लिए अस्पताल जाना है।
+        <Text style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}>
+          {t("caseDetail.category")}:
+        </Text>
+        <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
+          स्वास्थ्य सहायता
         </Text>
 
-        <Text style={[styles.labelKey, { marginTop: 12 ,color:theme.colors.colorTextSecondary}]}>संलग्न मीडिया:</Text>
-        <View style={[styles.attachmentBox,{backgroundColor:theme.colors.colorBgSurface}]}>
+        <Text style={[styles.labelKey, { marginTop: 12, color: theme.colors.colorTextSecondary }]}>
+          {t("caseDetail.details")}:
+        </Text>
+        <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
+          बुजुर्ग को चलने में कठिनाई हो रही है...
+        </Text>
+
+        <Text style={[styles.labelKey, { marginTop: 12, color: theme.colors.colorTextSecondary }]}>
+          {t("caseDetail.attachments")}:
+        </Text>
+        <View style={[styles.attachmentBox, { backgroundColor: theme.colors.colorBgSurface }]}>
           <RemixIcon name="image-line" size={32} color="#888" />
         </View>
       </View>
 
-      {/* LOCATION CARD */}
+      {/* LOCATION */}
       <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
         <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
-          Location
+          {t("caseDetail.location")}
         </Text>
 
         <View style={styles.keyValueRow}>
-          <Text style={[styles.labelKey,{color:theme.colors.colorTextSecondary}]}>पता:</Text>
-          <Text style={[styles.labelValue,{color:theme.colors.colorTextSecondary}]}>
-            123, गांधी नगर, सेक्टर 5, मुंबई, महाराष्ट्र - 400001
+          <Text style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}>
+            {t("caseDetail.address")}:
+          </Text>
+          <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
+            123, गांधी नगर, मुंबई - 400001
           </Text>
         </View>
 
-        <View style={[styles.mapBox,{backgroundColor:theme.colors.colorBgSurface}]}>
+        <View style={[styles.mapBox, { backgroundColor: theme.colors.colorBgSurface }]}>
           <RemixIcon name="map-pin-line" size={36} color="#999" />
         </View>
 
@@ -137,14 +164,14 @@ export default function CaseDetailScreen() {
           style={styles.navBtn}
           onPress={() => router.push("/StartNavigationScreen")}
         >
-          <Text style={styles.navBtnText}>नेविगेशन शुरू करें</Text>
+          <Text style={styles.navBtnText}>{t("caseDetail.startNavigation")}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* ---------------- TIMELINE (ANIMATED) ---------------- */}
+      {/* TIMELINE */}
       <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
         <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
-          Timeline
+          {t("caseDetail.timeline")}
         </Text>
 
         <View style={styles.timelineContainer}>
@@ -154,47 +181,37 @@ export default function CaseDetailScreen() {
             const lineProgress = animatedProgress.interpolate({
               inputRange: [index, index + 1],
               outputRange: ["0%", "100%"],
-              extrapolate: "clamp",
+              extrapolate: "clamp"
             });
 
             const dotActive = animatedProgress.interpolate({
               inputRange: [index - 0.5, index, index + 0.5],
               outputRange: [0, 1, 1],
-              extrapolate: "clamp",
-            });
-
-            const dotScale = dotActive.interpolate({
-              inputRange: [0, 1],
-              outputRange: [1, 1],
+              extrapolate: "clamp"
             });
 
             return (
               <View key={index} style={styles.progressRow}>
                 {/* DOT + LINE */}
                 <View style={styles.progressLeft}>
-                  
-                  {/* DOT */}
                   <Animated.View
                     style={[
                       styles.dot,
                       {
                         backgroundColor: dotActive.interpolate({
                           inputRange: [0, 1],
-                          outputRange: ["#D8D8D8", theme.colors.colorPrimary600],
-                        }),
-                        transform: [{ scale: dotScale }],
-                      },
+                          outputRange: ["#D8D8D8", theme.colors.colorPrimary600]
+                        })
+                      }
                     ]}
                   />
+
                   {!isLast && (
                     <View style={styles.lineContainer}>
                       <Animated.View
                         style={[
                           styles.lineFill,
-                          {
-                            backgroundColor: theme.colors.colorPrimary600,
-                            width: lineProgress,
-                          },
+                          { backgroundColor: theme.colors.colorPrimary600, width: lineProgress }
                         ]}
                       />
                     </View>
@@ -210,20 +227,15 @@ export default function CaseDetailScreen() {
                         color:
                           index < completedSteps
                             ? theme.colors.colorPrimary600
-                            : theme.colors.colorTextSecondary,
-                      },
+                            : theme.colors.colorTextSecondary
+                      }
                     ]}
                   >
                     {item.title}
                   </Text>
 
                   {item.time && (
-                    <Text
-                      style={[
-                        styles.progressTime,
-                        { color: theme.colors.colorTextSecondary },
-                      ]}
-                    >
+                    <Text style={[styles.progressTime, { color: theme.colors.colorTextSecondary }]}>
                       {item.time}
                     </Text>
                   )}
@@ -237,69 +249,52 @@ export default function CaseDetailScreen() {
       {/* ACTIONS */}
       <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
         <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
-          Actions
+          {t("caseDetail.actions")}
         </Text>
 
         {[
-          "स्थिति अपडेट करें",
-          "फोटो/वीडियो जोड़ें",
-          "नोट जोड़ें",
-          "वॉइस नोट जोड़ें",
-          "फॉलो-अप शेड्यूल करें",
+          t("caseDetail.updateStatus"),
+          t("caseDetail.addPhoto"),
+          t("caseDetail.addNote"),
+          t("caseDetail.addVoice"),
+          t("caseDetail.scheduleFollowup")
         ].map((label, index) => (
-          <TouchableOpacity key={index}
-            style={[styles.actionBtn,{borderColor:theme.colors.colorPrimary600}]}
-          >
-            <Text style={[styles.actionBtnText,{color:theme.colors.colorPrimary600}]}>{label}</Text>
+          <TouchableOpacity key={index} style={[styles.actionBtn, { borderColor: theme.colors.colorPrimary600 }]}>
+            <Text style={[styles.actionBtnText, { color: theme.colors.colorPrimary600 }]}>{label}</Text>
           </TouchableOpacity>
         ))}
 
-        <TouchableOpacity style={[styles.closeBtn,{backgroundColor:theme.colors.colorAccent500}]}>
-          <Text style={[styles.closeBtnText,{color:theme.colors.colorBgPage}]}>मामला बंद करें</Text>
+        <TouchableOpacity style={[styles.closeBtn, { backgroundColor: theme.colors.colorAccent500 }]}>
+          <Text style={[styles.closeBtnText, { color: theme.colors.colorBgPage }]}>
+            {t("caseDetail.closeCase")}
+          </Text>
         </TouchableOpacity>
       </View>
-
     </BodyLayout>
   );
 }
 
+/* STYLES (NO CHANGE) */
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-
-  /* CARD */
   card: {
-    marginHorizontal: 0,
     marginTop: 14,
     padding: 18,
     borderRadius: 12,
     shadowOpacity: 0.05,
     shadowRadius: 5,
-    elevation: 3,
+    elevation: 3
   },
 
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 12,
-  },
+  cardTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
 
-  /* KEY VALUE */
   keyValueRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 6,
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
-  labelKey: {
-    width: 130,
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  labelValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    flexShrink: 1,
-  },
+  labelKey: { width: 130, fontSize: 14, fontWeight: "500" },
+  labelValue: { fontSize: 14, fontWeight: "600", flexShrink: 1 },
 
   row: { flexDirection: "row", alignItems: "center" },
 
@@ -308,7 +303,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 50,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   attachmentBox: {
@@ -316,7 +311,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 8,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   mapBox: {
@@ -324,7 +319,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 10,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   navBtn: {
@@ -332,11 +327,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#027A61",
     paddingVertical: 12,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: "center"
   },
   navBtnText: { color: "#fff", fontSize: 15, fontWeight: "600" },
 
-  /* ---------------- TIMELINE ---------------- */
+  /* TIMELINE */
   timelineContainer: { marginTop: 4 },
 
   progressRow: { flexDirection: "row", minHeight: 55 },
@@ -347,8 +342,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 20,
-    backgroundColor: "#D8D8D8",
-    zIndex: 2,
+    backgroundColor: "#D8D8D8"
   },
 
   lineContainer: {
@@ -356,42 +350,29 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: "#D8D8D8",
     overflow: "hidden",
-    marginTop: -2,
+    marginTop: -2
   },
+  lineFill: { height: "100%", width: "0%" },
 
-  lineFill: {
-    height: "100%",
-    width: "0%",
-  },
-
-  progressContent: {
-    paddingLeft: 10,
-    paddingBottom: 10,
-    flex: 1,
-  },
-
+  progressContent: { paddingLeft: 10, paddingBottom: 10, flex: 1 },
   progressTitle: { fontSize: 14, fontWeight: "600" },
-
   progressTime: { fontSize: 12, marginTop: 2 },
 
-  /* ---------- ACTIONS ---------- */
+  /* ACTION BUTTONS */
   actionBtn: {
     borderWidth: 1,
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 10,
-    alignItems: "center",
+    alignItems: "center"
   },
-  actionBtnText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
+  actionBtnText: { fontSize: 15, fontWeight: "600" },
 
   closeBtn: {
     paddingVertical: 14,
     borderRadius: 8,
     marginTop: 14,
-    alignItems: "center",
+    alignItems: "center"
   },
-  closeBtnText: { fontSize: 15, fontWeight: "700" },
+  closeBtnText: { fontSize: 15, fontWeight: "700" }
 });

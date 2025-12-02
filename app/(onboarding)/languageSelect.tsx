@@ -52,8 +52,8 @@ export default function LanguageSelection() {
     setLoading(true);
     try {
  
-      // router.push('/(tabs)/(dashboard)');
-      router.push('/welcomeScreen');
+      router.push('/(tabs)/(dashboard)');
+      // router.push('/welcomeScreen');
     } catch (err) {
       console.error('Error changing language:', err);
     } finally {
