@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
 
+
 export default function OnboardingScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -26,6 +27,9 @@ export default function OnboardingScreen() {
     };
     prepare();
   }, []);
+
+  console.log("hii");
+  
 
   // ✅ Hide splash after layout + trigger navigation
   const onLayout = useCallback(async () => {
