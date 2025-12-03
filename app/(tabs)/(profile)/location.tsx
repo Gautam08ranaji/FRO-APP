@@ -1,6 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   StyleSheet,
   Text,
@@ -12,38 +13,49 @@ import { Dropdown } from "react-native-element-dropdown";
 
 export default function LocationDetailsScreen() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   const stateList = [
-    { label: "उत्तर प्रदेश", value: "UP" },
-    { label: "बिहार", value: "BR" },
-    { label: "राजस्थान", value: "RJ" },
+    { label: t("locationDetails.states.up"), value: "UP" },
+    { label: t("locationDetails.states.br"), value: "BR" },
+    { label: t("locationDetails.states.rj"), value: "RJ" },
   ];
 
   const districtList = [
-    { label: "लखनऊ", value: "lucknow" },
-    { label: "कानपुर", value: "kanpur" },
-    { label: "वाराणसी", value: "varanasi" },
+    { label: t("locationDetails.districts.lucknow"), value: "lucknow" },
+    { label: t("locationDetails.districts.kanpur"), value: "kanpur" },
+    { label: t("locationDetails.districts.varanasi"), value: "varanasi" },
   ];
 
   const [state, setState] = useState("UP");
   const [district, setDistrict] = useState("lucknow");
   const [block, setBlock] = useState("");
-  const [name, setName] = useState("राजेश कुमार");
+  const [name, setName] = useState(t("locationDetails.defaultName"));
 
   return (
-    <BodyLayout type={"screen"} screenName="कार्यक्षेत्र">
+    <BodyLayout
+      type={"screen"}
+      screenName={t("locationDetails.screenTitle")}
+    >
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
       >
+        {/* ---------- State ---------- */}
         <Text
           style={[styles.label, { color: theme.colors.colorTextSecondary }]}
         >
-          राज्य
+          {t("locationDetails.state")}
         </Text>
         <Dropdown
-          style={[styles.dropdown,{borderColor:theme.colors.inputBorder}]}
-          selectedTextStyle={[styles.dropdownText,{color:theme.colors.colorTextSecondary}]}
-          placeholderStyle={[styles.dropdownText,{color:theme.colors.colorTextSecondary}]}
+          style={[styles.dropdown, { borderColor: theme.colors.inputBorder }]}
+          selectedTextStyle={[
+            styles.dropdownText,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+          placeholderStyle={[
+            styles.dropdownText,
+            { color: theme.colors.colorTextSecondary },
+          ]}
           data={stateList}
           labelField="label"
           valueField="value"
@@ -51,16 +63,22 @@ export default function LocationDetailsScreen() {
           onChange={(item) => setState(item.value)}
         />
 
-        {/* ---------- District Dropdown ---------- */}
+        {/* ---------- District ---------- */}
         <Text
           style={[styles.label, { color: theme.colors.colorTextSecondary }]}
         >
-          जिला
+          {t("locationDetails.district")}
         </Text>
         <Dropdown
-          style={[styles.dropdown,{borderColor:theme.colors.inputBorder}]}
-          selectedTextStyle={[styles.dropdownText,{color:theme.colors.colorTextSecondary}]}
-          placeholderStyle={[styles.dropdownText,{color:theme.colors.colorTextSecondary}]}
+          style={[styles.dropdown, { borderColor: theme.colors.inputBorder }]}
+          selectedTextStyle={[
+            styles.dropdownText,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+          placeholderStyle={[
+            styles.dropdownText,
+            { color: theme.colors.colorTextSecondary },
+          ]}
           data={districtList}
           labelField="label"
           valueField="value"
@@ -68,10 +86,11 @@ export default function LocationDetailsScreen() {
           onChange={(item) => setDistrict(item.value)}
         />
 
+        {/* ---------- Block ---------- */}
         <Text
           style={[styles.label, { color: theme.colors.colorTextSecondary }]}
         >
-          ब्लॉक / थाना
+          {t("locationDetails.block")}
         </Text>
         <TextInput
           style={[
@@ -81,15 +100,17 @@ export default function LocationDetailsScreen() {
               color: theme.colors.colorTextSecondary,
             },
           ]}
-          placeholder="ब्लॉक / थाना दर्ज करें"
+          placeholder={t("locationDetails.blockPlaceholder")}
           value={block}
           onChangeText={setBlock}
           placeholderTextColor={theme.colors.colorTextSecondary}
         />
+
+        {/* ---------- Team Lead Name ---------- */}
         <Text
           style={[styles.label, { color: theme.colors.colorTextSecondary }]}
         >
-          टीम लीडर का नाम
+          {t("locationDetails.teamLeadName")}
         </Text>
         <TextInput
           style={[
@@ -99,13 +120,13 @@ export default function LocationDetailsScreen() {
               color: theme.colors.colorTextSecondary,
             },
           ]}
-          placeholder="ब्लॉक / थाना दर्ज करें"
+          placeholder={t("locationDetails.teamLeadPlaceholder")}
           value={name}
-          onChangeText={setBlock}
+          onChangeText={setName}
           placeholderTextColor={theme.colors.colorTextSecondary}
         />
 
-        {/* Save Button */}
+        {/* ---------- Save Button ---------- */}
         <TouchableOpacity
           style={[
             styles.saveBtn,
@@ -113,7 +134,7 @@ export default function LocationDetailsScreen() {
           ]}
         >
           <Text style={[styles.saveText, { color: theme.colors.colorBgPage }]}>
-            सेव करें
+            {t("locationDetails.save")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -126,7 +147,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginHorizontal: 15,
     padding: 20,
-
     borderRadius: 12,
     elevation: 3,
   },

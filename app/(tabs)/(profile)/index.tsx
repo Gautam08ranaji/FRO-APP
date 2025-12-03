@@ -40,7 +40,14 @@ export default function ProfileScreen() {
             color={theme.colors.colorPrimary600}
           />
         </View>
-        <Text style={[styles.itemText, { color: theme.colors.colorTextSecondary }]}>{label}</Text>
+        <Text
+          style={[
+            styles.itemText,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+        >
+          {label}
+        </Text>
       </View>
 
       <RemixIcon
@@ -53,11 +60,24 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.colorBgSurface }]}
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.colorBgSurface },
+      ]}
     >
       {/* ================= HEADER ================= */}
-      <View style={[styles.header, { backgroundColor: theme.colors.colorPrimary600 }]}>
-        <View style={[styles.avatarContainer, { backgroundColor: theme.colors.colorBgSurface }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: theme.colors.colorPrimary600 },
+        ]}
+      >
+        <View
+          style={[
+            styles.avatarContainer,
+            { backgroundColor: theme.colors.colorBgSurface },
+          ]}
+        >
           <RemixIcon
             name="user-3-line"
             size={38}
@@ -66,46 +86,62 @@ export default function ProfileScreen() {
         </View>
 
         <Text style={[styles.name, { color: theme.colors.colorBgPage }]}>
-          राजेश कुमार
+          {t("profile.name")}
         </Text>
         <Text style={[styles.code, { color: theme.colors.colorBgPage }]}>
-          FRO-14567-001
+          {t("profile.code")}
         </Text>
         <Text style={[styles.role, { color: theme.colors.colorBgPage }]}>
-          FRO - फील्ड रिस्पॉन्स ऑफिसर
+          {t("profile.role")}
         </Text>
       </View>
 
       {/* ================= BODY ================= */}
       <View style={styles.body}>
-        {renderItem("अधिकारी विवरण", "user-settings-line", () =>
-          router.push("/profileDetails")
+        {renderItem(
+          t("profile.menuOfficerDetails"),
+          "user-settings-line",
+          () => router.push("/profileDetails")
         )}
 
         {renderItem(
-          "कार्यक्षेत्र",
+          t("profile.menuWorkArea"),
           "map-pin-line",
           () => router.push("/location")
-          // console.log("कार्यक्षेत्र pressed")
         )}
 
-        {renderItem("भाषा", "translate-2", () =>
-          router.push("/languageSelect")
+        {renderItem(
+          t("profile.menuLanguage"),
+          "translate-2",
+          () => router.push("/languageSelect")
         )}
 
-        {renderItem("सेटिंग्स", "settings-3-line", () =>
-          router.push("/setting")
+        {renderItem(
+          t("profile.menuSettings"),
+          "settings-3-line",
+          () => router.push("/setting")
         )}
 
-        {renderItem("पासवर्ड बदलें", "lock-password-line", () =>
-          router.push("/changePassword")
+        {renderItem(
+          t("profile.menuChangePassword"),
+          "lock-password-line",
+          () => router.push("/changePassword")
         )}
 
         <TouchableOpacity
           onPress={() => setShowAlert(true)}
-          style={[styles.logoutBtn, { backgroundColor: theme.colors.colorError100 }]}
+          style={[
+            styles.logoutBtn,
+            { backgroundColor: theme.colors.colorError100 },
+          ]}
         >
-          <View style={{ flexDirection: "row", justifyContent: "center",gap:10 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 10,
+            }}
+          >
             <RemixIcon
               name={"login-box-line"}
               size={26}
@@ -117,7 +153,7 @@ export default function ProfileScreen() {
                 { color: theme.colors.colorError600 },
               ]}
             >
-              लॉगआउट
+              {t("profile.logout")}
             </Text>
           </View>
         </TouchableOpacity>
@@ -125,10 +161,10 @@ export default function ProfileScreen() {
         <ConfirmationAlert
           visible={showAlert}
           icon="login-box-line"
-          title={"क्या आप लॉगआउट करना चाहते हैं?"}
-          description="आप अपने खाते से बाहर हो जाएंगे।"
-          confirmText={"हाँ, लॉगआउट करें"}
-          cancelText={"रद्द करें"}
+          title={t("profile.logoutTitle")}
+          description={t("profile.logoutDescription")}
+          confirmText={t("profile.logoutConfirm")}
+          cancelText={t("profile.logoutCancel")}
           onConfirm={() => {
             setShowAlert(false);
             // router.push("/(tabs)/(dashboard)/confirmLocationScreen");

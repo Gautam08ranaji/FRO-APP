@@ -1,6 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   StyleSheet,
   Text,
@@ -11,42 +12,74 @@ import {
 
 export default function OfficerDetailsScreen() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   return (
-    <BodyLayout type={"screen"} screenName="अधिकारी विवरण">
+    <BodyLayout
+      type={"screen"}
+      screenName={t("officerDetails.screenTitle")}
+    >
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
       >
         <Text style={[styles.label, { color: theme.colors.colorTextPrimary }]}>
-          नाम
+          {t("officerDetails.name")}
         </Text>
         <TextInput
-          style={[styles.input, { backgroundColor: theme.colors.inputBg ,color:theme.colors.colorTextSecondary,borderColor:theme.colors.colorBgPage}]}
-          value="राजेश कुमार"
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.colors.inputBg,
+              color: theme.colors.colorTextSecondary,
+              borderColor: theme.colors.colorBgPage,
+            },
+          ]}
+          value={t("officerDetails.nameValue")}
         />
 
         <Text style={[styles.label, { color: theme.colors.colorTextPrimary }]}>
-          कर्मचारी कोड
+          {t("officerDetails.employeeCode")}
         </Text>
         <TextInput
-          style={[styles.input, { backgroundColor: theme.colors.inputBg,color:theme.colors.colorTextSecondary,borderColor:theme.colors.colorBgPage }]}
-          value="FRO-14567-001"
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.colors.inputBg,
+              color: theme.colors.colorTextSecondary,
+              borderColor: theme.colors.colorBgPage,
+            },
+          ]}
+          value={t("officerDetails.employeeCodeValue")}
         />
 
         <Text style={[styles.label, { color: theme.colors.colorTextPrimary }]}>
-          मोबाइल नंबर
+          {t("officerDetails.mobile")}
         </Text>
         <TextInput
-          style={[styles.input, { backgroundColor: theme.colors.inputBg ,color:theme.colors.colorTextSecondary,borderColor:theme.colors.colorBgPage}]}
-          value="+91-9876543210"
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.colors.inputBg,
+              color: theme.colors.colorTextSecondary,
+              borderColor: theme.colors.colorBgPage,
+            },
+          ]}
+          value={t("officerDetails.mobileValue")}
         />
 
         <Text style={[styles.label, { color: theme.colors.colorTextPrimary }]}>
-          ईमेल
+          {t("officerDetails.email")}
         </Text>
         <TextInput
-          style={[styles.input, { backgroundColor: theme.colors.inputBg ,color:theme.colors.colorTextSecondary,borderColor:theme.colors.colorBgPage}]}
-          value="rajesh.kumar@example.com"
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.colors.inputBg,
+              color: theme.colors.colorTextSecondary,
+              borderColor: theme.colors.colorBgPage,
+            },
+          ]}
+          value={t("officerDetails.emailValue")}
         />
 
         <TouchableOpacity
@@ -54,11 +87,15 @@ export default function OfficerDetailsScreen() {
             styles.saveBtn,
             { backgroundColor: theme.colors.colorPrimary600 },
           ]}
-          onPress={() => {
-            // router.push[('/location'),{backgroundColor:theme.colors.inputBg}]
-          }}
         >
-          <Text style={[styles.saveText,{color:theme.colors.colorBgPage}]}>सेव करें</Text>
+          <Text
+            style={[
+              styles.saveText,
+              { color: theme.colors.colorBgPage },
+            ]}
+          >
+            {t("officerDetails.save")}
+          </Text>
         </TouchableOpacity>
       </View>
     </BodyLayout>
@@ -66,29 +103,6 @@ export default function OfficerDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F3F3F3",
-  },
-
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 60,
-    paddingHorizontal: 15,
-    elevation: 3,
-  },
-
-  backBtn: {
-    paddingRight: 10,
-  },
-
-  headerTitle: {
-    fontSize: 20,
-    color: "#fff",
-    fontWeight: "600",
-  },
-
   card: {
     marginTop: 20,
     marginHorizontal: 15,

@@ -329,7 +329,95 @@
   "solvedCases": "सुलझे हुए मामले",
   "followUp": "फॉलो अप",
   "placeVisited": "देखी गई जगहें"
+},
+"profile": {
+  "name": "राजेश कुमार",
+  "code": "FRO-14567-001",
+  "role": "FRO - फील्ड रिस्पॉन्स ऑफिसर",
+
+  "menuOfficerDetails": "अधिकारी विवरण",
+  "menuWorkArea": "कार्यक्षेत्र",
+  "menuLanguage": "भाषा",
+  "menuSettings": "सेटिंग्स",
+  "menuChangePassword": "पासवर्ड बदलें",
+
+  "logout": "लॉगआउट",
+  "logoutTitle": "क्या आप लॉगआउट करना चाहते हैं?",
+  "logoutDescription": "आप अपने खाते से बाहर हो जाएंगे।",
+  "logoutConfirm": "हाँ, लॉगआउट करें",
+  "logoutCancel": "रद्द करें"
+},
+"officerDetails": {
+  "screenTitle": "अधिकारी विवरण",
+  "name": "नाम",
+  "nameValue": "राजेश कुमार",
+  "employeeCode": "कर्मचारी कोड",
+  "employeeCodeValue": "FRO-14567-001",
+  "mobile": "मोबाइल नंबर",
+  "mobileValue": "+91-9876543210",
+  "email": "ईमेल",
+  "emailValue": "rajesh.kumar@example.com",
+  "save": "सेव करें"
+},
+"locationDetails": {
+  "screenTitle": "कार्यक्षेत्र",
+  "state": "राज्य",
+  "district": "जिला",
+  "block": "ब्लॉक / थाना",
+  "blockPlaceholder": "ब्लॉक / थाना दर्ज करें",
+  "teamLeadName": "टीम लीडर का नाम",
+  "teamLeadPlaceholder": "टीम लीडर का नाम दर्ज करें",
+  "save": "सेव करें",
+  "defaultName": "राजेश कुमार",
+
+  "states": {
+    "up": "उत्तर प्रदेश",
+    "br": "बिहार",
+    "rj": "राजस्थान"
+  },
+
+  "districts": {
+    "lucknow": "लखनऊ",
+    "kanpur": "कानपुर",
+    "varanasi": "वाराणसी"
+  }
+},
+"settings": {
+  "screenTitle": "सेटिंग्स",
+
+  "notification": "नोटिफिकेशन",
+  "locationPermission": "लोकेशन अनुमति",
+  "changeTheme": "थीम बदलें",
+  "textSize": "टेक्स्ट साइज़",
+  "textSizeSmall": "छोटा",
+  "textSizeMedium": "मध्यम",
+  "textSizeLarge": "बड़ा",
+  "helpSupport": "हेल्प & सपोर्ट",
+
+  "locationAlertTitle": "लोकेशन बंद करें",
+  "locationAlertMessage": "लोकेशन परमिशन बंद करने के लिए ऐप सेटिंग्स खोलें।",
+  "locationAlertCancel": "रद्द करें",
+  "locationAlertOpenSettings": "सेटिंग्स खोलें"
+},
+"changePassword": {
+  "screenTitle": "पासवर्ड बदलें",
+
+  "oldPassword": "पुराना पासवर्ड",
+  "oldPasswordPlaceholder": "पुराना पासवर्ड दर्ज करें",
+
+  "newPassword": "नया पासवर्ड",
+  "newPasswordPlaceholder": "नया पासवर्ड दर्ज करें",
+
+  "confirmPassword": "पासवर्ड पुष्टि करें",
+  "confirmPasswordPlaceholder": "नया पासवर्ड फिर से दर्ज करें",
+
+  "save": "सेव करें"
 }
+
+
+
+
+
 
 
 

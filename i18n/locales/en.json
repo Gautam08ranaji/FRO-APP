@@ -307,7 +307,95 @@
   "solvedCases": "Solved Cases",
   "followUp": "Follow Up",
   "placeVisited": "Places Visited"
+},
+"profile": {
+  "name": "Rajesh Kumar",
+  "code": "FRO-14567-001",
+  "role": "FRO - Field Response Officer",
+
+  "menuOfficerDetails": "Officer Details",
+  "menuWorkArea": "Work Area",
+  "menuLanguage": "Language",
+  "menuSettings": "Settings",
+  "menuChangePassword": "Change Password",
+
+  "logout": "Logout",
+  "logoutTitle": "Do you want to logout?",
+  "logoutDescription": "You will be logged out from your account.",
+  "logoutConfirm": "Yes, logout",
+  "logoutCancel": "Cancel"
+},
+"officerDetails": {
+  "screenTitle": "Officer Details",
+  "name": "Name",
+  "nameValue": "Rajesh Kumar",
+  "employeeCode": "Employee Code",
+  "employeeCodeValue": "FRO-14567-001",
+  "mobile": "Mobile Number",
+  "mobileValue": "+91-9876543210",
+  "email": "Email",
+  "emailValue": "rajesh.kumar@example.com",
+  "save": "Save"
+},
+"locationDetails": {
+  "screenTitle": "Work Area",
+  "state": "State",
+  "district": "District",
+  "block": "Block / Police Station",
+  "blockPlaceholder": "Enter Block / Police Station",
+  "teamLeadName": "Team Leader Name",
+  "teamLeadPlaceholder": "Enter Team Leader Name",
+  "save": "Save",
+  "defaultName": "Rajesh Kumar",
+
+  "states": {
+    "up": "Uttar Pradesh",
+    "br": "Bihar",
+    "rj": "Rajasthan"
+  },
+
+  "districts": {
+    "lucknow": "Lucknow",
+    "kanpur": "Kanpur",
+    "varanasi": "Varanasi"
+  }
+},
+"settings": {
+  "screenTitle": "Settings",
+
+  "notification": "Notifications",
+  "locationPermission": "Location Permission",
+  "changeTheme": "Change Theme",
+  "textSize": "Text Size",
+  "textSizeSmall": "Small",
+  "textSizeMedium": "Medium",
+  "textSizeLarge": "Large",
+  "helpSupport": "Help & Support",
+
+  "locationAlertTitle": "Turn off location",
+  "locationAlertMessage": "Open app settings to turn off location permission.",
+  "locationAlertCancel": "Cancel",
+  "locationAlertOpenSettings": "Open Settings"
+},
+"changePassword": {
+  "screenTitle": "Change Password",
+
+  "oldPassword": "Old Password",
+  "oldPasswordPlaceholder": "Enter old password",
+
+  "newPassword": "New Password",
+  "newPasswordPlaceholder": "Enter new password",
+
+  "confirmPassword": "Confirm Password",
+  "confirmPasswordPlaceholder": "Re-enter new password",
+
+  "save": "Save"
 }
+
+
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   StyleSheet,
   Text,
@@ -12,6 +13,7 @@ import RemixIcon from "react-native-remix-icon";
 
 export default function ChangePasswordScreen() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -22,7 +24,10 @@ export default function ChangePasswordScreen() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   return (
-    <BodyLayout type={"screen"} screenName="पासवर्ड बदलें">
+    <BodyLayout
+      type={"screen"}
+      screenName={t("changePassword.screenTitle")}
+    >
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
       >
@@ -30,7 +35,7 @@ export default function ChangePasswordScreen() {
         <Text
           style={[styles.label, { color: theme.colors.colorTextSecondary }]}
         >
-          पुराना पासवर्ड
+          {t("changePassword.oldPassword")}
         </Text>
         <View style={styles.inputWrapper}>
           <TextInput
@@ -42,7 +47,8 @@ export default function ChangePasswordScreen() {
                 color: theme.colors.colorTextSecondary,
               },
             ]}
-            placeholder={theme.colors.colorTextSecondary}
+            placeholder={t("changePassword.oldPasswordPlaceholder")}
+            placeholderTextColor={theme.colors.colorTextSecondary}
             secureTextEntry={!showOld}
             value={oldPassword}
             onChangeText={setOldPassword}
@@ -63,7 +69,7 @@ export default function ChangePasswordScreen() {
         <Text
           style={[styles.label, { color: theme.colors.colorTextSecondary }]}
         >
-          नया पासवर्ड
+          {t("changePassword.newPassword")}
         </Text>
         <View style={styles.inputWrapper}>
           <TextInput
@@ -75,7 +81,8 @@ export default function ChangePasswordScreen() {
                 color: theme.colors.colorTextSecondary,
               },
             ]}
-            placeholder={theme.colors.inputPlaceholder}
+            placeholder={t("changePassword.newPasswordPlaceholder")}
+            placeholderTextColor={theme.colors.colorTextSecondary}
             secureTextEntry={!showNew}
             value={newPassword}
             onChangeText={setNewPassword}
@@ -96,7 +103,7 @@ export default function ChangePasswordScreen() {
         <Text
           style={[styles.label, { color: theme.colors.colorTextSecondary }]}
         >
-          पासवर्ड पुष्टि करें
+          {t("changePassword.confirmPassword")}
         </Text>
         <View style={styles.inputWrapper}>
           <TextInput
@@ -108,7 +115,8 @@ export default function ChangePasswordScreen() {
                 color: theme.colors.colorTextSecondary,
               },
             ]}
-            placeholder={theme.colors.inputPlaceholder}
+            placeholder={t("changePassword.confirmPasswordPlaceholder")}
+            placeholderTextColor={theme.colors.colorTextSecondary}
             secureTextEntry={!showConfirm}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
@@ -133,7 +141,14 @@ export default function ChangePasswordScreen() {
           ]}
           onPress={() => {}}
         >
-          <Text style={styles.saveText}>सेव करें</Text>
+          <Text
+            style={[
+              styles.saveText,
+              { color: theme.colors.colorBgPage },
+            ]}
+          >
+            {t("changePassword.save")}
+          </Text>
         </TouchableOpacity>
       </View>
     </BodyLayout>
@@ -184,7 +199,6 @@ const styles = StyleSheet.create({
   },
 
   saveText: {
-    color: "#fff",
     fontSize: 16,
     fontWeight: "600",
   },
