@@ -1,76 +1,436 @@
 {
   "LanguageScreen": {
-    "title": "زبان کا انتخاب کریں",
-    "subtitle": "وہ زبان منتخب کریں جس میں آپ آسانی محسوس کرتے ہیں",
+    "title": "زبان منتخب کریں",
+    "subtitle": "وہ زبان منتخب کریں جس میں آپ آرام محسوس کریں",
     "continue": "جاری رکھیں",
     "loading": "محفوظ کیا جا رہا ہے..."
   },
+
   "OnboardingScreen": {
-    "title1": "قومی سینئر شہری",
-    "title2": "سپورٹ سینٹر",
-    "chooseLanguage": "زبان کا انتخاب کریں"
+    "title1": "FRO",
+    "title2": "سروس پلیٹ فارم",
+    "chooseLanguage": "زبان منتخب کریں"
   },
-  "LoginScreen": {
-    "title": "لاگ اِن یا رجسٹر کریں",
-    "subtitle": "براہِ کرم اپنا موبائل/آدھار نمبر درج کریں۔ ہم آپ کو ایک OTP بھیجیں گے جسے یہاں درج کرنا ہوگا۔",
-    "phoneLabel": "فون / آدھار نمبر",
-    "placeholder": "10 یا 12 ہندسوں کا نمبر درج کریں",
-    "enterPhone": "براہِ کرم اپنا فون یا آدھار نمبر درج کریں۔",
-    "invalidNumber": "براہِ کرم درست 10 ہندسوں کا فون نمبر یا 12 ہندسوں کا آدھار نمبر درج کریں۔",
-    "existingUser": "موجودہ صارف ملا۔ براہِ کرم لاگ اِن کے لیے اپنا پاس ورڈ درج کریں۔",
-    "password": "اپنا پاس ورڈ درج کریں",
-    "invalidPassword": "براہِ کرم درست پاس ورڈ درج کریں۔",
-    "login": "لاگ اِن",
-    "loggingIn": "لاگ اِن کیا جا رہا ہے...",
-    "forgot": "پاس ورڈ بھول گئے؟",
-    "forgotComing": "پاس ورڈ ریکوری فیچر جلد ہی آ رہا ہے۔",
-    "newUser": "نیا صارف ملا۔ آئیے آپ کا نمبر تصدیق کرتے ہیں۔",
+
+  "login": {
+    "title": "لاگ اِن کریں",
+    "subtitle": "اپنا آفیسر آئی ڈی اور موبائل نمبر درج کریں۔",
+    "officerId": "آفیسر آئی ڈی",
+    "officerIdPlaceholder": "اپنا آفیسر کوڈ درج کریں",
+    "mobile": "موبائل نمبر",
     "sendOtp": "OTP بھیجیں",
-    "sendingOtp": "OTP بھیجا جا رہا ہے...",
-    "enterOtp": "6 ہندسوں کا OTP درج کریں",
-    "otpPlaceholder": "OTP درج کریں",
-    "invalidOtp": "براہِ کرم درست 6 ہندسوں کا OTP درج کریں۔",
-    "verifyOtp": "OTP کی تصدیق کریں",
-    "continue": "جاری رکھیں",
-    "otpTitle": "OTP درج کریں",
-    "otpSentTo": "ہم نے 6 ہندسوں کا OTP بھیجا ہے:",
-    "resendIn": "OTP دوبارہ بھیجیں:",
-    "resendOtp": "OTP دوبارہ بھیجیں"
+    "forgotPassword": "پاس ورڈ بھول گئے؟",
+    "contactSupervisor": "سپروائزر سے رابطہ کریں"
   },
-  "profile": {
-    "title": "پروفائل سیٹ کریں",
-    "subtitle": "آپ کی پروفائل ہمیں درست مدد بھیجنے میں مدد کرے گی۔",
-    "name": "پورا نام",
-    "nameError": "براہِ کرم پورا نام درج کریں",
-    "dob": "تاریخِ پیدائش",
-    "dobError": "براہِ کرم تاریخِ پیدائش منتخب کریں",
-    "gender": "جنس منتخب کریں",
-    "genderError": "براہِ کرم جنس منتخب کریں",
-    "emergCont": "ایمرجنسی رابطہ نمبر",
-    "contError": "براہِ کرم ایمرجنسی رابطہ نمبر درج کریں",
-    "button1": "اگلا مرحلہ: پتے کی تفصیلات",
-    "title1": "پتہ سیٹ کریں",
-    "subtitle": "آپ کے تمام پتے کی تفصیلات GPS کے ذریعے پہلے ہی حاصل کر لی گئی ہیں۔ ضرورت پڑنے پر آپ انہیں دستی طور پر تبدیل کر سکتے ہیں۔ اس سے ہماری ٹیم بغیر کسی تاخیر یا غلطی کے مدد پہنچا سکتی ہے۔",
-    "selectLocation": "مقام منتخب کریں",
-    "state": "ریاست منتخب کریں",
-    "city": "شہر منتخب کریں",
-    "addressdetails": "پتے کی تفصیلات",
-    "line1": "پتہ لائن 1 (لازمی)",
-    "line2": "پتہ لائن 2 (اختیاری)",
-    "Landmark": "لینڈ مارک اور اضافی معلومات",
-    "Landmark1": "لینڈ مارک (لازمی)",
-    "additionalInfo": "اضافی معلومات (اختیاری)",
-    "stateError": "براہِ کرم ریاست منتخب کریں",
-    "cityError": "براہِ کرم شہر منتخب کریں",
-    "addressError": "براہِ کرم (پتہ لائن 1) درج کریں",
-    "landmarkError": "براہِ کرم لینڈ مارک درج کریں"
+
+  "onboarding": {
+    "step1Title": "نئے کیس فوراً حاصل کریں",
+    "step1Subtitle": "آپ کو دیے گئے تمام نئے کیس یہاں دیکھیں۔",
+
+    "step2Title": "آسانی سے مقام پر جائیں",
+    "step2Subtitle": "GPS کے ذریعے براہ راست شہری کے مقام پر پہنچیں۔",
+
+    "step3Title": "کیس کی حیثیت اپڈیٹ کریں",
+    "step3Subtitle": "تصاویر، نوٹس اور ثبوت شامل کر کے کیس مکمل کریں۔",
+
+    "prev": "پچھلا",
+    "next": "اگلا",
+    "gotoDashboard": "ڈیش بورڈ پر جائیں"
   },
+
+  "otp": {
+    "enterOtp": "OTP درج کریں",
+    "sentTo": "ہم نے 6 ہندسوں کا OTP بھیجا ہے",
+    "verify": "تصدیق کریں",
+    "resendAfter": "سیکنڈ بعد",
+    "resendOtp": "دوبارہ OTP بھیجیں"
+  },
+
+  "profileSteps": {
+    "step1Title": "آفیسر کی تفصیلات",
+    "fullName": "پورا نام",
+    "enterFullName": "اپنا نام درج کریں",
+    "position": "عہدہ",
+    "empCode": "ملازم کوڈ",
+
+    "step2Title": "آپ کا کام کا علاقہ",
+    "step2Description": "براہ کرم اپنا کام کا علاقہ منتخب کریں تاکہ آپ کو درست کیس بھیجے جا سکیں۔",
+    "state": "ریاست",
+    "enterState": "ریاست درج کریں",
+    "district": "ضلع",
+    "enterDistrict": "ضلع درج کریں",
+    "block": "بلاک / تھانہ",
+    "enterBlock": "بلاک / تھانہ درج کریں",
+    "teamLead": "ٹیم لیڈر کا نام",
+
+    "step3Title": "رابطے کی تفصیلات",
+    "mobile": "موبائل نمبر",
+    "enterMobile": "موبائل نمبر درج کریں",
+    "email": "ای میل (اختیاری)",
+    "enterEmail": "ای میل درج کریں",
+
+    "mobileRequired": "براہ کرم موبائل نمبر درج کریں",
+    "mobileInvalid": "درست 10 ہندسوں کا موبائل نمبر درج کریں",
+    "emailInvalid": "درست ای میل درج کریں",
+
+    "next": "اگلا",
+    "submit": "جمع کریں"
+  },
+
   "button": {
     "back": "واپس",
     "continue": "جاری رکھیں"
   },
+
   "profileSuccess": {
     "welcome": "، خوش آمدید",
-    "message": "تمام تفصیلات کامیابی سے جمع کر لی گئی ہیں، اور ہم انہیں استعمال کے لیے تیار کر رہے ہیں۔"
+    "message": "تمام تفصیلات کامیابی سے جمع کر لی گئی ہیں اور ہم انہیں استعمال کے لیے تیار کر رہے ہیں۔"
+  },
+
+  "ConfirmLocation": {
+    "popupDistance": "قریب ترین FRO ٹیم",
+    "kmAway": "کلومیٹر دور ہے۔",
+
+    "confirmHeading": "اپنا مقام تصدیق کریں",
+    "yesCorrect": "جی ہاں، مقام درست ہے",
+    "notCorrect": "مقام درست نہیں ہے، دستی طور پر سیٹ کریں",
+
+    "searchAddress": "پتہ تلاش کریں",
+    "savedAddressUse": "محفوظ شدہ مقام استعمال کریں",
+
+    "sendingLocation": "آپ کا مقام بھیجا جا رہا ہے…",
+    "call14567": "14567 پر کال کریں",
+    "gotHelp": "مجھے دوسری مدد مل گئی ہے، شکریہ"
+  },
+
+  "home": {
+    "casesOverview": "کیسز کا خلاصہ",
+
+    "newCases": "نئے کیسز",
+    "approvedCases": "منظور شدہ کیسز",
+    "onTheWay": "راستے میں",
+    "working": "کام جاری ہے",
+    "followup": "فالو اَپ",
+    "closedCases": "بند شدہ کیسز",
+
+    "todayDuty": "آج کی ڈیوٹی",
+    "totalCases": "کل کیسز",
+    "highPriority": "اعلیٰ ترجیح والے کیسز:",
+    "quickActions": "فوری کارروائیاں",
+    "addNewCase": "نیا کیس شامل کریں",
+    "viewMap": "نقشہ دیکھیں"
+  },
+
+  "welcome": {
+    "title": "خوش آمدید، فیلڈ ریسپانس آفیسر",
+    "subtitle": "اس ایپ کے ذریعے آپ کو دیے گئے کیسز دیکھ سکتے ہیں، اپڈیٹ کر سکتے ہیں اور مدد فراہم کر سکتے ہیں۔",
+    "login": "لاگ اِن کریں",
+    "aboutApp": "ایپ کے بارے میں"
+  },
+
+  "escalation": {
+    "screenTitle": "ایسکلیشن بھیجیں",
+
+    "warningText": "⚠️ ایسکلیشن صرف سنگین معاملات کے لیے استعمال کریں۔ آپ کے سپروائزر کو فوراً اطلاع دی جائے گی۔",
+
+    "chooseReason": "وجہ منتخب کریں",
+    "reasonPlaceholder": "وجہ منتخب کریں",
+    "notesLabel": "نوٹس شامل کریں",
+    "notesPlaceholder": "یہاں لکھیں...",
+    "uploadLabel": "تصویر / دستاویز شامل کریں",
+    "uploadText": "فائل اپلوڈ کریں",
+    "fileSelected": "فائل منتخب ہو گئی ✓",
+
+    "camera": "📷 کیمرا",
+    "gallery": "🖼️ گیلری",
+    "cancel": "منسوخ کریں",
+
+    "submitEscalation": "ایسکلیشن جمع کریں",
+
+    "reason1": "ہنگامی صورتحال",
+    "reason2": "وجہ واضح نہیں",
+    "reason3": "تعاون حاصل نہیں ہوا",
+    "reason4": "علاج میں تاخیر"
+  },
+
+  "notifications": {
+    "screenTitle": "اطلاعات",
+
+    "newCaseAssigned": "آپ کو نیا کیس سونپا گیا ہے",
+    "ticketUpdated": "ٹکٹ اپڈیٹ ہو گیا ہے",
+    "supervisorComment": "سپروائزر نے تبصرہ شامل کیا ہے",
+
+    "ticketNumber": "ٹکٹ نمبر:",
+    "newMessage": "بزرگ شہری نے نیا پیغام بھیجا ہے",
+    "newComment": "نیا تبصرہ",
+
+    "minAgo": "منٹ پہلے",
+    "hourAgo": "گھنٹے پہلے"
+  },
+
+  "cases": {
+    "screenTitle": "کیسز",
+
+    "tabNew": "نئے",
+    "tabApproved": "منظور شدہ",
+    "tabOnWay": "راستے میں",
+    "tabWorking": "کام جاری",
+    "tabFollowup": "فالو اَپ",
+    "tabClosed": "بند",
+
+    "noCases": "کوئی کیس دستیاب نہیں",
+
+    "age": "عمر",
+    "category": "شکایت کی قسم",
+    "ticket": "ٹکٹ نمبر",
+    "away": "دور",
+    "viewCase": "کیس دیکھیں",
+
+    "timeMinutesAgo": "منٹ پہلے ملا",
+    "timeHoursAgo": "گھنٹے پہلے ملا"
+  },
+
+  "caseDetail": {
+    "screenTitle": "ٹکٹ نمبر: {{ticket}}",
+
+    "elderDetails": "بزرگ شہری کی تفصیلات",
+    "name": "نام",
+    "age": "عمر",
+    "gender": "جنس",
+    "phone": "فون نمبر",
+    "emergency": "ہنگامی رابطہ",
+
+    "complaintInfo": "شکایت کی تفصیلات",
+    "category": "شکایت کی قسم",
+    "details": "تفصیل",
+    "attachments": "منسلک میڈیا",
+
+    "location": "مقام",
+    "address": "پتہ",
+    "startNavigation": "نیویگیشن شروع کریں",
+
+    "timeline": "ٹائم لائن",
+
+    "actions": "کارروائیاں",
+    "updateStatus": "حیثیت اپڈیٹ کریں",
+    "addPhoto": "تصویر/ویڈیو شامل کریں",
+    "addNote": "نوٹ شامل کریں",
+    "addVoice": "وائس نوٹ شامل کریں",
+    "scheduleFollowup": "فالو اپ شیڈول کریں",
+    "closeCase": "کیس بند کریں",
+
+    "genderMale": "مرد",
+    "years": "سال",
+
+    "steps": {
+      "registered": "شکایت درج ہو گئی",
+      "assigned": "FRO کے حوالے کیا گیا",
+      "approved": "منظور شدہ",
+      "onway": "راستے میں",
+      "arrived": "مقام پر پہنچ گئے",
+      "working": "کام جاری"
+    }
+  },
+
+  "navigation": {
+    "screenTitle": "مقام پر جائیں",
+    "distance": "فاصلہ",
+    "eta": "اندازاً وقت",
+    "address": "پتہ",
+    "openMaps": "Google Maps میں کھولیں",
+    "onTheWay": "میں راستے میں ہوں",
+
+    "name": "رام لال شرما",
+    "distanceValue": "2.3 کلومیٹر",
+    "etaValue": "8 منٹ",
+    "fullAddress": "123، گاندھی نگر، سیکٹر 5، ممبئی، مہاراشٹر - 400001"
+  },
+
+  "statusUpdate": {
+    "screenTitle": "حیثیت اپڈیٹ کریں",
+
+    "step1Title": "کیس منظور ہو گیا",
+    "step1Subtitle": "کیس قبول کریں اور آگے بڑھیں",
+    "acceptCase": "کیس قبول کریں",
+
+    "step2Title": "میں راستے میں ہوں",
+    "step2Subtitle": "آپ کا مقام شیئر کیا جا رہا ہے۔",
+    "locationTracking": "📍 آپ کا لائیو مقام ٹریک کیا جا رہا ہے",
+    "updateStatus": "حیثیت اپڈیٹ کریں",
+
+    "step3Title": "کیا آپ پہنچ گئے ہیں؟",
+    "step3Subtitle": "براہ کرم تصدیق کریں اور کام شروع کریں۔",
+    "step3Yes": "جی ہاں، پہنچ گیا",
+    "step3No": "نہیں، پتہ نہیں ملا",
+
+    "step4Title": "کیا بزرگ شہری سے رابطہ ہوا؟",
+    "step4Yes": "جی ہاں",
+    "step4No": "نہیں",
+
+    "step5Title": "کیے گئے کام کی تفصیل",
+    "notesPlaceholder": "یہاں لکھیں...",
+    "uploadPhoto": "تصویر",
+    "uploadVoice": "وائس نوٹ",
+    "saveAndUpdate": "محفوظ کریں اور اپڈیٹ کریں"
+  },
+
+  "addPhoto": {
+    "screenTitle": "تصویر شامل کریں",
+    "openCamera": "کیمرا کھولیں",
+    "chooseGallery": "گیلری سے منتخب کریں",
+    "selectedPhoto": "منتخب شدہ تصویر",
+    "savePhoto": "تصویر محفوظ کریں"
+  },
+
+  "voiceNote": {
+    "screenTitle": "وائس نوٹ ریکارڈ کریں",
+    "recording": "ریکارڈنگ جاری ہے...",
+    "ready": "ریکارڈ کے لیے تیار",
+    "start": "ریکارڈ شروع کریں",
+    "stop": "ریکارڈ روکیں",
+    "savedNote": "ریکارڈ شدہ وائس نوٹ",
+    "play": "چلائیں",
+    "pause": "روکیں"
+  },
+
+  "availability": {
+    "screenTitle": "رپورٹنگ",
+    "tabAttendance": "حاضری",
+    "tabDaily": "یومیہ",
+    "tabWeekly": "ہفتہ وار",
+    "tabMonthly": "ماہانہ"
+  },
+
+  "attendance": {
+    "todayAttendanceTitle": "آج کی حاضری",
+    "startTimeLabel": "ڈیوٹی شروع کرنے کا وقت:",
+    "endTimeLabel": "ڈیوٹی ختم کرنے کا وقت:",
+    "totalTimeLabel": "کل وقت:",
+    "hoursSuffix": "گھنٹے",
+    "startDutyButton": "ڈیوٹی شروع کریں",
+    "endDutyButton": "ڈیوٹی ختم کریں",
+    "timePlaceholder": "--:-- --",
+    "amLabel": "AM",
+    "pmLabel": "PM"
+  },
+
+  "dailyReport": {
+    "title": "یومیہ رپورٹ",
+    "totalCases": "کل کیسز",
+    "solvedCases": "حل شدہ کیسز",
+    "followUp": "فالو اَپ",
+    "placeVisited": "دورہ کیے گئے مقامات"
+  },
+
+  "weeklyReport": {
+    "title": "ہفتہ وار رپورٹ",
+    "totalCases": "کل کیسز",
+    "solvedCases": "حل شدہ کیسز",
+
+    "days": {
+      "mon": "پیر",
+      "tue": "منگل",
+      "wed": "بدھ",
+      "thu": "جمعرات",
+      "fri": "جمعہ",
+      "sat": "ہفتہ",
+      "sun": "اتوار"
+    }
+  },
+
+  "monthlyReport": {
+    "title": "ماہانہ رپورٹ",
+    "totalCases": "کل کیسز",
+    "solvedCases": "حل شدہ کیسز",
+    "followUp": "فالو اَپ",
+    "placeVisited": "دورہ کیے گئے مقامات"
+  },
+
+  "profile": {
+    "name": "راجیش کمار",
+    "code": "FRO-14567-001",
+    "role": "FRO - فیلڈ ریسپانس آفیسر",
+
+    "menuOfficerDetails": "آفیسر کی تفصیلات",
+    "menuWorkArea": "کام کا علاقہ",
+    "menuLanguage": "زبان",
+    "menuSettings": "سیٹنگز",
+    "menuChangePassword": "پاس ورڈ تبدیل کریں",
+
+    "logout": "لاگ آؤٹ",
+    "logoutTitle": "کیا آپ لاگ آؤٹ کرنا چاہتے ہیں؟",
+    "logoutDescription": "آپ اپنے اکاؤنٹ سے باہر ہو جائیں گے۔",
+    "logoutConfirm": "جی ہاں، لاگ آؤٹ کریں",
+    "logoutCancel": "منسوخ کریں"
+  },
+
+  "officerDetails": {
+    "screenTitle": "آفیسر کی تفصیلات",
+    "name": "نام",
+    "nameValue": "راجیش کمار",
+    "employeeCode": "ملازم کوڈ",
+    "employeeCodeValue": "FRO-14567-001",
+    "mobile": "موبائل نمبر",
+    "mobileValue": "+91-9876543210",
+    "email": "ای میل",
+    "emailValue": "rajesh.kumar@example.com",
+    "save": "محفوظ کریں"
+  },
+
+  "locationDetails": {
+    "screenTitle": "کام کا علاقہ",
+    "state": "ریاست",
+    "district": "ضلع",
+    "block": "بلاک / تھانہ",
+    "blockPlaceholder": "بلاک / تھانہ درج کریں",
+    "teamLeadName": "ٹیم لیڈر کا نام",
+    "teamLeadPlaceholder": "ٹیم لیڈر کا نام درج کریں",
+    "save": "محفوظ کریں",
+    "defaultName": "راجیش کمار",
+
+    "states": {
+      "up": "اتر پردیش",
+      "br": "بہار",
+      "rj": "راجستھان"
+    },
+
+    "districts": {
+      "lucknow": "لکھنؤ",
+      "kanpur": "کانپور",
+      "varanasi": "وارانسی"
+    }
+  },
+
+  "settings": {
+    "screenTitle": "سیٹنگز",
+
+    "notification": "اطلاعات",
+    "locationPermission": "مقام کی اجازت",
+    "changeTheme": "تھیم تبدیل کریں",
+    "textSize": "متن کا سائز",
+    "textSizeSmall": "چھوٹا",
+    "textSizeMedium": "درمیانہ",
+    "textSizeLarge": "بڑا",
+    "helpSupport": "مدد اور سپورٹ",
+
+    "locationAlertTitle": "مقام بند کریں",
+    "locationAlertMessage": "مقام کی اجازت بند کرنے کے لیے ایپ سیٹنگز کھولیں۔",
+    "locationAlertCancel": "منسوخ کریں",
+    "locationAlertOpenSettings": "سیٹنگز کھولیں"
+  },
+
+  "changePassword": {
+    "screenTitle": "پاس ورڈ تبدیل کریں",
+
+    "oldPassword": "پرانا پاس ورڈ",
+    "oldPasswordPlaceholder": "پرانا پاس ورڈ درج کریں",
+
+    "newPassword": "نیا پاس ورڈ",
+    "newPasswordPlaceholder": "نیا پاس ورڈ درج کریں",
+
+    "confirmPassword": "پاس ورڈ کی تصدیق کریں",
+    "confirmPasswordPlaceholder": "نیا پاس ورڈ دوبارہ درج کریں",
+
+    "save": "محفوظ کریں"
   }
 }
