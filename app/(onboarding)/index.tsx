@@ -19,7 +19,6 @@ export default function OnboardingScreen() {
   useEffect(() => {
     const prepare = async () => {
       try {
-        // loadFonts(), restoreState(), etc.
         await new Promise(resolve => setTimeout(resolve, 800));
       } finally {
         setAppReady(true);
@@ -31,22 +30,18 @@ export default function OnboardingScreen() {
   console.log("hii");
   
 
-  // ✅ Hide splash after layout + trigger navigation
   const onLayout = useCallback(async () => {
     if (appReady) {
-      // wait one frame for React Native to paint UI
       setTimeout(async () => {
-        await SplashScreen.hideAsync(); // hide splash once ready
+        await SplashScreen.hideAsync(); 
       }, 100);
 
-      // navigate after logo/text animation finishes
       setTimeout(() => {
         router.push('/(onboarding)/languageSelect');
       }, 2500);
     }
   }, [appReady]);
 
-  // ⛔ Keep showing native splash until ready
   if (!appReady) return null;
 
   return (
@@ -54,7 +49,6 @@ export default function OnboardingScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       onLayout={onLayout}
     >
-      {/* Fade-in wrapper for smoother transition */}
       <MotiView
         from={{ opacity: 0 }}
         animate={{ opacity: 1 }}

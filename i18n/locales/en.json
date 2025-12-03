@@ -260,7 +260,57 @@
   "savedNote": "Recorded Voice Note",
   "play": "Play",
   "pause": "Pause"
+},
+"availability": {
+  "screenTitle": "Reporting",
+  "tabAttendance": "Attendance",
+  "tabDaily": "Daily",
+  "tabWeekly": "Weekly",
+  "tabMonthly": "Monthly"
+},
+"attendance": {
+  "todayAttendanceTitle": "Today's Attendance",
+  "startTimeLabel": "Duty start time:",
+  "endTimeLabel": "Duty end time:",
+  "totalTimeLabel": "Total time:",
+  "hoursSuffix": "hours",
+  "startDutyButton": "Start Duty",
+  "endDutyButton": "End Duty",
+  "timePlaceholder": "--:-- --",
+  "amLabel": "AM",
+  "pmLabel": "PM"
+},
+"dailyReport": {
+  "title": "Daily Report",
+  "totalCases": "Total Cases",
+  "solvedCases": "Solved Cases",
+  "followUp": "Follow Up",
+  "placeVisited": "Places Visited"
+},
+"weeklyReport": {
+  "title": "Weekly Report",
+  "totalCases": "Total Cases",
+  "solvedCases": "Solved Cases",
+  "days": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  }
+},
+"monthlyReport": {
+  "title": "Monthly Report",
+  "totalCases": "Total Cases",
+  "solvedCases": "Solved Cases",
+  "followUp": "Follow Up",
+  "placeVisited": "Places Visited"
 }
+
+
+
 
 
 

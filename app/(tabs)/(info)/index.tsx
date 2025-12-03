@@ -11,34 +11,44 @@ import {
 
 import type { IconName } from "react-native-remix-icon";
 import RemixIcon from "react-native-remix-icon";
+
 import AttendanceTab from "./attendanceTab";
 import DailyTab from "./dailyTab";
 import MonthlyTab from "./monthly";
 import WeeklyTab from "./weeklyTab";
 
-const TABS: { key: string; icon: IconName }[] = [
-  { key: "उपस्थिति", icon: "alarm-line" },
-  { key: "दैनिक", icon: "calendar-line" },
-  { key: "साप्ताहिक", icon: "bar-chart-2-line" },
-  { key: "मासिक", icon: "calendar-2-line" },
-];
+import { useTranslation } from "react-i18next";
+
+type TabKey = "attendance" | "daily" | "weekly" | "monthly";
+
 export default function AvailabilityScreen() {
-  const [activeTab, setActiveTab] = useState("उपस्थिति");
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const scrollRef = useRef<ScrollView>(null);
 
-  const handleTabPress = (tab: string, index: number) => {
-    setActiveTab(tab);
+  // ---------------------- i18n Tabs ----------------------
+  const tabs: { label: string; key: TabKey; icon: IconName }[] = [
+    { label: t("availability.tabAttendance"), key: "attendance", icon: "alarm-line" },
+    { label: t("availability.tabDaily"), key: "daily", icon: "calendar-line" },
+    { label: t("availability.tabWeekly"), key: "weekly", icon: "bar-chart-2-line" },
+    { label: t("availability.tabMonthly"), key: "monthly", icon: "calendar-2-line" },
+  ];
 
-    // Auto-scroll to keep active tab in view
+  const [activeTab, setActiveTab] = useState(0); // index-based like CasesScreen
+
+  const handleTabPress = (index: number) => {
+    setActiveTab(index);
+
     scrollRef.current?.scrollTo({
-      x: index * 120, // adjust width according to your UI
+      x: index * 120, // adjust if needed
       animated: true,
     });
   };
 
+  const activeTabKey = tabs[activeTab]?.key;
+
   return (
-    <BodyLayout type="screen" screenName="रिपोर्टिंग">
+    <BodyLayout type="screen" screenName={t("availability.screenTitle")}>
       {/* ---------- TOP TABS ---------- */}
       <View style={{ marginBottom: 20 }}>
         <ScrollView
@@ -47,8 +57,8 @@ export default function AvailabilityScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabsScrollContainer}
         >
-          {TABS.map((item, index) => {
-            const isActive = activeTab === item.key;
+          {tabs.map((item, index) => {
+            const isActive = index === activeTab;
 
             return (
               <TouchableOpacity
@@ -62,7 +72,7 @@ export default function AvailabilityScreen() {
                     elevation: 2,
                   },
                 ]}
-                onPress={() => handleTabPress(item.key, index)}
+                onPress={() => handleTabPress(index)}
               >
                 <RemixIcon
                   name={item.icon}
@@ -86,7 +96,7 @@ export default function AvailabilityScreen() {
                         ]
                   }
                 >
-                  {item.key}
+                  {item.label}
                 </Text>
               </TouchableOpacity>
             );
@@ -95,10 +105,10 @@ export default function AvailabilityScreen() {
       </View>
 
       {/* ---------- RENDER TAB SCREENS ---------- */}
-      {activeTab === "उपस्थिति" && <AttendanceTab />}
-      {activeTab === "दैनिक" && <DailyTab />}
-      {activeTab === "साप्ताहिक" && <WeeklyTab />}
-      {activeTab === "मासिक" && <MonthlyTab />}
+      {activeTabKey === "attendance" && <AttendanceTab />}
+      {activeTabKey === "daily" && <DailyTab />}
+      {activeTabKey === "weekly" && <WeeklyTab />}
+      {activeTabKey === "monthly" && <MonthlyTab />}
     </BodyLayout>
   );
 }

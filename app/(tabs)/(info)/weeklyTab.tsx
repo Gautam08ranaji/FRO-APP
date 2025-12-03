@@ -10,13 +10,13 @@ export default function WeeklyTab() {
   const { t } = useTranslation();
 
   const weeklyData = [
-    { value: 2, label: "Mon" },
-    { value: 5, label: "Tue" },
-    { value: 3, label: "Wed" },
-    { value: 8, label: "Thu" },
-    { value: 6, label: "Fri" },
-    { value: 4, label: "Sat" },
-    { value: 7, label: "Sun" },
+    { value: 2, label: t("weeklyReport.days.mon") },
+    { value: 5, label: t("weeklyReport.days.tue") },
+    { value: 3, label: t("weeklyReport.days.wed") },
+    { value: 8, label: t("weeklyReport.days.thu") },
+    { value: 6, label: t("weeklyReport.days.fri") },
+    { value: 4, label: t("weeklyReport.days.sat") },
+    { value: 7, label: t("weeklyReport.days.sun") },
   ];
 
   return (
@@ -52,12 +52,17 @@ export default function WeeklyTab() {
           <Text
             style={[
               theme.typography.fontH3,
-              { color: theme.colors.validationInfoText ,},
+              { color: theme.colors.validationInfoText },
             ]}
           >
             12
           </Text>
-          <Text style={[theme.typography.fontTag, { color: theme.colors.colorTextSecondary ,marginTop:10}]}>
+          <Text
+            style={[
+              theme.typography.fontTag,
+              { color: theme.colors.colorTextSecondary, marginTop: 10 },
+            ]}
+          >
             {t("weeklyReport.totalCases")}
           </Text>
         </TouchableOpacity>
@@ -76,8 +81,13 @@ export default function WeeklyTab() {
           >
             34
           </Text>
-          <Text style={[theme.typography.fontTag, { color: theme.colors.colorTextSecondary ,marginTop:10 }]}>
-            {t("weeklyReport.solvedCases",)}
+          <Text
+            style={[
+              theme.typography.fontTag,
+              { color: theme.colors.colorTextSecondary, marginTop: 10 },
+            ]}
+          >
+            {t("weeklyReport.solvedCases")}
           </Text>
         </TouchableOpacity>
       </View>

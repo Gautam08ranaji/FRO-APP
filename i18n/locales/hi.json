@@ -126,38 +126,6 @@
     "login": "लॉगिन करें",
     "aboutApp": "ऐप के बारे में जानें"
   },
-  "attendance": {
-    "today": "उपस्थिति",
-    "daily": "दैनिक",
-    "weekly": "साप्ताहिक",
-    "todayStatus": "आज की उपस्थिति",
-    "startTime": "ड्यूटी शुरू करने का समय:",
-    "endTime": "ड्यूटी समाप्त करने का समय:",
-    "totalTime": "कुल समय:",
-    "hours": "घंटे",
-    "endDuty": "ड्यूटी समाप्त करें"
-  },
-  "dailyReport": {
-    "title": "दैनिक रिपोर्ट",
-    "totalCases": "कुल मामले",
-    "solvedCases":"हल किए गए मामले",
-    "followUp":"फॉलो-अप",
-    "placeVisited":"स्थल भ्रमण"
-  },
-  "weeklyReport":{
-    "title":"साप्ताहिक सारांश",
-    "totalCases": "कुल मामले",
-    "solvedCases":"हल किए गए मामले"
-  },
-  "monthlyReport":{
-   
-    "title": "मासिक रिपोर्ट",
-    "totalCases": "कुल मामले",
-    "solvedCases":"लंबित",
-    "followUp":"फॉलो-अप",
-    "placeVisited":"सफलता दर"
-  
-  },
   "escalation": {
   "screenTitle": "एस्केलेशन भेजें",
 
@@ -314,7 +282,57 @@
   "savedNote": "रिकॉर्ड किया गया वॉइस नोट",
   "play": "चलाएँ",
   "pause": "रोकें"
+},
+"availability": {
+  "screenTitle": "रिपोर्टिंग",
+  "tabAttendance": "उपस्थिति",
+  "tabDaily": "दैनिक",
+  "tabWeekly": "साप्ताहिक",
+  "tabMonthly": "मासिक"
+},
+"attendance": {
+  "todayAttendanceTitle": "आज की उपस्थिति",
+  "startTimeLabel": "ड्यूटी शुरू करने का समय:",
+  "endTimeLabel": "ड्यूटी समाप्त करने का समय:",
+  "totalTimeLabel": "कुल समय:",
+  "hoursSuffix": "घंटे",
+  "startDutyButton": "ड्यूटी शुरू करें",
+  "endDutyButton": "ड्यूटी समाप्त करें",
+  "timePlaceholder": "--:-- --",
+  "amLabel": "AM",
+  "pmLabel": "PM"
+},
+"dailyReport": {
+  "title": "दैनिक रिपोर्ट",
+  "totalCases": "कुल मामले",
+  "solvedCases": "सुलझे हुए मामले",
+  "followUp": "फॉलो अप",
+  "placeVisited": "देखी गई जगहें"
+},
+"weeklyReport": {
+  "title": "साप्ताहिक रिपोर्ट",
+  "totalCases": "कुल मामले",
+  "solvedCases": "सुलझे हुए मामले",
+  "days": {
+    "mon": "सोम",
+    "tue": "मंगल",
+    "wed": "बुध",
+    "thu": "गुरु",
+    "fri": "शुक्र",
+    "sat": "शनि",
+    "sun": "रवि"
+  }
+},
+"monthlyReport": {
+  "title": "मासिक रिपोर्ट",
+  "totalCases": "कुल मामले",
+  "solvedCases": "सुलझे हुए मामले",
+  "followUp": "फॉलो अप",
+  "placeVisited": "देखी गई जगहें"
 }
+
+
+
 
 
 
