@@ -27,7 +27,7 @@ export default function OnboardingScreen() {
     prepare();
   }, []);
 
-  console.log("hii");
+
   
 
   const onLayout = useCallback(async () => {
