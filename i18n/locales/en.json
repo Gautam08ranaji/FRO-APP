@@ -268,18 +268,33 @@
   "tabWeekly": "Weekly",
   "tabMonthly": "Monthly"
 },
-"attendance": {
-  "todayAttendanceTitle": "Today's Attendance",
-  "startTimeLabel": "Duty start time:",
-  "endTimeLabel": "Duty end time:",
-  "totalTimeLabel": "Total time:",
-  "hoursSuffix": "hours",
-  "startDutyButton": "Start Duty",
-  "endDutyButton": "End Duty",
-  "timePlaceholder": "--:-- --",
-  "amLabel": "AM",
-  "pmLabel": "PM"
-},
+  "attendance": {
+    "todayAttendanceTitle": "Today's Attendance",
+    "startTimeLabel": "Start Time",
+    "endTimeLabel": "End Time",
+    "totalTimeLabel": "Total Time",
+    "startDutyButton": "Start Duty",
+    "endDutyButton": "End Duty",
+    "hoursSuffix": "hours",
+
+    "tabs": {
+      "all": "All",
+      "present": "Present",
+      "absent": "Absent",
+      "leave": "Leave"
+    },
+
+    "history": {
+      "presentStatus": "Present",
+      "absentStatus": "Absent",
+      "leaveStatus": "Leave",
+      "checkInOutLabel": "Check-in / Check-out",
+      "totalWorkingHoursLabel": "Total Working Hours",
+      "toLabel": "To"
+    }
+  }
+
+,
 "dailyReport": {
   "title": "Daily Report",
   "totalCases": "Total Cases",

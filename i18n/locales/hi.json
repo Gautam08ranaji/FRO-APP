@@ -266,6 +266,33 @@
   "uploadVoice": "वॉइस नोट",
   "saveAndUpdate": "सेव करें और अपडेट करें"
 },
+"attendance": {
+    "todayAttendanceTitle": "आज की उपस्थिति",
+    "startTimeLabel": "शुरू होने का समय",
+    "endTimeLabel": "समाप्ति का समय",
+    "totalTimeLabel": "कुल समय",
+    "startDutyButton": "ड्यूटी शुरू करें",
+    "endDutyButton": "ड्यूटी समाप्त करें",
+    "hoursSuffix": "घंटे",
+
+    "tabs": {
+      "all": "सभी",
+      "present": "उपस्थित",
+      "absent": "अनुपस्थित",
+      "leave": "अवकाश"
+    },
+
+    "history": {
+      "presentStatus": "उपस्थित",
+      "absentStatus": "अनुपस्थित",
+      "leaveStatus": "अवकाश",
+      "checkInOutLabel": "चेक-इन / चेक-आउट",
+      "totalWorkingHoursLabel": "कुल कार्य समय",
+      "toLabel": "से"
+    }
+  },
+
+
 "addPhoto": {
   "screenTitle": "फोटो जोड़ें",
   "openCamera": "कैमरा खोलें",
@@ -290,18 +317,32 @@
   "tabWeekly": "साप्ताहिक",
   "tabMonthly": "मासिक"
 },
-"attendance": {
-  "todayAttendanceTitle": "आज की उपस्थिति",
-  "startTimeLabel": "ड्यूटी शुरू करने का समय:",
-  "endTimeLabel": "ड्यूटी समाप्त करने का समय:",
-  "totalTimeLabel": "कुल समय:",
-  "hoursSuffix": "घंटे",
-  "startDutyButton": "ड्यूटी शुरू करें",
-  "endDutyButton": "ड्यूटी समाप्त करें",
-  "timePlaceholder": "--:-- --",
-  "amLabel": "AM",
-  "pmLabel": "PM"
-},
+ "attendance": {
+    "todayAttendanceTitle": "आज की उपस्थिति",
+    "startTimeLabel": "शुरू होने का समय",
+    "endTimeLabel": "समाप्ति का समय",
+    "totalTimeLabel": "कुल समय",
+    "startDutyButton": "ड्यूटी शुरू करें",
+    "endDutyButton": "ड्यूटी समाप्त करें",
+    "hoursSuffix": "घंटे",
+    "tabs": {
+      "all": "सभी",
+      "present": "उपस्थित",
+      "absent": "अनुपस्थित",
+      "leave": "अवकाश"
+    },
+    "history": {
+      "dateLabel": "तारीख",
+      "checkInOutLabel": "चेक-इन / चेक-आउट",
+      "totalWorkingHoursLabel": "कुल कार्य समय",
+      "presentStatus": "उपस्थित",
+      "absentStatus": "अनुपस्थित",
+      "leaveStatus": "अवकाश"
+    },
+    "timePlaceholder": "--:--",
+    "amLabel": "पूर्वाह्न",
+    "pmLabel": "अपराह्न"
+  },
 "dailyReport": {
   "title": "दैनिक रिपोर्ट",
   "totalCases": "कुल मामले",

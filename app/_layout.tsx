@@ -7,6 +7,7 @@ import { Platform, StatusBar as RNStatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { AudioRecorderProvider } from "@/hooks/AudioRecorderProvider";
 import { CameraPermissionProvider } from "@/hooks/CameraPermissionProvider";
 import { LocationProvider } from "@/hooks/LocationContext";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
@@ -40,7 +41,9 @@ export default function RootLayout() {
         <LocationProvider>
           <CameraPermissionProvider>
             <ThemeProvider>
-              <ThemedStack />
+              <AudioRecorderProvider>
+                <ThemedStack />
+              </AudioRecorderProvider>
             </ThemeProvider>
           </CameraPermissionProvider>
         </LocationProvider>
@@ -52,7 +55,6 @@ export default function RootLayout() {
 function ThemedStack() {
   const { theme, isDarkMode } = useTheme();
 
-  // Always set status bar background + icon color
   useEffect(() => {
     if (Platform.OS === "android") {
       RNStatusBar.setBackgroundColor(theme.colors.btnPrimaryBg);
@@ -62,12 +64,9 @@ function ThemedStack() {
 
   return (
     <>
-     
-
       <Stack
         screenOptions={{
           headerShown: false,
-          
         }}
       >
         <Stack.Screen name="(onboarding)/index" />
@@ -78,8 +77,8 @@ function ThemedStack() {
 
       <StatusBar
         style={isDarkMode ? "light" : "dark"}
-        translucent={false}                     // ✔ Prevents overlap
-        backgroundColor={theme.colors.colorAccent500}  // ✔ Same static color
+        translucent={false}
+        backgroundColor={theme.colors.colorAccent500}
       />
     </>
   );
