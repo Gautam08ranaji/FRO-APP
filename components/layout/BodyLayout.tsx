@@ -17,11 +17,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { width } = Dimensions.get("window");
 
 interface BodyLayoutProps {
-  type: "dashboard" | "screen";
+  type: "dashboard" | "screen" | "frl"; // ✅ frl added
   screenName?: string;
   children: React.ReactNode;
-
-  
   scrollViewStyle?: StyleProp<ViewStyle>;
   scrollContentStyle?: StyleProp<ViewStyle>;
 }
@@ -40,14 +38,13 @@ export default function BodyLayout({
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
     >
-      {type === "dashboard" ? (
+      {type === "dashboard" || type === "frl" ? (
         <View
           style={[
             styles.dashboardHeader,
-            { backgroundColor: theme.colors.colorPrimary600,paddingVertical:24 },
+            { backgroundColor: theme.colors.colorPrimary600, paddingVertical: 24 },
           ]}
         >
-         
           <View style={styles.topRow}>
             <View>
               <Text
@@ -72,76 +69,107 @@ export default function BodyLayout({
 
             <View style={styles.iconRow}>
               <TouchableOpacity
-                style={[styles.iconCircle,{backgroundColor:theme.colors.colorBgSurface}]}
+                style={[
+                  styles.iconCircle,
+                  { backgroundColor: theme.colors.colorBgSurface },
+                ]}
                 onPress={() => {
                   router.push("/notification");
                 }}
               >
-                <RemixIcon name="notification-line" size={22} color={theme.colors.colorPrimary600} />
+                <RemixIcon
+                  name="notification-line"
+                  size={22}
+                  color={theme.colors.colorPrimary600}
+                />
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>3</Text>
                 </View>
               </TouchableOpacity>
 
               <TouchableOpacity
-                 style={[styles.iconCircle,{backgroundColor:theme.colors.colorBgSurface}]}
+                style={[
+                  styles.iconCircle,
+                  { backgroundColor: theme.colors.colorBgSurface },
+                ]}
                 onPress={() => {
                   router.push("/escalation");
                 }}
               >
-                <RemixIcon name="alert-line" size={22} color={theme.colors.colorPrimary600} />
+                <RemixIcon
+                  name="alert-line"
+                  size={22}
+                  color={theme.colors.colorPrimary600}
+                />
               </TouchableOpacity>
 
-              <TouchableOpacity  style={[styles.iconCircle,{backgroundColor:theme.colors.colorBgSurface}]}>
-                <RemixIcon name="phone-line" size={22} color={theme.colors.colorPrimary600} />
-              </TouchableOpacity>
+              {/* ✅ Call icon hidden for frl */}
+              {type !== "frl" && (
+                <TouchableOpacity
+                  style={[
+                    styles.iconCircle,
+                    { backgroundColor: theme.colors.colorBgSurface },
+                  ]}
+                >
+                  <RemixIcon
+                    name="phone-line"
+                    size={22}
+                    color={theme.colors.colorPrimary600}
+                  />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
-          
-          <View
-            style={[styles.bottomSection, { backgroundColor: theme.colors.colorPrimary50 }]}
-          >
-            <View style={styles.row}>
-              <Text
-                style={[
-                  theme.typography.fontBody,
-                  { color: theme.colors.colorPrimary600 },
-                ]}
-              >
-                आज की ड्यूटी
-              </Text>
+          {/* ✅ Bottom section hidden for frl */}
+          {type !== "frl" && (
+            <View
+              style={[
+                styles.bottomSection,
+                { backgroundColor: theme.colors.colorPrimary50 },
+              ]}
+            >
+              <View style={styles.row}>
+                <Text
+                  style={[
+                    theme.typography.fontBody,
+                    { color: theme.colors.colorPrimary600 },
+                  ]}
+                >
+                  आज की ड्यूटी
+                </Text>
 
-              <Text
-                style={[
-                  theme.typography.fontBody,
-                  { color: theme.colors.colorPrimary600, paddingHorizontal: 1 },
-                ]}
-              >
-                कुल मामले
-              </Text>
+                <Text
+                  style={[
+                    theme.typography.fontBody,
+                    { color: theme.colors.colorPrimary600, paddingHorizontal: 1 },
+                  ]}
+                >
+                  कुल मामले
+                </Text>
+              </View>
+
+              <View style={styles.row}>
+                <Text
+                  style={[
+                    theme.typography.fontH4,
+                    { color: theme.colors.colorPrimary600 },
+                  ]}
+                >
+                  12
+                </Text>
+
+                <Text
+                  style={[
+                    theme.typography.fontH4,
+                    { color: theme.colors.colorPrimary600 },
+                  ]}
+                >
+                  04
+                </Text>
+              </View>
             </View>
-
-            <View style={styles.row}>
-              <Text
-                style={[
-                  theme.typography.fontH4,
-                  { color: theme.colors.colorPrimary600 },
-                ]}
-              >
-                12
-              </Text>
-
-              <Text
-                style={[
-                  theme.typography.fontH4,
-                  { color: theme.colors.colorPrimary600 },
-                ]}
-              >
-                04
-              </Text>
-            </View>
-          </View>
+          )}
         </View>
       ) : (
         <View
@@ -178,13 +206,16 @@ export default function BodyLayout({
         </View>
       )}
 
-      
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={[styles.bodyContainer, scrollViewStyle,{backgroundColor:theme.colors.colorBgSurface}]} 
+        style={[
+          styles.bodyContainer,
+          scrollViewStyle,
+          { backgroundColor: theme.colors.colorBgSurface },
+        ]}
         contentContainerStyle={[
           styles.contentPadding,
-          scrollContentStyle, 
+          scrollContentStyle,
         ]}
       >
         {children}
@@ -224,7 +255,6 @@ const styles = StyleSheet.create({
   },
 
   iconCircle: {
-    // backgroundColor: "rgba(255,255,255,0.15)",
     padding: 8,
     borderRadius: 20,
     position: "relative",

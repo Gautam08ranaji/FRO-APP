@@ -406,4 +406,31 @@
 
   "save": "Save"
 }
+
+
+
+
+
+
+
+
+
+
+
+,
+ "frl": {
+    "home": {
+      "casesOverview": "FROs & Cases",
+      "newCases": "Total FROs",
+      "approvedCases": "On Duty",
+      "onTheWay": "Off Duty",
+      "working": "Active Cases",
+      "todayDuty": "Today's Duty",
+      "totalCases": "Total Cases",
+      "highPriority": "High Priority",
+      "quickActions": "Quick Actions",
+      "addNewCase": "Add New Case",
+      "viewMap": "View Map"
+    }
+  }
 }

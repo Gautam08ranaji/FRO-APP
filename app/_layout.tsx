@@ -1,4 +1,5 @@
 // app/_layout.tsx
+
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -14,16 +15,12 @@ import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
 
-export const unstable_settings = {
-  initialRouteName: "(onboarding)",
-};
-
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
 
   useEffect(() => {
     async function prepare() {
-      await new Promise((r) => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 800));
       setAppIsReady(true);
     }
     prepare();
@@ -64,15 +61,19 @@ function ThemedStack() {
 
   return (
     <>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="(onboarding)/index" />
-        <Stack.Screen name="(onboarding)/login" />
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* ✅ ONBOARDING FLOW */}
+        <Stack.Screen name="(onboarding)" />
+
+        {/* ✅ ROLE-BASED TAB LAYOUTS */}
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+        <Stack.Screen name="(frl)" />
+
+        {/* ✅ MODAL */}
+        <Stack.Screen
+          name="modal"
+          options={{ presentation: "modal" }}
+        />
       </Stack>
 
       <StatusBar

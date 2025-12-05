@@ -1,0 +1,720 @@
+import BodyLayout from "@/components/layout/BodyLayout";
+import Card from "@/components/reusables/Card";
+import ReusableCard from "@/components/reusables/ReusableCard";
+import { useTheme } from "@/theme/ThemeContext";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import RemixIcon, { IconName } from "react-native-remix-icon";
+
+const caseStatusData = [
+  {
+    id: 1,
+    label: "On Duty",
+    value: 12,
+    color: "#1677FF",
+    bg: "#E9F4FF",
+  },
+  {
+    id: 2,
+    label: "Assigned",
+    value: 8,
+    color: "#2E7D32",
+    bg: "#EAF7ED",
+  },
+  {
+    id: 3,
+    label: "In Progress",
+    value: 15,
+    color: "#FF8C00",
+    bg: "#FFF3E0",
+  },
+  {
+    id: 4,
+    label: "Resolved",
+    value: 5,
+    color: "#1B5E20",
+    bg: "#EAF7ED",
+  },
+  {
+    id: 5,
+    label: "Follow-up",
+    value: 2,
+    color: "#FF7A00",
+    bg: "#FFF3E0",
+  },
+];
+
+const recentAlerts: {
+  id: number;
+  title: string;
+  time: string;
+  icon: IconName;
+  bg: string;
+  color: string;
+}[] = [
+  {
+    id: 1,
+    title: "High Priority Case Pending",
+    time: "5 min ago",
+    icon: "error-warning-line",
+    bg: "#FFEAEA",
+    color: "#E62929",
+  },
+  {
+    id: 2,
+    title: "FRO Late Check-in Alert",
+    time: "15 min ago",
+    icon: "progress-1-line",
+    bg: "#E9F4FF",
+    color: "#1677FF",
+  },
+  {
+    id: 3,
+    title: "Case Resolved Successfully",
+    time: "1 hour ago",
+    icon: "checkbox-circle-line",
+    bg: "#EAF7ED",
+    color: "#16A34A",
+  },
+];
+
+const topPerformers = [
+  {
+    id: 1,
+    name: "Ashish Tomar",
+    code: "FRO-001",
+    cases: 28,
+    rating: 4.8,
+  },
+  {
+    id: 2,
+    name: "Gautam Rana",
+    code: "FRO-005",
+    cases: 25,
+    rating: 4.7,
+  },
+  {
+    id: 3,
+    name: "Abhishek Mishra",
+    code: "FRO-012",
+    cases: 23,
+    rating: 4.6,
+  },
+];
+
+/* ================= SCREEN ================= */
+
+const TARGET_MINUTES = 8 * 60;
+
+function formatMinutesToTime(minutes: number) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h ${m}m`;
+}
+
+function formatTimeAMPM(date: Date) {
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function PunchInCard() {
+  const { theme } = useTheme();
+
+  const [punchInTime, setPunchInTime] = useState<Date | null>(null);
+  const [workedMinutes, setWorkedMinutes] = useState(0);
+  const [isPunchedIn, setIsPunchedIn] = useState(false);
+
+useEffect(() => {
+  let interval: ReturnType<typeof setInterval> | undefined;
+
+  if (isPunchedIn && punchInTime) {
+    interval = setInterval(() => {
+      const now = new Date();
+      const diffMs = now.getTime() - punchInTime.getTime();
+      const totalMinutes = Math.floor(diffMs / 60000);
+      setWorkedMinutes(totalMinutes);
+    }, 60000);
+  }
+
+  return () => {
+    if (interval) clearInterval(interval);
+  };
+}, [isPunchedIn, punchInTime]);
+
+  const handlePunchIn = () => {
+    setPunchInTime(new Date());
+    setWorkedMinutes(0);
+    setIsPunchedIn(true);
+  };
+
+  const handlePunchOut = () => {
+    setIsPunchedIn(false);
+  };
+
+  return (
+    <View
+      style={{
+        padding: 12,
+        backgroundColor: theme.colors.validationWarningBg,
+        marginTop: 10,
+        borderRadius: 12,
+        borderColor: theme.colors.validationWarningText,
+        borderWidth: 1,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <View>
+          <Text style={{ color: theme.colors.colorTextSecondary }}>
+            Punched-in at
+          </Text>
+
+          <Text style={[theme.typography.fontH4,{color:theme.colors.validationWarningText,marginTop:5}]}>
+            {punchInTime ? formatTimeAMPM(punchInTime) : "--:--"}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          onPress={isPunchedIn ? handlePunchOut : handlePunchIn}
+          style={{
+            paddingVertical: 12,
+            paddingHorizontal: 22,
+            borderRadius: 10,
+            backgroundColor: theme.colors.validationWarningText,
+          }}
+        >
+          <Text style={{ color: "#fff", fontWeight: "700" }}>
+            {isPunchedIn ? "Punch Out" : "Punch In"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginTop: 12,
+        }}
+      >
+        <Text style={{ color: theme.colors.colorTextSecondary }}>
+          Working Time: {formatMinutesToTime(workedMinutes)}
+        </Text>
+
+        <Text style={{ color: theme.colors.colorTextSecondary }}>
+          Target: {formatMinutesToTime(TARGET_MINUTES)}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+export default function HomeScreen() {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const screenWidth = Dimensions.get("window").width;
+
+  const getAlertColor = (title: string) => {
+    if (title.toLowerCase().includes("high")) {
+      return theme.colors.validationErrorText; // 🔴 High Priority
+    }
+
+    if (title.toLowerCase().includes("resolved")) {
+      return theme.colors.validationSuccessText; // 🟢 Resolved
+    }
+
+    return theme.colors.colorPrimary600; // 🔵 Default Info
+  };
+
+  const getAlertBg = (title: string) => {
+    if (title.toLowerCase().includes("high")) {
+      return theme.colors.validationErrorBg; // 🔴 Light Red Background
+    }
+
+    if (title.toLowerCase().includes("resolved")) {
+      return theme.colors.validationSuccessBg; // 🟢 Light Green Background
+    }
+
+    return theme.colors.validationInfoBg; 
+  };
+
+  return (
+    <BodyLayout type="frl">
+      <Text
+        style={[
+          theme.typography.fontH2,
+          { color: theme.colors.colorPrimary600 },
+        ]}
+      >
+        {t("frl.home.casesOverview")}
+      </Text>
+
+      <Card backgroundColor={theme.colors.colorBgPage}>
+        <View style={styles.topRow}>
+          <TouchableOpacity
+            style={[
+              styles.topBox,
+              { backgroundColor: theme.colors.colorPrimary50 },
+            ]}
+          >
+            <Text
+              style={[
+                theme.typography.fontBody,
+                { color: theme.colors.colorPrimary600 },
+              ]}
+            >
+              Today’s Case
+            </Text>
+
+            <Text
+              style={[
+                theme.typography.fontH2,
+                { marginTop: 10, color: theme.colors.colorPrimary600 },
+              ]}
+            >
+              42
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.topBox,
+              { backgroundColor: theme.colors.colorPrimary50 },
+            ]}
+          >
+            <Text
+              style={[
+                theme.typography.fontBody,
+                { color: theme.colors.colorPrimary600 },
+              ]}
+            >
+              Active FROs
+            </Text>
+            <Text
+              style={[
+                theme.typography.fontH2,
+                { marginTop: 10, color: theme.colors.colorPrimary600 },
+              ]}
+            >
+              18/24
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <PunchInCard />
+      </Card>
+      <View style={styles.row}>
+        <ReusableCard
+          icon="file-text-line"
+          count={"+9"}
+          countBg={"#FF6900" + 22}
+          title={t("frl.home.working")}
+          subTitle={13}
+          subTitleColor={"#FF6900"}
+          bg={theme.colors.colorBgPage}
+          iconBg="#FF6900"
+          countColor={"#FF6900"}
+          titleColor={theme.colors.colorTextSecondary}
+        />
+
+        <ReusableCard
+          icon="group-line"
+          count={"+5"}
+          countBg={theme.colors.validationInfoText + 22}
+          title={t("frl.home.newCases")}
+          subTitle={43}
+          subTitleColor={theme.colors.validationInfoText}
+          bg={theme.colors.colorBgPage}
+          iconBg={theme.colors.validationInfoText}
+          countColor={theme.colors.colorPrimary600}
+          titleColor={theme.colors.colorTextSecondary}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <ReusableCard
+          icon="user-follow-line"
+          count={""}
+          title={t("frl.home.approvedCases")}
+          subTitle={13}
+          subTitleColor={"#00C950"}
+          bg={theme.colors.colorBgPage}
+          iconBg="#00C950"
+          countColor={theme.colors.colorPrimary600}
+          titleColor={theme.colors.colorTextSecondary}
+        />
+
+        <ReusableCard
+          icon="user-unfollow-line"
+          count={""}
+          title={t("frl.home.onTheWay")}
+          subTitle={13}
+          subTitleColor={"#6A7282"}
+          bg={theme.colors.colorBgPage}
+          iconBg="#6A7282"
+          countColor={theme.colors.colorPrimary600}
+          titleColor={theme.colors.colorTextSecondary}
+        />
+      </View>
+
+      {/* ================= QUICK ACTIONS ================= */}
+      <Card
+        title={t("frl.home.quickActions")}
+        cardStyle={{
+          backgroundColor: theme.colors.colorBgPage,
+          gap: 10,
+        }}
+        titleColor={theme.colors.btnPrimaryBg}
+      >
+        <View style={[styles.row, { marginTop: 0 }]}>
+          <ActionBox icon="file-text-line" label="Assign Case" />
+          <ActionBox icon="map-pin-2-line" label="Live Tracking" />
+        </View>
+
+        <View style={[styles.row, { marginTop: 0 }]}>
+          <ActionBox icon="group-line" label="View FROs" />
+          <ActionBox icon="line-chart-line" label="Performance" />
+        </View>
+      </Card>
+
+      <Card
+        title="Case Status Overview"
+        titleColor={theme.colors.colorTextSecondary}
+        cardStyle={{ backgroundColor: theme.colors.colorBgPage }}
+      >
+        {caseStatusData.map((item) => (
+          <View key={item.id} style={styles.statusRow}>
+            {/* Left Section */}
+            <View style={styles.statusLeft}>
+              <View
+                style={[styles.statusDot, { backgroundColor: item.color }]}
+              />
+              <Text
+                style={[
+                  theme.typography.fontBody,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                {item.label}
+              </Text>
+            </View>
+
+            {/* Right Section */}
+            <View style={styles.statusRight}>
+              <View
+                style={[styles.progressTrack, { backgroundColor: item.bg }]}
+              >
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      backgroundColor: item.color,
+                      width: `${item.value * 5}%`, // ✅ dynamic progress
+                    },
+                  ]}
+                />
+              </View>
+
+              <Text
+                style={[
+                  theme.typography.fontH5,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                {item.value.toString().padStart(2, "0")}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </Card>
+
+      <Card cardStyle={{ backgroundColor: theme.colors.colorBgPage }}>
+        <View style={[styles.row, { marginTop: 0 }]}>
+          <Text
+            style={[
+              theme.typography.fontH5,
+              { color: theme.colors.colorTextSecondary },
+            ]}
+          >
+            Recent Alerts
+          </Text>
+
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Text
+              style={[
+                theme.typography.fontH5,
+                { color: theme.colors.colorPrimary600 },
+              ]}
+            >
+              View All Alerts
+            </Text>
+            <RemixIcon
+              name="arrow-right-line"
+              size={22}
+              color={theme.colors.colorPrimary600}
+            />
+          </View>
+        </View>
+
+        {recentAlerts.map((item) => (
+          <View
+            key={item.id}
+            style={[
+              styles.alertBox,
+              { backgroundColor: getAlertBg(item.title) },
+            ]}
+          >
+            <RemixIcon name={item.icon} size={22} color={item.color} />
+
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[
+                  theme.typography.fontH5,
+                  { color: getAlertColor(item.title) },
+                ]}
+              >
+                {item.title}
+              </Text>
+
+              <Text
+                style={[
+                  theme.typography.fontBodySmall,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                {item.time}
+              </Text>
+            </View>
+          </View>
+        ))}
+
+        <Text
+          style={[
+            theme.typography.fontH5,
+            {
+              color: theme.colors.colorTextSecondary,
+              marginTop: 20,
+              marginBottom: 10,
+            },
+          ]}
+        >
+          Top Performers Today
+        </Text>
+
+        {topPerformers.map((user, index) => (
+          <View
+            key={user.id}
+            style={[
+              styles.performerBox,
+              { backgroundColor: theme.colors.colorPrimary50 },
+            ]}
+          >
+            <View
+              style={[
+                styles.rankCircle,
+                { backgroundColor: theme.colors.colorPrimary600 },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.rankText,
+                  { color: theme.colors.colorPrimary50 },
+                ]}
+              >
+                #{index + 1}
+              </Text>
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[
+                  styles.performerName,
+                  { color: theme.colors.colorPrimary600 },
+                ]}
+              >
+                {user.name}
+              </Text>
+              <Text
+                style={[
+                  styles.performerCode,
+                  { color: theme.colors.colorTextTertiary },
+                ]}
+              >
+                {user.code}
+              </Text>
+            </View>
+
+            <View style={{ alignItems: "flex-end" }}>
+              <Text
+                style={[
+                  styles.caseText,
+                  { color: theme.colors.colorPrimary600 },
+                ]}
+              >
+                {user.cases} Cases
+              </Text>
+
+              <View style={{ flexDirection: "row", gap: 4 }}>
+                <RemixIcon name="star-fill" size={14} color="#FACC15" />
+                <Text
+                  style={[
+                    styles.ratingText,
+                    { color: theme.colors.colorTextTertiary },
+                  ]}
+                >
+                  {user.rating}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ))}
+      </Card>
+    </BodyLayout>
+  );
+}
+
+function ActionBox({ icon, label }: { icon: IconName; label: string }) {
+  const { theme } = useTheme();
+
+  return (
+    <TouchableOpacity
+      style={{
+        backgroundColor: theme.colors.colorBgSurface,
+        borderWidth: 1,
+        borderColor: theme.colors.colorPrimary600,
+        padding: 15,
+        flex: 1,
+        borderRadius: 10,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <RemixIcon name={icon} size={28} color={theme.colors.colorPrimary600} />
+      <Text
+        style={[
+          theme.typography.fontH5,
+          { marginTop: 10, color: theme.colors.colorPrimary600 },
+        ]}
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 20,
+    marginTop: 20,
+  },
+
+  topRow: {
+    flexDirection: "row",
+    marginTop: 10,
+    gap: 10,
+  },
+
+  topBox: {
+    padding: 20,
+    borderRadius: 10,
+    flex: 1,
+  },
+
+  alertBox: {
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  performerBox: {
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+
+  rankCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  rankText: {
+    fontWeight: "700",
+  },
+
+  performerName: {
+    fontWeight: "700",
+  },
+
+  performerCode: {
+    fontSize: 12,
+  },
+
+  caseText: {
+    fontWeight: "700",
+  },
+
+  ratingText: {
+    fontSize: 12,
+  },
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
+
+  statusLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+
+  statusRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  progressTrack: {
+    width: 140,
+    height: 10,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+
+  progressFill: {
+    height: "100%",
+    borderRadius: 10,
+  },
+});

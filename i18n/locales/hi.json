@@ -453,5 +453,36 @@
   "confirmPasswordPlaceholder": "नया पासवर्ड फिर से दर्ज करें",
 
   "save": "सेव करें"
+},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"frl": {
+  "home": {
+    "casesOverview": "एफ़आरओ और मामले",
+    "newCases": "कुल एफआरओ",
+    "approvedCases": "ड्यूटी पर",
+    "onTheWay": "ड्यूटी से बाहर",
+    "working": "सक्रिय मामले",
+    "todayDuty": "आज की ड्यूटी",
+    "totalCases": "कुल मामले",
+    "highPriority": "उच्च प्राथमिकता",
+    "quickActions": "त्वरित कार्य",
+    "addNewCase": "नया मामला जोड़ें",
+    "viewMap": "नक्शा देखें"
+  }
 }
+
 }

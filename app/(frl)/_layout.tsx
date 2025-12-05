@@ -19,7 +19,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: theme.colors.background,
           borderTopColor: theme.colors.border,
-          // height: 60 + insets.bottom,
+          height: 60 + insets.bottom,
           paddingBottom: insets.bottom,
         },
 
@@ -34,24 +34,34 @@ export default function TabLayout() {
             <RemixIcon name="home-5-line" size={28} color={color} />
         }}
       />
-
-      <Tabs.Screen
-        name="(complaints)"
+        <Tabs.Screen
+        name="(cases)"
         options={{
           title: 'Cases',
           tabBarIcon: ({ color }) =>
-            <RemixIcon name="customer-service-line" size={28} color={color} />
+            <RemixIcon name="file-list-3-line" size={28} color={color} />
         }}
       />
 
-      <Tabs.Screen
-        name="(info)"
+     
+         <Tabs.Screen
+        name="(reports)"
         options={{
-          title: 'Reporting',
+          title: 'Community',
           tabBarIcon: ({ color }) =>
-            <RemixIcon name="article-line" size={28} color={color} />
+            <RemixIcon name="team-line" size={28} color={color} />
         }}
       />
+
+     <Tabs.Screen
+        name="(fro)"
+        options={{
+          title: 'FROs',
+          tabBarIcon: ({ color }) =>
+            <RemixIcon name="group-line" size={28} color={color} />
+        }}
+      />
+   
 
       <Tabs.Screen
         name="(profile)"
