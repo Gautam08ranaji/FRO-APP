@@ -2,6 +2,7 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import Card from "@/components/reusables/Card";
 import ReusableCard from "@/components/reusables/ReusableCard";
 import { useTheme } from "@/theme/ThemeContext";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -109,7 +110,6 @@ const topPerformers = [
   },
 ];
 
-
 const TARGET_MINUTES = 8 * 60;
 
 function formatMinutesToTime(minutes: number) {
@@ -132,22 +132,22 @@ function PunchInCard() {
   const [workedMinutes, setWorkedMinutes] = useState(0);
   const [isPunchedIn, setIsPunchedIn] = useState(false);
 
-useEffect(() => {
-  let interval: ReturnType<typeof setInterval> | undefined;
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | undefined;
 
-  if (isPunchedIn && punchInTime) {
-    interval = setInterval(() => {
-      const now = new Date();
-      const diffMs = now.getTime() - punchInTime.getTime();
-      const totalMinutes = Math.floor(diffMs / 60000);
-      setWorkedMinutes(totalMinutes);
-    }, 60000);
-  }
+    if (isPunchedIn && punchInTime) {
+      interval = setInterval(() => {
+        const now = new Date();
+        const diffMs = now.getTime() - punchInTime.getTime();
+        const totalMinutes = Math.floor(diffMs / 60000);
+        setWorkedMinutes(totalMinutes);
+      }, 60000);
+    }
 
-  return () => {
-    if (interval) clearInterval(interval);
-  };
-}, [isPunchedIn, punchInTime]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPunchedIn, punchInTime]);
 
   const handlePunchIn = () => {
     setPunchInTime(new Date());
@@ -182,7 +182,12 @@ useEffect(() => {
             Punched-in at
           </Text>
 
-          <Text style={[theme.typography.fontH4,{color:theme.colors.validationWarningText,marginTop:5}]}>
+          <Text
+            style={[
+              theme.typography.fontH4,
+              { color: theme.colors.validationWarningText, marginTop: 5 },
+            ]}
+          >
             {punchInTime ? formatTimeAMPM(punchInTime) : "--:--"}
           </Text>
         </View>
@@ -228,26 +233,26 @@ export default function HomeScreen() {
 
   const getAlertColor = (title: string) => {
     if (title.toLowerCase().includes("high")) {
-      return theme.colors.validationErrorText; 
+      return theme.colors.validationErrorText;
     }
 
     if (title.toLowerCase().includes("resolved")) {
-      return theme.colors.validationSuccessText; 
+      return theme.colors.validationSuccessText;
     }
 
-    return theme.colors.colorPrimary600; 
+    return theme.colors.colorPrimary600;
   };
 
   const getAlertBg = (title: string) => {
     if (title.toLowerCase().includes("high")) {
-      return theme.colors.validationErrorBg; 
+      return theme.colors.validationErrorBg;
     }
 
     if (title.toLowerCase().includes("resolved")) {
-      return theme.colors.validationSuccessBg; 
+      return theme.colors.validationSuccessBg;
     }
 
-    return theme.colors.validationInfoBg; 
+    return theme.colors.validationInfoBg;
   };
 
   return (
@@ -260,11 +265,9 @@ export default function HomeScreen() {
       >
         Attendance
       </Text>
-      
 
       <Card backgroundColor={theme.colors.colorBgPage}>
-        
-         <PunchInCard />
+        <PunchInCard />
         <View style={styles.topRow}>
           <TouchableOpacity
             style={[
@@ -315,13 +318,11 @@ export default function HomeScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-
-       
       </Card>
       <Text
         style={[
           theme.typography.fontH2,
-          { color: theme.colors.colorPrimary600,marginTop:20 },
+          { color: theme.colors.colorPrimary600, marginTop: 20 },
         ]}
       >
         {t("frl.home.casesOverview")}
@@ -338,6 +339,12 @@ export default function HomeScreen() {
           iconBg="#FF6900"
           countColor={"#FF6900"}
           titleColor={theme.colors.colorTextSecondary}
+          onPress={() => {
+            router.push({
+              pathname: "/(frl)/(cases)",
+              params: { filter: "Available" },
+            });
+          }}
         />
 
         <ReusableCard
@@ -351,6 +358,12 @@ export default function HomeScreen() {
           iconBg={theme.colors.validationInfoText}
           countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+           onPress={() => {
+            router.push({
+              pathname: "/(frl)/(fro)",
+              params: { filter: "Available" },
+            });
+          }}
         />
       </View>
 
@@ -365,6 +378,12 @@ export default function HomeScreen() {
           iconBg="#00C950"
           countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+          onPress={() => {
+            router.push({
+              pathname: "/(frl)/(fro)",
+              params: { filter: "On Duty" },
+            });
+          }}
         />
 
         <ReusableCard
@@ -377,6 +396,12 @@ export default function HomeScreen() {
           iconBg="#6A7282"
           countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+          onPress={() => {
+            router.push({
+              pathname: "/(frl)/(fro)",
+              params: { filter: "Off Duty" },
+            });
+          }}
         />
       </View>
 
@@ -389,12 +414,33 @@ export default function HomeScreen() {
         titleColor={theme.colors.btnPrimaryBg}
       >
         <View style={[styles.row, { marginTop: 0 }]}>
-          <ActionBox icon="file-text-line" label="Assign Case" />
-          <ActionBox icon="map-pin-2-line" label="Live Tracking" />
+          <ActionBox icon="file-text-line" label="Assign Case"
+            onPress={() => {
+            router.push({
+              pathname: "/(frl)/(cases)",
+              params: { filter: "New" },
+            });
+          }}
+          />
+          <ActionBox icon="map-pin-2-line" label="Live Tracking"
+          
+            onPress={() => {
+            router.push({
+              pathname: "/liveTracking",
+             
+            });
+          }}/>
         </View>
 
         <View style={[styles.row, { marginTop: 0 }]}>
-          <ActionBox icon="group-line" label="View FROs" />
+          <ActionBox icon="group-line" label="View FROs" 
+           onPress={() => {
+            router.push({
+              pathname: "/(frl)/(fro)",
+              params: { filter: "All" },
+            });
+          }}
+          />
           <ActionBox icon="line-chart-line" label="Performance" />
         </View>
       </Card>
@@ -429,7 +475,7 @@ export default function HomeScreen() {
                     styles.progressFill,
                     {
                       backgroundColor: item.color,
-                      width: `${item.value * 5}%`, 
+                      width: `${item.value * 5}%`,
                     },
                   ]}
                 />
@@ -593,11 +639,21 @@ export default function HomeScreen() {
   );
 }
 
-function ActionBox({ icon, label }: { icon: IconName; label: string }) {
+function ActionBox({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: IconName;
+  label: string;
+  onPress?: () => void;
+}) {
   const { theme } = useTheme();
 
   return (
     <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
       style={{
         backgroundColor: theme.colors.colorBgSurface,
         borderWidth: 1,
@@ -621,6 +677,7 @@ function ActionBox({ icon, label }: { icon: IconName; label: string }) {
     </TouchableOpacity>
   );
 }
+
 
 const styles = StyleSheet.create({
   row: {

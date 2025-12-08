@@ -1,14 +1,14 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import ReusableCard from "@/components/reusables/ReusableCard";
 import { useTheme } from "@/theme/ThemeContext";
+import { router } from "expo-router";
 import React from "react";
 import {
   Image,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 
@@ -123,7 +123,7 @@ export default function ProfileScreen() {
 
   return (
     <BodyLayout type="screen" screenName="Profile">
-      <ScrollView showsVerticalScrollIndicator={false}>
+     
         <View
           style={[
             styles.profileCard,
@@ -169,6 +169,10 @@ export default function ProfileScreen() {
               styles.reportBtn,
               { backgroundColor: theme.colors.validationInfoText },
             ]}
+
+            onPress={()=>{
+              router.push('/(frl)/(profile)/TeamOverviewScreen')
+            }}
           >
             <Text style={[styles.reportBtnText,{color:theme.colors.validationInfoBg}]}>See Reports</Text>
           </TouchableOpacity>
@@ -414,7 +418,6 @@ export default function ProfileScreen() {
 
           <Text style={[styles.logoutText,{color:theme.colors.validationErrorText}]}>Logout</Text>
         </TouchableOpacity>
-      </ScrollView>
     </BodyLayout>
   );
 }

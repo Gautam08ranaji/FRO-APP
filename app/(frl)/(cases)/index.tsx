@@ -1,6 +1,6 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import {
   FlatList,
@@ -12,6 +12,8 @@ import {
   View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
+
+
 
 const caseTabs = [
   { label: "All" },
@@ -80,8 +82,19 @@ const caseData = [
 ];
 
 export default function CaseManagementScreen() {
+  const { filter } = useLocalSearchParams();
+  
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState("All");
+const [activeTab, setActiveTab] = useState(
+  typeof filter === "string" ? filter : "All"
+);
+
+
+React.useEffect(() => {
+  if (typeof filter === "string") {
+    setActiveTab(filter);
+  }
+}, [filter]);
 
   // ✅ SCROLL + TAB POSITION TRACKING
   const scrollRef = useRef<ScrollView>(null);

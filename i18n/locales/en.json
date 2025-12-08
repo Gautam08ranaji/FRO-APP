@@ -421,7 +421,7 @@
  "frl": {
     "home": {
       "casesOverview": "FROs & Cases",
-      "newCases": "Total FROs",
+      "newCases": "Active FROs",
       "approvedCases": "On Duty",
       "onTheWay": "Off Duty",
       "working": "Active Cases",

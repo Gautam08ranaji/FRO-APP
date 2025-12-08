@@ -1,5 +1,6 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
+import { useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   FlatList,
@@ -12,7 +13,6 @@ import {
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
-/* ================= STATIC DATA ================= */
 
 const froData = [
   {
@@ -73,13 +73,25 @@ const froData = [
   },
 ];
 
-/* ================= SCREEN ================= */
 
 export default function FROListScreen() {
-  const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState("All");
 
-  // ✅ FILTER LOGIC (ONLY ADDITION)
+  
+  const { theme } = useTheme();
+const { filter } = useLocalSearchParams();
+
+const [activeTab, setActiveTab] = useState(
+  typeof filter === "string" ? filter : "All"
+);
+
+
+React.useEffect(() => {
+  if (typeof filter === "string") {
+    setActiveTab(filter);
+  }
+}, [filter]);
+
+
   const filteredData = useMemo(() => {
     if (activeTab === "All") return froData;
     if (activeTab === "Available")
@@ -126,7 +138,6 @@ export default function FROListScreen() {
 
   return (
     <BodyLayout type="screen" screenName="FROs">
-      {/* ================= SEARCH ================= */}
       <View style={styles.searchBox}>
         <RemixIcon name="search-line" size={18} color="#6A7282" />
         <TextInput

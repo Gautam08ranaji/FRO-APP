@@ -1,6 +1,4 @@
 import BodyLayout from "@/components/layout/BodyLayout";
-import Card from "@/components/reusables/Card";
-import ReusableButton from "@/components/reusables/ReusableButton";
 import ReusableCard from "@/components/reusables/ReusableCard";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
@@ -180,7 +178,7 @@ export default function HomeScreen() {
       </View>
 
       {/* QUICK ACTION CARD */}
-      <Card
+      {/* <Card
         title={t("home.quickActions")}
         cardStyle={{
           height: 140,
@@ -216,7 +214,7 @@ export default function HomeScreen() {
             },
           ]}
         />
-      </Card>
+      </Card> */}
     </BodyLayout>
   );
 }

@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { width } = Dimensions.get("window");
 
 interface BodyLayoutProps {
-  type: "dashboard" | "screen" | "frl"; // ✅ frl added
+  type: "dashboard" | "screen" | "frl";
   screenName?: string;
   children: React.ReactNode;
   scrollViewStyle?: StyleProp<ViewStyle>;
@@ -34,6 +34,29 @@ export default function BodyLayout({
   const { theme } = useTheme();
   const router = useRouter();
 
+  // ✅ CENTRALIZED ICON NAVIGATION (NORMAL vs FRL)
+  const handleIconPress = (
+    iconType: "notification" | "escalation" | "call"
+  ) => {
+    if (type === "frl") {
+      if (iconType === "notification") {
+        router.push("/(frl)/(dashboard)/notification");
+      } else if (iconType === "escalation") {
+        router.push("/(frl)/(dashboard)/alert");
+      } else if (iconType === "call") {
+        // router.push("/frl/call");
+      }
+    } else {
+      if (iconType === "notification") {
+        router.push("/notification");
+      } else if (iconType === "escalation") {
+        router.push("/escalation");
+      } else if (iconType === "call") {
+        // router.push("/call");
+      }
+    }
+  };
+
   return (
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
@@ -42,7 +65,10 @@ export default function BodyLayout({
         <View
           style={[
             styles.dashboardHeader,
-            { backgroundColor: theme.colors.colorPrimary600, paddingVertical: 24 },
+            {
+              backgroundColor: theme.colors.colorPrimary600,
+              paddingVertical: 24,
+            },
           ]}
         >
           <View style={styles.topRow}>
@@ -53,14 +79,17 @@ export default function BodyLayout({
                   { color: theme.colors.colorBgPage, paddingHorizontal: 1 },
                 ]}
               >
-                नमस्ते, राजेश जी
+                Hello , Rejesh
               </Text>
 
               <Text
                 style={[
                   theme.typography.fontBodySmall,
                   styles.subId,
-                  { color: theme.colors.colorBgPage, fontSize: width * 0.035 },
+                  {
+                    color: theme.colors.colorBgPage,
+                    fontSize: width * 0.035,
+                  },
                 ]}
               >
                 FRO-14567-001
@@ -68,14 +97,13 @@ export default function BodyLayout({
             </View>
 
             <View style={styles.iconRow}>
+              {/* 🔔 Notification */}
               <TouchableOpacity
                 style={[
                   styles.iconCircle,
                   { backgroundColor: theme.colors.colorBgSurface },
                 ]}
-                onPress={() => {
-                  router.push("/notification");
-                }}
+                onPress={() => handleIconPress("notification")}
               >
                 <RemixIcon
                   name="notification-line"
@@ -87,14 +115,13 @@ export default function BodyLayout({
                 </View>
               </TouchableOpacity>
 
+              {/* ⚠️ Escalation */}
               <TouchableOpacity
                 style={[
                   styles.iconCircle,
                   { backgroundColor: theme.colors.colorBgSurface },
                 ]}
-                onPress={() => {
-                  router.push("/escalation");
-                }}
+                onPress={() => handleIconPress("escalation")}
               >
                 <RemixIcon
                   name="alert-line"
@@ -103,13 +130,14 @@ export default function BodyLayout({
                 />
               </TouchableOpacity>
 
-              {/* ✅ Call icon hidden for frl */}
+              {/* ✅ Call icon hidden for FRL */}
               {type !== "frl" && (
                 <TouchableOpacity
                   style={[
                     styles.iconCircle,
                     { backgroundColor: theme.colors.colorBgSurface },
                   ]}
+                  onPress={() => handleIconPress("call")}
                 >
                   <RemixIcon
                     name="phone-line"
@@ -121,7 +149,7 @@ export default function BodyLayout({
             </View>
           </View>
 
-          {/* ✅ Bottom section hidden for frl */}
+          {/* ✅ Bottom section hidden for FRL */}
           {type !== "frl" && (
             <View
               style={[
@@ -136,16 +164,19 @@ export default function BodyLayout({
                     { color: theme.colors.colorPrimary600 },
                   ]}
                 >
-                  आज की ड्यूटी
+                    {"Today's Duty"}
                 </Text>
 
                 <Text
                   style={[
                     theme.typography.fontBody,
-                    { color: theme.colors.colorPrimary600, paddingHorizontal: 1 },
+                    {
+                      color: theme.colors.colorPrimary600,
+                      paddingHorizontal: 1,
+                    },
                   ]}
                 >
-                  कुल मामले
+                  Total Cases
                 </Text>
               </View>
 
