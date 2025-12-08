@@ -259,10 +259,13 @@ export default function HomeScreen() {
           { color: theme.colors.colorPrimary600 },
         ]}
       >
-        {t("frl.home.casesOverview")}
+        Attendance
       </Text>
+      
 
       <Card backgroundColor={theme.colors.colorBgPage}>
+        
+         <PunchInCard />
         <View style={styles.topRow}>
           <TouchableOpacity
             style={[
@@ -314,8 +317,16 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <PunchInCard />
+       
       </Card>
+      <Text
+        style={[
+          theme.typography.fontH2,
+          { color: theme.colors.colorPrimary600,marginTop:20 },
+        ]}
+      >
+        {t("frl.home.casesOverview")}
+      </Text>
       <View style={styles.row}>
         <ReusableCard
           icon="file-text-line"

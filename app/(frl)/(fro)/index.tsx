@@ -1,6 +1,6 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   FlatList,
   Image,
@@ -75,43 +75,63 @@ const froData = [
 
 /* ================= SCREEN ================= */
 
-
-
 export default function FROListScreen() {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState("All");
 
+  // ✅ FILTER LOGIC (ONLY ADDITION)
+  const filteredData = useMemo(() => {
+    if (activeTab === "All") return froData;
+    if (activeTab === "Available")
+      return froData.filter((item) => item.status === "available");
+    if (activeTab === "On Duty")
+      return froData.filter((item) => item.status === "busy");
+    if (activeTab === "Off Duty")
+      return froData.filter((item) => item.status === "unavailable");
 
-  
-function StatBox({ label, value, bg }: any) {
-  return (
-    <View style={[styles.statBox, { backgroundColor: bg }]}>
-      <Text style={[styles.statLabel,{color:theme.colors.colorTextSecondary}]}>{label}</Text>
-      <Text style={[styles.statValue,{color:theme.colors.colorTextSecondary}]}>{value}</Text>
-    </View>
-  );
-}
+    return froData;
+  }, [activeTab]);
 
-function ActionButton({ label, icon }: any) {
-  return (
-    <TouchableOpacity style={styles.outlineBtn}>
-      <RemixIcon name={icon} size={16} color="#0F766E" />
-      <Text style={styles.outlineText}>{label}</Text>
-    </TouchableOpacity>
-  );
-}
+  function StatBox({ label, value, bg }: any) {
+    return (
+      <View style={[styles.statBox, { backgroundColor: bg }]}>
+        <Text
+          style={[
+            styles.statLabel,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+        >
+          {label}
+        </Text>
+        <Text
+          style={[
+            styles.statValue,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+        >
+          {value}
+        </Text>
+      </View>
+    );
+  }
 
+  function ActionButton({ label, icon }: any) {
+    return (
+      <TouchableOpacity style={styles.outlineBtn}>
+        <RemixIcon name={icon} size={16} color="#0F766E" />
+        <Text style={styles.outlineText}>{label}</Text>
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <BodyLayout type="screen" screenName="FROs">
-    
-
       {/* ================= SEARCH ================= */}
       <View style={styles.searchBox}>
         <RemixIcon name="search-line" size={18} color="#6A7282" />
         <TextInput
           placeholder="Search FRO by name or ID..."
-            style={[{ flex: 1 ,color:theme.colors.colorTextSecondary}]}
+          style={[{ flex: 1, color: theme.colors.colorTextSecondary }]}
           placeholderTextColor={theme.colors.inputText}
         />
       </View>
@@ -120,10 +140,7 @@ function ActionButton({ label, icon }: any) {
         {["All", "On Duty", "Off Duty", "Available"].map((tab) => (
           <TouchableOpacity
             key={tab}
-            style={[
-              styles.tab,
-              activeTab === tab && styles.tabActive,
-            ]}
+            style={[styles.tab, activeTab === tab && styles.tabActive]}
             onPress={() => setActiveTab(tab)}
           >
             <Text
@@ -139,18 +156,46 @@ function ActionButton({ label, icon }: any) {
       </View>
 
       <FlatList
-        data={froData}
+        data={filteredData}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <View style={[styles.card,{backgroundColor:theme.colors.colorBgPage,marginVertical:20}]}>
+          <View
+            style={[
+              styles.card,
+              {
+                backgroundColor: theme.colors.colorBgPage,
+                marginVertical: 20,
+              },
+            ]}
+          >
             {/* TOP ROW */}
             <View style={styles.topRow}>
-              <Image source={{ uri: item.image }} style={[styles.avatar,{borderColor:theme.colors.colorPrimary600}]} />
+              <Image
+                source={{ uri: item.image }}
+                style={[
+                  styles.avatar,
+                  { borderColor: theme.colors.colorPrimary600 },
+                ]}
+              />
 
               <View style={{ flex: 1 }}>
-                <Text style={[styles.name,{color:theme.colors.colorTextSecondary}]}>{item.name}</Text>
-                <Text style={[styles.code,{color:theme.colors.colorTextSecondary}]}>{item.code}</Text>
+                <Text
+                  style={[
+                    styles.name,
+                    { color: theme.colors.colorTextSecondary },
+                  ]}
+                >
+                  {item.name}
+                </Text>
+                <Text
+                  style={[
+                    styles.code,
+                    { color: theme.colors.colorTextSecondary },
+                  ]}
+                >
+                  {item.code}
+                </Text>
               </View>
 
               <View
@@ -169,8 +214,8 @@ function ActionButton({ label, icon }: any) {
                     item.status === "available"
                       ? { color: theme.colors.validationSuccessText }
                       : item.status === "busy"
-                      ? { color:  theme.colors.validationErrorText  }
-                      : { color: theme.colors.colorTextTertiary  },
+                      ? { color: theme.colors.validationErrorText }
+                      : { color: theme.colors.colorTextTertiary },
                   ]}
                 >
                   {item.status}
@@ -181,26 +226,70 @@ function ActionButton({ label, icon }: any) {
             {/* LOCATION & TIME */}
             <View style={styles.metaRow}>
               <View style={styles.rowItem}>
-                <RemixIcon name="map-pin-line" size={16} color={theme.colors.btnDisabledText} />
-                <Text style={[styles.metaText,{color:theme.colors.btnDisabledText}]}>{item.location}</Text>
+                <RemixIcon
+                  name="map-pin-line"
+                  size={16}
+                  color={theme.colors.btnDisabledText}
+                />
+                <Text
+                  style={[
+                    styles.metaText,
+                    { color: theme.colors.btnDisabledText },
+                  ]}
+                >
+                  {item.location}
+                </Text>
               </View>
 
               <View style={styles.rowItem}>
-                <RemixIcon name="time-line" size={16} color={theme.colors.btnDisabledText} />
-                <Text style={[styles.metaText,{color:theme.colors.btnDisabledText}]}>{item.time}</Text>
+                <RemixIcon
+                  name="time-line"
+                  size={16}
+                  color={theme.colors.btnDisabledText}
+                />
+                <Text
+                  style={[
+                    styles.metaText,
+                    { color: theme.colors.btnDisabledText },
+                  ]}
+                >
+                  {item.time}
+                </Text>
               </View>
             </View>
 
             {/* STATS */}
             <View style={styles.statsRow}>
-              <StatBox label="Cases Today" value={item.casesToday} bg={theme.colors.validationSuccessBg} />
-              <StatBox label="Solved" value={item.solved} bg={theme.colors.validationWarningBg} />
-              <StatBox label="Rating" value={item.rating} bg={theme.colors.validationInfoBg} />
+              <StatBox
+                label="Cases Today"
+                value={item.casesToday}
+                bg={theme.colors.validationSuccessBg}
+              />
+              <StatBox
+                label="Solved"
+                value={item.solved}
+                bg={theme.colors.validationWarningBg}
+              />
+              <StatBox
+                label="Rating"
+                value={item.rating}
+                bg={theme.colors.validationInfoBg}
+              />
             </View>
 
             {item.activeCase !== "" && (
-              <View style={[styles.activeCase,{backgroundColor:theme.colors.validationInfoBg}]}>
-                <Text style={[styles.activeText,{color:theme.colors.validationInfoText}]}>
+              <View
+                style={[
+                  styles.activeCase,
+                  { backgroundColor: theme.colors.validationInfoBg },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.activeText,
+                    { color: theme.colors.validationInfoText },
+                  ]}
+                >
                   Active Case: {item.activeCase}
                 </Text>
               </View>
@@ -220,15 +309,20 @@ function ActionButton({ label, icon }: any) {
               </TouchableOpacity>
             </View>
 
-            <Text style={[styles.lastSeen,{color:theme.colors.colorTextTertiary}]}>Last Seen: {item.lastSeen}</Text>
+            <Text
+              style={[
+                styles.lastSeen,
+                { color: theme.colors.colorTextTertiary },
+              ]}
+            >
+              Last Seen: {item.lastSeen}
+            </Text>
           </View>
         )}
       />
     </BodyLayout>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   header: {
@@ -297,7 +391,7 @@ const styles = StyleSheet.create({
   },
 
   topRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  avatar: { width: 44, height: 44, borderRadius: 22,borderWidth:1, },
+  avatar: { width: 44, height: 44, borderRadius: 22, borderWidth: 1 },
   name: { fontWeight: "700" },
   code: { fontSize: 12, color: "#6A7282" },
 

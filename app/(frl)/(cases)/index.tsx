@@ -1,8 +1,10 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
-import React, { useState } from "react";
+import { router } from "expo-router";
+import React, { useMemo, useRef, useState } from "react";
 import {
   FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -12,10 +14,10 @@ import {
 import RemixIcon from "react-native-remix-icon";
 
 const caseTabs = [
-  { label: "All", count: 42 },
-  { label: "New", count: 12 },
-  { label: "Assigned", count: 8 },
-  { label: "In Progress", count: 6 },
+  { label: "All" },
+  { label: "New" },
+  { label: "Assigned" },
+  { label: "In Progress" },
 ];
 
 const caseData = [
@@ -81,24 +83,66 @@ export default function CaseManagementScreen() {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState("All");
 
+  // ✅ SCROLL + TAB POSITION TRACKING
+  const scrollRef = useRef<ScrollView>(null);
+  const tabLayouts = useRef<Record<string, number>>({});
+
+  // ✅ FILTER LOGIC
+  const filteredData = useMemo(() => {
+    if (activeTab === "All") return caseData;
+    return caseData.filter((item) => item.status === activeTab);
+  }, [activeTab]);
+
+  // ✅ DYNAMIC COUNTS
+  const tabCounts = useMemo(() => {
+    return {
+      All: caseData.length,
+      New: caseData.filter((i) => i.status === "New").length,
+      Assigned: caseData.filter((i) => i.status === "Assigned").length,
+      "In Progress": caseData.filter((i) => i.status === "In Progress").length,
+    };
+  }, []);
+
   return (
     <BodyLayout type="screen" screenName="Case Management">
-
+      {/* 🔍 SEARCH */}
       <View style={styles.searchBox}>
-        <RemixIcon name="search-line" size={18} color={theme.colors.colorTextSecondary} />
+        <RemixIcon
+          name="search-line"
+          size={18}
+          color={theme.colors.colorTextSecondary}
+        />
         <TextInput
           placeholder="Search case/ticket ID or elder name..."
-          style={[{ flex: 1 ,color:theme.colors.colorTextSecondary}]}
+          style={[{ flex: 1, color: theme.colors.colorTextSecondary }]}
           placeholderTextColor={theme.colors.inputText}
-          
         />
       </View>
 
-      <View style={styles.tabsRow}>
+      {/* ✅ SCROLLABLE FILTER TABS */}
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabsRow}
+      >
         {caseTabs.map((tab) => (
           <TouchableOpacity
             key={tab.label}
-            onPress={() => setActiveTab(tab.label)}
+            onLayout={(e) => {
+              tabLayouts.current[tab.label] = e.nativeEvent.layout.x;
+            }}
+            onPress={() => {
+              setActiveTab(tab.label);
+
+              const x = tabLayouts.current[tab.label];
+              if (x !== undefined) {
+                scrollRef.current?.scrollTo({
+                  x: Math.max(x - 40, 0),
+                  animated: true,
+                });
+              }
+            }}
             style={[
               styles.tab,
               {
@@ -119,33 +163,53 @@ export default function CaseManagementScreen() {
                 fontWeight: "700",
               }}
             >
-              {tab.label} {tab.count.toString().padStart(2, "0")}
+              {tab.label}{" "}
+              {String(
+                tabCounts[tab.label as keyof typeof tabCounts]
+              ).padStart(2, "0")}
             </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
+      {/* ✅ FILTERED LIST */}
       <FlatList
-        data={caseData}
+        data={filteredData}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-<View
-  style={[
-    styles.card,
-    {
-      backgroundColor:
-        item?.status === "New"
-          ? theme.colors.colorPrimary50
-        : theme.colors.colorBgPage
-    },
-  ]}
->
+          <TouchableOpacity
+            style={[
+              styles.card,
+              {
+                backgroundColor:
+                  item?.status === "New"
+                    ? theme.colors.colorPrimary50
+                    : theme.colors.colorBgPage,
+              },
+            ]}
+
+            onPress={()=>{
+              router.push('/caseDetail')
+            }}
+          >
             {/* NAME ROW */}
             <View style={styles.topRow}>
               <View>
-                <Text style={[styles.name,{color:theme.colors.colorTextSecondary}]}>{item.name}</Text>
-                <Text style={[styles.ticket,{color:theme.colors.colorTextSecondary}]}>
+                <Text
+                  style={[
+                    styles.name,
+                    { color: theme.colors.colorTextSecondary },
+                  ]}
+                >
+                  {item.name}
+                </Text>
+                <Text
+                  style={[
+                    styles.ticket,
+                    { color: theme.colors.colorTextSecondary },
+                  ]}
+                >
                   {item.ticket} ({item.age} Years)
                 </Text>
               </View>
@@ -175,24 +239,49 @@ export default function CaseManagementScreen() {
               </View>
             </View>
 
-          
-            <Text style={[styles.category,{color:theme.colors.colorTextSecondary}]}>
+            <Text
+              style={[
+                styles.category,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
               ● {item.category} • {item.status}
             </Text>
 
             <View style={styles.metaRow}>
               <View style={styles.rowItem}>
-                <RemixIcon name="map-pin-line" size={16} color={theme.colors.btnDisabledText} />
-                <Text style={[styles.metaText,{color:theme.colors.btnDisabledText}]}>{item.location}</Text>
+                <RemixIcon
+                  name="map-pin-line"
+                  size={16}
+                  color={theme.colors.btnDisabledText}
+                />
+                <Text
+                  style={[
+                    styles.metaText,
+                    { color: theme.colors.btnDisabledText },
+                  ]}
+                >
+                  {item.location}
+                </Text>
               </View>
 
               <View style={styles.rowItem}>
-                <RemixIcon name="time-line" size={16} color={theme.colors.btnDisabledText} />
-                <Text style={[styles.metaText,{color:theme.colors.btnDisabledText}]}>{item.time}</Text>
+                <RemixIcon
+                  name="time-line"
+                  size={16}
+                  color={theme.colors.btnDisabledText}
+                />
+                <Text
+                  style={[
+                    styles.metaText,
+                    { color: theme.colors.btnDisabledText },
+                  ]}
+                >
+                  {item.time}
+                </Text>
               </View>
             </View>
 
-         
             {!item.assigned ? (
               <View
                 style={[
@@ -200,7 +289,11 @@ export default function CaseManagementScreen() {
                   { backgroundColor: theme.colors.validationInfoText },
                 ]}
               >
-                <RemixIcon name="information-line" size={16} color={theme.colors.validationInfoBg} />
+                <RemixIcon
+                  name="information-line"
+                  size={16}
+                  color={theme.colors.validationInfoBg}
+                />
                 <Text
                   style={{
                     color: theme.colors.validationInfoBg,
@@ -217,7 +310,11 @@ export default function CaseManagementScreen() {
                   { backgroundColor: theme.colors.validationSuccessBg },
                 ]}
               >
-                <RemixIcon name="user-line" size={16} color={theme.colors.validationSuccessText} />
+                <RemixIcon
+                  name="user-line"
+                  size={16}
+                  color={theme.colors.validationSuccessText}
+                />
                 <Text
                   style={{
                     color: theme.colors.validationSuccessText,
@@ -230,7 +327,14 @@ export default function CaseManagementScreen() {
             )}
 
             <View style={styles.tatRow}>
-              <Text style={[styles.tatLabel,{color:theme.colors.colorTextSecondary}]}>TAT:</Text>
+              <Text
+                style={[
+                  styles.tatLabel,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                TAT:
+              </Text>
               <Text
                 style={[
                   styles.tatValue,
@@ -243,25 +347,27 @@ export default function CaseManagementScreen() {
               </Text>
             </View>
 
-          
             {!item.assigned && (
               <TouchableOpacity
                 style={[
                   styles.assignBtn,
                   { backgroundColor: theme.colors.btnPrimaryBg },
                 ]}
+                onPress={()=>{
+                  router.push('/assignScreen')
+                }}
               >
                 <Text style={styles.assignText}>Assign to FRO</Text>
               </TouchableOpacity>
             )}
-          </View>
+          </TouchableOpacity>
         )}
       />
     </BodyLayout>
   );
 }
 
-
+/* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
   searchBox: {
@@ -275,7 +381,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 
-  tabsRow: { flexDirection: "row", gap: 10, marginTop: 12 },
+  tabsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 12,
+    paddingRight: 20,
+  },
 
   tab: {
     paddingVertical: 6,
