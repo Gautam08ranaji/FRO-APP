@@ -109,7 +109,6 @@ const topPerformers = [
   },
 ];
 
-/* ================= SCREEN ================= */
 
 const TARGET_MINUTES = 8 * 60;
 
@@ -229,23 +228,23 @@ export default function HomeScreen() {
 
   const getAlertColor = (title: string) => {
     if (title.toLowerCase().includes("high")) {
-      return theme.colors.validationErrorText; // 🔴 High Priority
+      return theme.colors.validationErrorText; 
     }
 
     if (title.toLowerCase().includes("resolved")) {
-      return theme.colors.validationSuccessText; // 🟢 Resolved
+      return theme.colors.validationSuccessText; 
     }
 
-    return theme.colors.colorPrimary600; // 🔵 Default Info
+    return theme.colors.colorPrimary600; 
   };
 
   const getAlertBg = (title: string) => {
     if (title.toLowerCase().includes("high")) {
-      return theme.colors.validationErrorBg; // 🔴 Light Red Background
+      return theme.colors.validationErrorBg; 
     }
 
     if (title.toLowerCase().includes("resolved")) {
-      return theme.colors.validationSuccessBg; // 🟢 Light Green Background
+      return theme.colors.validationSuccessBg; 
     }
 
     return theme.colors.validationInfoBg; 
@@ -381,7 +380,6 @@ export default function HomeScreen() {
         />
       </View>
 
-      {/* ================= QUICK ACTIONS ================= */}
       <Card
         title={t("frl.home.quickActions")}
         cardStyle={{
@@ -408,7 +406,6 @@ export default function HomeScreen() {
       >
         {caseStatusData.map((item) => (
           <View key={item.id} style={styles.statusRow}>
-            {/* Left Section */}
             <View style={styles.statusLeft}>
               <View
                 style={[styles.statusDot, { backgroundColor: item.color }]}
@@ -423,7 +420,6 @@ export default function HomeScreen() {
               </Text>
             </View>
 
-            {/* Right Section */}
             <View style={styles.statusRight}>
               <View
                 style={[styles.progressTrack, { backgroundColor: item.bg }]}
@@ -433,7 +429,7 @@ export default function HomeScreen() {
                     styles.progressFill,
                     {
                       backgroundColor: item.color,
-                      width: `${item.value * 5}%`, // ✅ dynamic progress
+                      width: `${item.value * 5}%`, 
                     },
                   ]}
                 />
