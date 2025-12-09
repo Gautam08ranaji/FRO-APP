@@ -140,10 +140,18 @@ const filteredData = useMemo(() => {
     );
   }
 
-  function ActionButton({ label, icon }: any) {
+   function ActionButton({
+    label,
+    icon,
+    onPress,
+  }: {
+    label: string;
+    icon: string;
+    onPress: () => void;
+  }) {
     return (
-      <TouchableOpacity style={styles.outlineBtn}>
-        <RemixIcon name={icon} size={16} color="#0F766E" />
+      <TouchableOpacity style={styles.outlineBtn} onPress={onPress}>
+        <RemixIcon name={icon as any} size={16} color="#0F766E" />
         <Text style={styles.outlineText}>{label}</Text>
       </TouchableOpacity>
     );
@@ -378,8 +386,17 @@ const filteredData = useMemo(() => {
 
             {/* ACTIONS */}
             <View style={styles.actionRow}>
-              <ActionButton label="Track" icon="map-pin-line" />
-              <ActionButton label="Call" icon="phone-line" />
+              <ActionButton
+                label="Track"
+                icon="map-pin-line"
+                onPress={() => router.push("/(frl)/(fro)/trackFro")}
+              />
+
+              <ActionButton
+                label="Call"
+                icon="phone-line"
+                onPress={() => {}}
+              />
               <TouchableOpacity
                 style={[
                   styles.assignBtn,
