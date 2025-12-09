@@ -22,29 +22,7 @@ type Language = { code: string; label: string; nativeLabel: string };
 const LANGUAGES: Language[] = [
   { code: 'en', label: 'English', nativeLabel: 'English' },
   { code: 'hi', label: 'Hindi', nativeLabel: 'हिन्दी' },
-  { code: 'mr', label: 'Marathi', nativeLabel: 'मराठी' },
-  { code: 'bn', label: 'Bengali', nativeLabel: 'বাংলা' },
-  { code: 'pa', label: 'Punjabi', nativeLabel: 'ਪੰਜਾਬੀ' },
-  { code: 'ta', label: 'Tamil', nativeLabel: 'தமிழ்' },
-  { code: 'te', label: 'Telugu', nativeLabel: 'తెలుగు' },
-  { code: 'gu', label: 'Gujarati', nativeLabel: 'ગુજરાતી' },
-  { code: 'ur', label: 'Urdu', nativeLabel: 'اردو' },
-  { code: 'kn', label: 'Kannada', nativeLabel: 'ಕನ್ನಡ' },
-
-  // Newly added languages
-  { code: 'as', label: 'Assamese', nativeLabel: 'অসমীয়া' },
-  { code: 'brx', label: 'Bodo', nativeLabel: 'बड़ो' },
-  { code: 'doi', label: 'Dogri', nativeLabel: 'डोगरी' },
-  { code: 'ks', label: 'Kashmiri', nativeLabel: 'كٲشُر' },
-  { code: 'gom', label: 'Konkani', nativeLabel: 'कोंकणी' },
-  { code: 'mai', label: 'Maithili', nativeLabel: 'मैथिली' },
-  { code: 'ml', label: 'Malayalam', nativeLabel: 'മലയാളം' },
-  { code: 'mni', label: 'Manipuri', nativeLabel: 'ꯃꯤꯇꯩꯂꯣꯟ' },
-  { code: 'ne', label: 'Nepali', nativeLabel: 'नेपाली' },
-  { code: 'or', label: 'Odia', nativeLabel: 'ଓଡ଼ିଆ' },
-  { code: 'sa', label: 'Sanskrit', nativeLabel: 'संस्कृतम्' },
-  { code: 'sat', label: 'Santali', nativeLabel: 'ᱥᱟᱱᱛᱟᱲᱤ' },
-  { code: 'sd', label: 'Sindhi', nativeLabel: 'سنڌي' },
+ 
 ];
 
 export default function LanguageSelection() {
@@ -271,10 +249,10 @@ const styles = StyleSheet.create({
   moreButton: { marginTop: 10, alignItems: 'center', width: '100%' },
   button: {
     paddingVertical: 15,
-    borderRadius: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    // marginTop: 40,
+    marginTop: 30,
     elevation: 3,
   },
 });
