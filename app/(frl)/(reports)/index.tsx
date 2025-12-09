@@ -13,6 +13,9 @@ export default function CommunityScreen() {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState("All Queries");
 
+  // ✅ SEARCH STATE (NEW)
+  const [search, setSearch] = useState("");
+
   return (
     <BodyLayout type="screen" screenName="Community & Knowledge">
       {/* ✅ SEARCH BAR */}
@@ -31,6 +34,8 @@ export default function CommunityScreen() {
           placeholder="Search queries"
           style={{ flex: 1, color: theme.colors.colorTextSecondary }}
           placeholderTextColor={theme.colors.inputPlaceholder}
+          value={search}                    // ✅ Dynamic value
+          onChangeText={setSearch}          // ✅ Dynamic update
         />
       </View>
 
@@ -47,8 +52,7 @@ export default function CommunityScreen() {
                   activeTab === tab
                     ? theme.colors.btnPrimaryBg
                     : theme.colors.colorBgSurface,
-                    borderColor: 
-                     theme.colors.btnPrimaryBg,
+                borderColor: theme.colors.btnPrimaryBg,
                 color:
                   activeTab === tab
                     ? theme.colors.btnPrimaryText
@@ -61,11 +65,11 @@ export default function CommunityScreen() {
         ))}
       </View>
 
-      {/* ✅ TAB SCREENS */}
+      {/* ✅ TAB SCREENS (Search Passed Dynamically) */}
       {activeTab === "All Queries" ? (
-        <AllQueriesTab />
+        <AllQueriesTab search={search} />
       ) : (
-        <KnowledgeBaseTab />
+        <KnowledgeBaseTab search={search} />
       )}
     </BodyLayout>
   );
@@ -94,6 +98,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontWeight: "700",
     borderRadius: 12,
-    borderWidth:1
+    borderWidth: 1,
   },
 });

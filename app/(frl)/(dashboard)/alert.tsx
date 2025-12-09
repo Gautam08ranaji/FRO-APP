@@ -1,18 +1,37 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  LayoutChangeEvent,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
-const FILTERS = ["All Alerts", "Urgent", "Case Alerts", "FRO Alerts"];
+/* ✅ STRONGLY TYPED FILTERS */
+const FILTERS = ["All Alerts", "Urgent", "Case Alerts", "FRO Alerts"] as const;
+type FilterType = (typeof FILTERS)[number];
 
-const ALERTS_DATA = [
+/* ✅ ALERT TYPE */
+type AlertType = {
+  id: number;
+  title: string;
+  badge: "High" | "Medium" | "Low";
+  description: string;
+  time: string;
+  location?: string;
+  caseId: string;
+  actionText: string;
+  type: "danger" | "warning" | "info";
+  outline?: boolean;
+  category: "Case Alerts" | "FRO Alerts";
+};
+
+/* ✅ ALERT DATA */
+const ALERTS_DATA: AlertType[] = [
   {
     id: 1,
     title: "High Priority Case - Unassigned",
@@ -66,85 +85,121 @@ const ALERTS_DATA = [
   },
 ];
 
+/* ============================= SCREEN ============================= */
+
 export default function AlertsScreen() {
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState("All Alerts");
+  const [activeTab, setActiveTab] = useState<FilterType>("All Alerts");
 
-  // ✅ FILTER LOGIC
+  const scrollRef = useRef<ScrollView>(null);
+  const tabLayouts = useRef<Record<FilterType, number>>({} as any);
+
+  /* ✅ TYPE-SAFE COUNTS */
+  const counts: Record<FilterType, number> = useMemo(() => {
+    return {
+      "All Alerts": ALERTS_DATA.length,
+      Urgent: ALERTS_DATA.filter((i) => i.badge === "High").length,
+      "Case Alerts": ALERTS_DATA.filter((i) => i.category === "Case Alerts")
+        .length,
+      "FRO Alerts": ALERTS_DATA.filter((i) => i.category === "FRO Alerts").length,
+    };
+  }, []);
+
+  /* ✅ FILTER LOGIC */
   const filteredAlerts = useMemo(() => {
-    if (activeTab === "All Alerts") return ALERTS_DATA;
-
-    if (activeTab === "Urgent") {
-      return ALERTS_DATA.filter((item) => item.badge === "High");
+    switch (activeTab) {
+      case "Urgent":
+        return ALERTS_DATA.filter((i) => i.badge === "High");
+      case "Case Alerts":
+        return ALERTS_DATA.filter((i) => i.category === "Case Alerts");
+      case "FRO Alerts":
+        return ALERTS_DATA.filter((i) => i.category === "FRO Alerts");
+      default:
+        return ALERTS_DATA;
     }
-
-    return ALERTS_DATA.filter((item) => item.category === activeTab);
   }, [activeTab]);
+
+  const handleTabPress = (tab: FilterType) => {
+    setActiveTab(tab);
+
+    const x = tabLayouts.current[tab];
+    if (x !== undefined) {
+      scrollRef.current?.scrollTo({ x: Math.max(x - 40, 0), animated: true });
+    }
+  };
 
   return (
     <BodyLayout type="screen" screenName="Alerts">
-      {/* SUMMARY CARDS */}
-      <View style={styles.summaryRow}>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Urgent</Text>
-          <Text style={styles.summaryValue}>03</Text>
-        </View>
-
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Action Needed</Text>
-          <Text style={styles.summaryValue}>04</Text>
-        </View>
-
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Information</Text>
-          <Text style={styles.summaryValue}>05</Text>
-        </View>
-      </View>
-
-      {/* FILTER TABS */}
+      {/* ✅ FILTER TABS WITH AUTO SCROLL */}
       <ScrollView
+        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.tabsRow}
+        contentContainerStyle={styles.tabsContent}
       >
-        {FILTERS.map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            onPress={() => setActiveTab(tab)}
-            style={[
-              styles.tab,
-              {
-                backgroundColor:
-                  activeTab === tab
-                    ? theme.colors.colorPrimary600
-                    : "transparent",
-                borderColor: theme.colors.colorPrimary600,
-              },
-            ]}
-          >
-            <Text
+        {FILTERS.map((tab) => {
+          const isActive = activeTab === tab;
+
+          return (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => handleTabPress(tab)}
+              onLayout={(e: LayoutChangeEvent) => {
+                tabLayouts.current[tab] = e.nativeEvent.layout.x;
+              }}
               style={[
-                styles.tabText,
+                styles.tabPill,
                 {
-                  color:
-                    activeTab === tab
-                      ? "#fff"
-                      : theme.colors.colorPrimary600,
+                  backgroundColor: isActive
+                    ? theme.colors.colorPrimary600
+                    : theme.colors.inputBg,
+                  borderColor: theme.colors.colorPrimary600,
                 },
               ]}
             >
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.tabPillText,
+                  {
+                    color: isActive
+                      ? theme.colors.inputBg
+                      : theme.colors.colorPrimary600,
+                  },
+                ]}
+              >
+                {tab}
+              </Text>
+
+              <View
+                style={[
+                  styles.countCircle,
+                  {
+                    backgroundColor: isActive
+                      ? theme.colors.inputBg
+                      : theme.colors.colorPrimary600,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.countText,
+                    {
+                      color: isActive
+                        ? theme.colors.colorPrimary600
+                        : theme.colors.inputBg,
+                    },
+                  ]}
+                >
+                  {counts[tab]}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
-      {/* ✅ ACTIVE FILTER RESULT */}
-      <Text style={styles.activeFilterText}>
-        Showing: {activeTab}
-      </Text>
-
-      {/* ✅ FILTERED ALERT LIST */}
+      {/* ✅ ALERT LIST */}
       {filteredAlerts.map((alert) => (
         <AlertCard key={alert.id} {...alert} />
       ))}
@@ -152,7 +207,7 @@ export default function AlertsScreen() {
   );
 }
 
-/* ---------------- ALERT CARD ---------------- */
+/* ============================= ALERT CARD ============================= */
 
 const AlertCard = ({
   title,
@@ -164,14 +219,14 @@ const AlertCard = ({
   actionText,
   type,
   outline = false,
-}: any) => {
-  const bgMap: any = {
+}: AlertType) => {
+  const bgMap: Record<AlertType["type"], string> = {
     danger: "#fee2e2",
     warning: "#fff7ed",
     info: "#e0f2fe",
   };
 
-  const badgeMap: any = {
+  const badgeMap: Record<AlertType["badge"], string> = {
     High: "#dc2626",
     Medium: "#f97316",
     Low: "#2563eb",
@@ -186,12 +241,8 @@ const AlertCard = ({
     >
       <View style={styles.alertHeader}>
         <Text style={styles.alertTitle}>{title}</Text>
-        <View
-          style={[
-            styles.badgePill,
-            { backgroundColor: badgeMap[badge] },
-          ]}
-        >
+
+        <View style={[styles.badgePill, { backgroundColor: badgeMap[badge] }]}>
           <Text style={styles.badgeText}>{badge}</Text>
         </View>
       </View>
@@ -245,40 +296,46 @@ const AlertCard = ({
   );
 };
 
-/* ---------------- STYLES ---------------- */
+/* ============================= STYLES ============================= */
 
 const styles = StyleSheet.create({
-  summaryRow: { flexDirection: "row", gap: 10 },
-
-  summaryCard: {
-    flex: 1,
-    backgroundColor: "#e7f5f3",
-    borderRadius: 10,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#2E7D32",
+  tabsRow: { marginVertical: 8 },
+  tabsContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingRight: 20,
   },
 
-  summaryTitle: { fontSize: 12, color: "#475569" },
-  summaryValue: { fontSize: 22, fontWeight: "700", marginTop: 4 },
-
-  tabsRow: { marginBottom: 10, marginTop: 10 },
-
-  tab: {
+  tabPill: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    marginRight: 10,
+    borderRadius: 30,
+    borderWidth: 2,
+    marginRight: 8,
+    gap: 8,
+    flexShrink: 0,
   },
 
-  tabText: { fontSize: 13, fontWeight: "600" },
+  tabPillText: {
+    fontSize: 14,
+    fontWeight: "700",
+    flexShrink: 0,
+  },
 
-  activeFilterText: {
-    fontSize: 12,
-    color: "#475569",
-    marginBottom: 6,
-    fontWeight: "600",
+  countCircle: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 6,
+  },
+
+  countText: {
+    fontSize: 13,
+    fontWeight: "800",
   },
 
   alertCard: {

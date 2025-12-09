@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import RemixIcon from "react-native-remix-icon";
 
 export default function OfficerDetailsScreen() {
   const { theme } = useTheme();
@@ -22,6 +23,37 @@ export default function OfficerDetailsScreen() {
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
       >
+
+        {/* ===== PROFILE IMAGE WITH EDIT ICON (ADDED ON TOP) ===== */}
+        <View style={[styles.profileWrapper,{}]}>
+          <View
+            style={[
+              styles.profileCircle,
+              { backgroundColor: theme.colors.colorPrimary600 +22 },
+            ]}
+          >
+            <RemixIcon
+              name="user-3-line"
+              size={42}
+              color={theme.colors.colorPrimary600}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.editIcon,
+              { backgroundColor: theme.colors.colorPrimary600 },
+            ]}
+          >
+            <RemixIcon
+              name="edit-line"
+              size={16}
+              color={theme.colors.colorBgPage}
+            />
+          </TouchableOpacity>
+        </View>
+        {/* ===== PROFILE IMAGE WITH EDIT ICON END ===== */}
+
         <Text style={[styles.label, { color: theme.colors.colorTextPrimary }]}>
           {t("officerDetails.name")}
         </Text>
@@ -111,6 +143,32 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 3,
   },
+
+  /* ===== PROFILE IMAGE STYLES (ADDED) ===== */
+  profileWrapper: {
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+
+  profileCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  editIcon: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  /* ===== PROFILE IMAGE STYLES END ===== */
 
   label: {
     fontSize: 14,

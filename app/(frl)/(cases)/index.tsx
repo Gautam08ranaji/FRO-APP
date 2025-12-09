@@ -13,8 +13,6 @@ import {
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
-
-
 const caseTabs = [
   { label: "All" },
   { label: "New" },
@@ -83,30 +81,58 @@ const caseData = [
 
 export default function CaseManagementScreen() {
   const { filter } = useLocalSearchParams();
-  
   const { theme } = useTheme();
-const [activeTab, setActiveTab] = useState(
-  typeof filter === "string" ? filter : "All"
-);
 
+  console.log("flt", filter);
 
-React.useEffect(() => {
-  if (typeof filter === "string") {
-    setActiveTab(filter);
-  }
-}, [filter]);
+  const [activeTab, setActiveTab] = useState(
+    typeof filter === "string" ? filter : "All"
+  );
 
-  // ✅ SCROLL + TAB POSITION TRACKING
+  const [priorityFilter, setPriorityFilter] = useState<
+    "All" | "High" | "Medium" | "Low"
+  >("All");
+
+  const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
+
+  // ✅ ONLY SEARCH STATE ADDED
+  const [searchQuery, setSearchQuery] = useState("");
+
+  React.useEffect(() => {
+    if (typeof filter === "string") {
+      setActiveTab(filter);
+    }
+  }, [filter]);
+
   const scrollRef = useRef<ScrollView>(null);
   const tabLayouts = useRef<Record<string, number>>({});
 
-  // ✅ FILTER LOGIC
+  // ✅ STATUS + PRIORITY + SEARCH FILTER
   const filteredData = useMemo(() => {
-    if (activeTab === "All") return caseData;
-    return caseData.filter((item) => item.status === activeTab);
-  }, [activeTab]);
+    let data = caseData;
 
-  // ✅ DYNAMIC COUNTS
+    if (activeTab !== "All") {
+      data = data.filter((item) => item.status === activeTab);
+    }
+
+    if (priorityFilter !== "All") {
+      data = data.filter((item) => item.priority === priorityFilter);
+    }
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      data = data.filter(
+        (item) =>
+          item.name.toLowerCase().includes(query) ||
+          item.ticket.toLowerCase().includes(query) ||
+          item.category.toLowerCase().includes(query) ||
+          item.status.toLowerCase().includes(query)
+      );
+    }
+
+    return data;
+  }, [activeTab, priorityFilter, searchQuery]);
+
   const tabCounts = useMemo(() => {
     return {
       All: caseData.length,
@@ -127,6 +153,8 @@ React.useEffect(() => {
         />
         <TextInput
           placeholder="Search case/ticket ID or elder name..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
           style={[{ flex: 1, color: theme.colors.colorTextSecondary }]}
           placeholderTextColor={theme.colors.inputText}
         />
@@ -177,15 +205,60 @@ React.useEffect(() => {
               }}
             >
               {tab.label}{" "}
-              {String(
-                tabCounts[tab.label as keyof typeof tabCounts]
-              ).padStart(2, "0")}
+              {String(tabCounts[tab.label as keyof typeof tabCounts]).padStart(
+                2,
+                "0"
+              )}
             </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* ✅ FILTERED LIST */}
+      {/* ✅ PRIORITY ROW */}
+      <View style={styles.priorityRow}>
+        <Text style={styles.allCasesText}>All Cases</Text>
+
+        <TouchableOpacity
+          style={[
+            styles.priorityBtn,
+            { backgroundColor: theme.colors.validationSuccessBg },
+          ]}
+          onPress={() => setShowPriorityDropdown((prev) => !prev)}
+        >
+          <Text
+            style={[
+              styles.priorityBtnText,
+              { color: theme.colors.validationSuccessText },
+            ]}
+          >
+            Priority ({priorityFilter})
+          </Text>
+          <RemixIcon
+            name="arrow-down-s-line"
+            size={18}
+            color={theme.colors.validationSuccessText}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {showPriorityDropdown && (
+        <View style={styles.priorityDropdown}>
+          {["All", "High", "Medium", "Low"].map((item) => (
+            <TouchableOpacity
+              key={item}
+              style={styles.priorityOption}
+              onPress={() => {
+                setPriorityFilter(item as any);
+                setShowPriorityDropdown(false);
+              }}
+            >
+              <Text style={styles.priorityOptionText}>{item}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* ✅ FULL ORIGINAL CARD UI */}
       <FlatList
         data={filteredData}
         keyExtractor={(item) => item.id.toString()}
@@ -201,12 +274,16 @@ React.useEffect(() => {
                     : theme.colors.colorBgPage,
               },
             ]}
-
-            onPress={()=>{
-              router.push('/caseDetail')
+            onPress={() => {
+              router.push({
+                pathname: "/caseDetail",
+                params: {
+                  assigned: item.assigned ? "yes" : "no",
+                  ticket: item.ticket,
+                },
+              });
             }}
           >
-            {/* NAME ROW */}
             <View style={styles.topRow}>
               <View>
                 <Text
@@ -366,8 +443,8 @@ React.useEffect(() => {
                   styles.assignBtn,
                   { backgroundColor: theme.colors.btnPrimaryBg },
                 ]}
-                onPress={()=>{
-                  router.push('/assignScreen')
+                onPress={() => {
+                  router.push("/assignScreen");
                 }}
               >
                 <Text style={styles.assignText}>Assign to FRO</Text>
@@ -406,6 +483,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 20,
     borderWidth: 1,
+  },
+
+  priorityRow: {
+    marginTop: 14,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  allCasesText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#374151",
+  },
+
+  priorityBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+
+  priorityBtnText: {
+    fontWeight: "700",
+  },
+
+  priorityDropdown: {
+    marginTop: 8,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    elevation: 4,
+    overflow: "hidden",
+  },
+
+  priorityOption: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  priorityOptionText: {
+    fontWeight: "600",
+    color: "#374151",
   },
 
   card: {

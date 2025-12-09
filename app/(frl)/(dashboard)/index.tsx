@@ -17,7 +17,7 @@ import RemixIcon, { IconName } from "react-native-remix-icon";
 const caseStatusData = [
   {
     id: 1,
-    label: "On Duty",
+    label: "Follow Up",
     value: 12,
     color: "#1677FF",
     bg: "#E9F4FF",
@@ -45,7 +45,7 @@ const caseStatusData = [
   },
   {
     id: 5,
-    label: "Follow-up",
+    label: "Closed",
     value: 2,
     color: "#FF7A00",
     bg: "#FFF3E0",
@@ -168,6 +168,7 @@ function PunchInCard() {
         borderRadius: 12,
         borderColor: theme.colors.validationWarningText,
         borderWidth: 1,
+        elevation:2
       }}
     >
       <View
@@ -188,7 +189,7 @@ function PunchInCard() {
               { color: theme.colors.validationWarningText, marginTop: 5 },
             ]}
           >
-            {punchInTime ? formatTimeAMPM(punchInTime) : "--:--"}
+            {punchInTime ? formatTimeAMPM(punchInTime) : "00:00"}
           </Text>
         </View>
 
@@ -266,59 +267,8 @@ export default function HomeScreen() {
         Attendance
       </Text>
 
-      <Card backgroundColor={theme.colors.colorBgPage}>
+   
         <PunchInCard />
-        <View style={styles.topRow}>
-          <TouchableOpacity
-            style={[
-              styles.topBox,
-              { backgroundColor: theme.colors.colorPrimary50 },
-            ]}
-          >
-            <Text
-              style={[
-                theme.typography.fontBody,
-                { color: theme.colors.colorPrimary600 },
-              ]}
-            >
-              Today’s Case
-            </Text>
-
-            <Text
-              style={[
-                theme.typography.fontH2,
-                { marginTop: 10, color: theme.colors.colorPrimary600 },
-              ]}
-            >
-              42
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.topBox,
-              { backgroundColor: theme.colors.colorPrimary50 },
-            ]}
-          >
-            <Text
-              style={[
-                theme.typography.fontBody,
-                { color: theme.colors.colorPrimary600 },
-              ]}
-            >
-              Active FROs
-            </Text>
-            <Text
-              style={[
-                theme.typography.fontH2,
-                { marginTop: 10, color: theme.colors.colorPrimary600 },
-              ]}
-            >
-              18/24
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </Card>
       <Text
         style={[
           theme.typography.fontH2,
@@ -342,23 +292,21 @@ export default function HomeScreen() {
           onPress={() => {
             router.push({
               pathname: "/(frl)/(cases)",
-              params: { filter: "Available" },
+              params: { filter: "In Progress" },
             });
           }}
         />
 
         <ReusableCard
           icon="group-line"
-          count={"+5"}
-          countBg={theme.colors.validationInfoText + 22}
+          count={""}
           title={t("frl.home.newCases")}
           subTitle={43}
           subTitleColor={theme.colors.validationInfoText}
           bg={theme.colors.colorBgPage}
           iconBg={theme.colors.validationInfoText}
-          countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
-           onPress={() => {
+          onPress={() => {
             router.push({
               pathname: "/(frl)/(fro)",
               params: { filter: "Available" },
@@ -405,8 +353,16 @@ export default function HomeScreen() {
         />
       </View>
 
+      <Text
+        style={[
+          theme.typography.fontH2,
+          { color: theme.colors.colorPrimary600,marginTop:20 },
+        ]}
+      >
+        {t("frl.home.quickActions")}
+      </Text>
+
       <Card
-        title={t("frl.home.quickActions")}
         cardStyle={{
           backgroundColor: theme.colors.colorBgPage,
           gap: 10,
@@ -414,39 +370,52 @@ export default function HomeScreen() {
         titleColor={theme.colors.btnPrimaryBg}
       >
         <View style={[styles.row, { marginTop: 0 }]}>
-          <ActionBox icon="file-text-line" label="Assign Case"
+          <ActionBox
+            icon="file-text-line"
+            label="Assign Case"
             onPress={() => {
-            router.push({
-              pathname: "/(frl)/(cases)",
-              params: { filter: "New" },
-            });
-          }}
+              router.push({
+                pathname: "/(frl)/(cases)",
+                params: { filter: "New" },
+              });
+            }}
           />
-          <ActionBox icon="map-pin-2-line" label="Live Tracking"
-          
+          <ActionBox
+            icon="map-pin-2-line"
+            label="Live Tracking"
             onPress={() => {
-            router.push({
-              pathname: "/liveTracking",
-             
-            });
-          }}/>
+              router.push({
+                pathname: "/liveTracking",
+              });
+            }}
+          />
         </View>
 
         <View style={[styles.row, { marginTop: 0 }]}>
-          <ActionBox icon="group-line" label="View FROs" 
-           onPress={() => {
-            router.push({
-              pathname: "/(frl)/(fro)",
-              params: { filter: "All" },
-            });
-          }}
+          <ActionBox
+            icon="group-line"
+            label="View FROs"
+            onPress={() => {
+              router.push({
+                pathname: "/(frl)/(fro)",
+                params: { filter: "All" },
+              });
+            }}
           />
           <ActionBox icon="line-chart-line" label="Performance" />
         </View>
       </Card>
 
+
+     <Text
+        style={[
+          theme.typography.fontH2,
+          { color: theme.colors.colorPrimary600,marginTop:20 },
+        ]}
+      >
+        Case Status Overview
+      </Text>
       <Card
-        title="Case Status Overview"
         titleColor={theme.colors.colorTextSecondary}
         cardStyle={{ backgroundColor: theme.colors.colorBgPage }}
       >
@@ -505,7 +474,11 @@ export default function HomeScreen() {
             Recent Alerts
           </Text>
 
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+          onPress={()=>{
+            router.push('/alert')
+          }}
+          >
             <Text
               style={[
                 theme.typography.fontH5,
@@ -519,7 +492,7 @@ export default function HomeScreen() {
               size={22}
               color={theme.colors.colorPrimary600}
             />
-          </View>
+          </TouchableOpacity>
         </View>
 
         {recentAlerts.map((item) => (
@@ -677,7 +650,6 @@ function ActionBox({
     </TouchableOpacity>
   );
 }
-
 
 const styles = StyleSheet.create({
   row: {

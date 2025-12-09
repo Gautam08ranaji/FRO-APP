@@ -1,5 +1,5 @@
 import { useTheme } from "@/theme/ThemeContext";
-import React from "react";
+import React, { useMemo } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
@@ -55,12 +55,24 @@ const uiMap: any = {
   },
 };
 
-export default function KnowledgeBaseTab() {
+// ✅ ACCEPT SEARCH PROP (ONLY LOGIC ADDED)
+export default function KnowledgeBaseTab({ search = "" }) {
   const { theme } = useTheme();
+
+  // ✅ FILTER LOGIC (ONLY LOGIC ADDED)
+  const filteredData = useMemo(() => {
+    if (!search.trim()) return knowledgeBaseData;
+
+    return knowledgeBaseData.filter(
+      (item) =>
+        item.title.toLowerCase().includes(search.toLowerCase()) ||
+        item.subtitle.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
 
   return (
     <FlatList
-      data={knowledgeBaseData}
+      data={filteredData}   
       keyExtractor={(item) => item.id.toString()}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 40 }}

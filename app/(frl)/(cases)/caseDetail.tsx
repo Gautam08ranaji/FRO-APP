@@ -1,42 +1,84 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Animated,
-    Easing,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  Easing,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
+
+const { width } = Dimensions.get("window");
+
+/* ✅ STATIC JSON DATA (NO ICONS) */
+const caseDetailData = {
+  ticketNo: "TKT-14567-001",
+
+  user: {
+    name: "Ram Prasad Sharma",
+    age: 72,
+    gender: "Male",
+    address: "Ameerpur, Agra, UP",
+    phone: "+91-9453416629",
+    emergencyPhone: "+91-9876543210",
+    avatar: "https://randomuser.me/api/portraits/men/75.jpg",
+  },
+
+  complaint: {
+    category: "स्वास्थ्य सहायता",
+    details: "बुजुर्ग को चलने में कठिनाई हो रही है...",
+  },
+
+  fro: {
+    name: "Priya Singh",
+    code: "FRO-002",
+    status: "Working",
+    avatar: "https://randomuser.me/api/portraits/women/45.jpg",
+  },
+
+  location: {
+    address:
+      "123, Ameerpur, Sector 5, Agra, Uttar Pradesh - 400001",
+  },
+
+  timeline: {
+    completedSteps: 3,
+    steps: [
+      { titleKey: "registered", time: "10:30 AM" },
+      { titleKey: "assigned", time: "10:45 AM" },
+      { titleKey: "approved" },
+      { titleKey: "onway" },
+      { titleKey: "arrived" },
+      { titleKey: "working" },
+    ],
+  },
+};
 
 export default function CaseDetailScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
 
-  const ticketNo = "TKT-14567-001";
+  /* ✅ GET ASSIGNED STATUS FROM NAVIGATION */
+  const { assigned } = useLocalSearchParams();
+  const isAssigned = assigned === "yes";
 
-  const steps = [
-    { title: t("caseDetail.steps.registered"), time: "10:30 AM" },
-    { title: t("caseDetail.steps.assigned"), time: "10:45 AM" },
-    { title: t("caseDetail.steps.approved") },
-    { title: t("caseDetail.steps.onway") },
-    { title: t("caseDetail.steps.arrived") },
-    { title: t("caseDetail.steps.working") },
-  ];
+  const { user, complaint, fro, location, timeline, ticketNo } =
+    caseDetailData;
 
-  const completedSteps = 3;
+  const completedSteps = timeline.completedSteps;
   const animatedProgress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(animatedProgress, {
       toValue: completedSteps,
-      duration: 4800,
-      delay: 800,
+      duration: 1200,
       easing: Easing.out(Easing.exp),
       useNativeDriver: false,
     }).start();
@@ -47,7 +89,7 @@ export default function CaseDetailScreen() {
       type="screen"
       screenName={t("caseDetail.screenTitle", { ticket: ticketNo })}
     >
-      {/* ✅ TOP PROFILE CARD */}
+      {/* ✅ PROFILE CARD */}
       <View
         style={[
           styles.profileCard,
@@ -56,116 +98,153 @@ export default function CaseDetailScreen() {
       >
         <View style={styles.profileTopRow}>
           <View style={styles.profileLeftRow}>
-            <Image
-              source={{ uri: "https://randomuser.me/api/portraits/men/75.jpg" }}
-              style={styles.profileAvatar}
-            />
-            <View>
-              <Text style={[styles.profileName,{color:theme.colors.inputBg}]}>Ram Prasad Sharma</Text>
-              <Text style={[styles.profileSub,{color:theme.colors.inputBg}]}>72 Years • Male</Text>
-              <Text style={[styles.profileSub,{color:theme.colors.inputBg}]}>
-                Ameerpur, Agra, UP • {ticketNo}
+            <Image source={{ uri: user.avatar }} style={styles.profileAvatar} />
+            <View style={{ maxWidth: width * 0.55 }}>
+              <Text style={[styles.profileName, { color: theme.colors.inputBg }]}>
+                {user.name}
+              </Text>
+              <Text style={[styles.profileSub, { color: theme.colors.inputBg }]}>
+                {user.age} Years • {user.gender}
+              </Text>
+              <Text numberOfLines={1} style={[styles.profileSub, { color: theme.colors.inputBg }]}>
+                {user.address} • {ticketNo}
               </Text>
             </View>
           </View>
 
-          <TouchableOpacity style={[styles.callBtn,{backgroundColor:theme.colors.colorBgSurface}]}>
+          <TouchableOpacity
+            style={[
+              styles.callBtn,
+              { backgroundColor: theme.colors.colorBgSurface },
+            ]}
+          >
             <RemixIcon name="phone-line" size={22} color="#0F766E" />
           </TouchableOpacity>
         </View>
 
         <View style={styles.profileBottomRow}>
           <View>
-            <Text style={[styles.profileLabel,{color:theme.colors.inputBg}]}>Phone No.:</Text>
-            <Text style={[styles.profileValue,{color:theme.colors.inputBg}]}>+91-9453416629</Text>
+            <Text style={[styles.profileLabel, { color: theme.colors.inputBg }]}>Phone No.:</Text>
+            <Text style={[styles.profileValue, { color: theme.colors.inputBg }]}>{user.phone}</Text>
           </View>
 
           <View>
-            <Text style={[styles.profileLabel,{color:theme.colors.inputBg}]}>Emergency Contact:</Text>
-            <Text style={[styles.profileValue,{color:theme.colors.inputBg}]}>+91-9876543210</Text>
+            <Text style={[styles.profileLabel, { color: theme.colors.inputBg }]}>Emergency Contact:</Text>
+            <Text style={[styles.profileValue, { color: theme.colors.inputBg }]}>{user.emergencyPhone}</Text>
           </View>
         </View>
       </View>
 
-
-    
-
       {/* ✅ COMPLAINT INFO */}
       <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
+        <Text style={[styles.cardTitle,{ color: theme.colors.colorPrimary600 }]}>
           {t("caseDetail.complaintInfo")}
         </Text>
 
-        <Text style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}>
+        <Text style={[styles.labelKey,{ color: theme.colors.colorTextSecondary }]}>
           {t("caseDetail.category")}:
         </Text>
-        <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
-          स्वास्थ्य सहायता
+        <Text style={[styles.labelValue,{ color: theme.colors.colorTextSecondary }]}>
+          {complaint.category}
         </Text>
 
-        <Text style={[styles.labelKey, { marginTop: 12, color: theme.colors.colorTextSecondary }]}>
+        <Text style={[styles.labelKey,styles.mt12,{ color: theme.colors.colorTextSecondary }]}>
           {t("caseDetail.details")}:
         </Text>
-        <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
-          बुजुर्ग को चलने में कठिनाई हो रही है...
+        <Text style={[styles.labelValue,{ color: theme.colors.colorTextSecondary }]}>
+          {complaint.details}
         </Text>
 
-        <Text style={[styles.labelKey, { marginTop: 12, color: theme.colors.colorTextSecondary }]}>
+        <Text style={[styles.labelKey,styles.mt12,{ color: theme.colors.colorTextSecondary }]}>
           {t("caseDetail.attachments")}:
         </Text>
 
-        <View style={[styles.attachmentBox, { backgroundColor: theme.colors.colorBgSurface }]}>
-          <RemixIcon name="image-line" size={32} color="#888" />
+        <View style={[styles.attachmentBox,{ backgroundColor: theme.colors.colorPrimary50 }]}>
+          <RemixIcon name="image-line" size={32} color={theme.colors.colorPrimary600} />
         </View>
       </View>
 
-      {/* ✅ LOCATION */}
-      <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
-          {t("caseDetail.location")}
-        </Text>
-
-        <View style={styles.keyValueRow}>
-          <Text style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}>
-            {t("caseDetail.address")}:
-          </Text>
-          <Text style={[styles.labelValue, { color: theme.colors.colorTextSecondary }]}>
-            123, गांधी नगर, मुंबई - 400001
-          </Text>
-        </View>
-
-        <View style={[styles.mapBox, { backgroundColor: theme.colors.colorBgSurface }]}>
-          <RemixIcon name="map-pin-line" size={36} color="#999" />
-        </View>
-
+      {/* ✅ ASSIGN BUTTON ONLY IF NOT ASSIGNED */}
+      {!isAssigned && (
         <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.navBtn}
-          onPress={() => router.push("/StartNavigationScreen")}
+          style={[styles.assignBtn,{ backgroundColor: theme.colors.btnPrimaryBg }]}
+          onPress={() => router.push("/assignScreen")}
         >
-          <Text style={styles.navBtnText}>{t("caseDetail.startNavigation")}</Text>
+          <Text style={styles.assignText}>Assign to FRO</Text>
         </TouchableOpacity>
-      </View>
+      )}
+
+      {/* ✅ ASSIGNED TO (ONLY IF ASSIGNED) */}
+      {isAssigned && (
+        <>
+          <Text style={[theme.typography.fontBody,styles.mt20,{ color: theme.colors.colorPrimary600 }]}>
+            Assigned to
+          </Text>
+
+          <View style={[styles.froCard,{ backgroundColor: theme.colors.colorPrimary600 }]}>
+            <View style={styles.froTopRow}>
+              <View style={styles.froLeftRow}>
+                <Image source={{ uri: fro.avatar }} style={styles.froAvatar} />
+                <View>
+                  <Text style={[styles.froName,{ color: theme.colors.inputBg }]}>{fro.name}</Text>
+                  <Text style={[styles.froCode,{ color: theme.colors.inputBg }]}>{fro.code}</Text>
+                </View>
+              </View>
+
+              <View style={styles.statusBadge}>
+                <Text style={[theme.typography.fontBadge,{ color: theme.colors.colorPrimary600 }]}>
+                  {fro.status}
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.callFullBtn}>
+              <RemixIcon name="phone-line" size={20} color="#0F766E" />
+              <Text style={styles.callFullBtnText}>Call</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+
+      {/* ✅ FRO LOCATION ONLY IF ASSIGNED */}
+      {isAssigned && (
+        <View style={[styles.mapContainer,{ backgroundColor: theme.colors.colorBgPage }]}>
+          <Text style={[theme.typography.fontBody,{ color: theme.colors.colorPrimary600 }]}>
+            {"Fro's Location"}
+          </Text>
+
+          <Text style={[styles.mapText,{ color: theme.colors.colorTextSecondary }]}>
+            Live Location:
+          </Text>
+
+          <Text style={[styles.mapText,{ color: theme.colors.colorTextSecondary }]}>
+            {location.address}
+          </Text>
+
+          <View style={styles.mapCard}>
+            <Text style={styles.mapPlaceholder}>[ Map View Here ]</Text>
+          </View>
+
+          <TouchableOpacity style={styles.callButton}>
+            <RemixIcon name="map-pin-line" size={18} color="#fff" />
+            <Text style={styles.callButtonText}>Open In Map</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* ✅ TIMELINE */}
-      <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
+      <View style={[styles.card,{ backgroundColor: theme.colors.colorBgPage }]}>
+        <Text style={[styles.cardTitle,{ color: theme.colors.colorPrimary600 }]}>
           {t("caseDetail.timeline")}
         </Text>
 
         <View style={styles.timelineContainer}>
-          {steps.map((item, index) => {
-            const isLast = index === steps.length - 1;
+          {timeline.steps.map((item, index) => {
+            const isLast = index === timeline.steps.length - 1;
 
             const lineProgress = animatedProgress.interpolate({
               inputRange: [index, index + 1],
               outputRange: ["0%", "100%"],
-              extrapolate: "clamp",
-            });
-
-            const dotActive = animatedProgress.interpolate({
-              inputRange: [index - 0.5, index, index + 0.5],
-              outputRange: [0, 1, 1],
               extrapolate: "clamp",
             });
 
@@ -176,10 +255,10 @@ export default function CaseDetailScreen() {
                     style={[
                       styles.dot,
                       {
-                        backgroundColor: dotActive.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ["#D8D8D8", theme.colors.colorPrimary600],
-                        }),
+                        backgroundColor:
+                          index < completedSteps
+                            ? theme.colors.colorPrimary600
+                            : "#D8D8D8",
                       },
                     ]}
                   />
@@ -211,16 +290,11 @@ export default function CaseDetailScreen() {
                       },
                     ]}
                   >
-                    {item.title}
+                    {t(`caseDetail.steps.${item.titleKey}`)}
                   </Text>
 
                   {item.time && (
-                    <Text
-                      style={[
-                        styles.progressTime,
-                        { color: theme.colors.colorTextSecondary },
-                      ]}
-                    >
+                    <Text style={[styles.progressTime,{ color: theme.colors.colorTextSecondary }]}>
                       {item.time}
                     </Text>
                   )}
@@ -230,133 +304,44 @@ export default function CaseDetailScreen() {
           })}
         </View>
       </View>
-
-      {/* ✅ ACTIONS */}
-      <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
-          {t("caseDetail.actions")}
-        </Text>
-
-        {[
-          t("caseDetail.updateStatus"),
-          t("caseDetail.addPhoto"),
-          t("caseDetail.addNote"),
-          t("caseDetail.addVoice"),
-          t("caseDetail.scheduleFollowup"),
-        ].map((label, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.actionBtn,
-              { borderColor: theme.colors.colorPrimary600 },
-            ]}
-          >
-            <Text
-              style={[
-                styles.actionBtnText,
-                { color: theme.colors.colorPrimary600 },
-              ]}
-            >
-              {label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-
-        <TouchableOpacity
-          style={[styles.closeBtn, { backgroundColor: theme.colors.colorAccent500 }]}
-        >
-          <Text style={[styles.closeBtnText, { color: theme.colors.colorBgPage }]}>
-            {t("caseDetail.closeCase")}
-          </Text>
-        </TouchableOpacity>
-      </View>
     </BodyLayout>
   );
 }
 
-/* ✅✅✅ STYLES ✅✅✅ */
+/* ✅ STYLES */
 const styles = StyleSheet.create({
-  /* TOP PROFILE */
-  profileCard: {
-    borderRadius: 14,
-    padding: 16,
-    
-  },
-  profileTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  profileLeftRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  profileAvatar: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    marginRight: 12,
-  },
-  profileName: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  profileSub: {
-    color: "#D1FAE5",
-    fontSize: 12,
-    marginTop: 2,
-  },
-  callBtn: {
-    backgroundColor: "#ECFEFF",
-    padding: 10,
-    borderRadius: 999,
-  },
+  mt12: { marginTop: 12 },
+  mt20: { marginTop: 20 },
+
+  profileCard: { borderRadius: 14, padding: 16 },
+  profileTopRow: { flexDirection: "row", justifyContent: "space-between" },
+  profileLeftRow: { flexDirection: "row", alignItems: "center" },
+  profileAvatar: { width: 54, height: 54, borderRadius: 27, marginRight: 12 },
+  profileName: { fontSize: 16, fontWeight: "800" },
+  profileSub: { fontSize: 12, marginTop: 2 },
+
+  callBtn: { padding: 20, borderRadius: 99 },
+
   profileBottomRow: {
     marginTop: 14,
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  profileLabel: {
-    color: "#D1FAE5",
-    fontSize: 12,
-  },
-  profileValue: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-    marginTop: 2,
-  },
 
-  /* COMMON */
+  profileLabel: { fontSize: 12 },
+  profileValue: { fontSize: 14, fontWeight: "700", marginTop: 2 },
+
   card: {
     marginTop: 14,
     padding: 18,
     borderRadius: 12,
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
     elevation: 3,
   },
+
   cardTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
 
-  keyValueRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 6,
-    flexWrap: "wrap",
-  },
-  labelKey: { width: 130, fontSize: 14, fontWeight: "500" },
-  labelValue: { fontSize: 14, fontWeight: "600", flexShrink: 1 },
-
-  row: { flexDirection: "row", alignItems: "center" },
-
-  avatarBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  labelKey: { fontSize: 14, fontWeight: "500" },
+  labelValue: { fontSize: 14, fontWeight: "600" },
 
   attachmentBox: {
     height: 70,
@@ -366,34 +351,69 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  mapBox: {
-    height: 120,
-    borderRadius: 10,
-    marginTop: 10,
+  froCard: { marginTop: 14, borderRadius: 14, padding: 16 },
+  froTopRow: { flexDirection: "row", justifyContent: "space-between" },
+  froLeftRow: { flexDirection: "row", alignItems: "center" },
+  froAvatar: { width: 46, height: 46, borderRadius: 23, marginRight: 10 },
+
+  froName: { fontSize: 15, fontWeight: "800" },
+  froCode: { fontSize: 12, marginTop: 2 },
+
+  statusBadge: {
+    backgroundColor: "#ECFEFF",
+    paddingHorizontal: 20,
+    borderRadius: 18,
     justifyContent: "center",
-    alignItems: "center",
   },
 
-  navBtn: {
-    marginTop: 12,
-    backgroundColor: "#027A61",
+  callFullBtn: {
+    marginTop: 14,
+    backgroundColor: "#ECFEFF",
+    flexDirection: "row",
+    justifyContent: "center",
     paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
+    borderRadius: 10,
+    gap: 8,
   },
-  navBtnText: { color: "#fff", fontSize: 15, fontWeight: "600" },
 
-  /* TIMELINE */
+  callFullBtnText: { color: "#027A61", fontSize: 15, fontWeight: "700" },
+
+  mapContainer: { marginTop: 14, padding: 18, borderRadius: 12, elevation: 3 },
+
+  mapText: { marginTop: 8 },
+
+  mapCard: {
+    marginTop: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#0f766e",
+    backgroundColor: "#e2e8f0",
+  },
+
+  mapPlaceholder: {
+    height: 200,
+    textAlign: "center",
+    textAlignVertical: "center",
+    color: "#475569",
+  },
+
+  callButton: {
+    marginTop: 12,
+    backgroundColor: "#0f766e",
+    flexDirection: "row",
+    justifyContent: "center",
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+
+  callButtonText: { color: "#fff", fontWeight: "600" },
+
   timelineContainer: { marginTop: 4 },
   progressRow: { flexDirection: "row", minHeight: 55 },
   progressLeft: { width: 30, alignItems: "center" },
 
-  dot: {
-    width: 20,
-    height: 20,
-    borderRadius: 20,
-    backgroundColor: "#D8D8D8",
-  },
+  dot: { width: 20, height: 20, borderRadius: 20 },
 
   lineContainer: {
     width: 2,
@@ -402,27 +422,23 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginTop: -2,
   },
+
   lineFill: { height: "100%", width: "0%" },
 
   progressContent: { paddingLeft: 10, paddingBottom: 10, flex: 1 },
   progressTitle: { fontSize: 14, fontWeight: "600" },
   progressTime: { fontSize: 12, marginTop: 2 },
 
-  /* ACTION BUTTONS */
-  actionBtn: {
-    borderWidth: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 10,
-    alignItems: "center",
-  },
-  actionBtnText: { fontSize: 15, fontWeight: "600" },
-
-  closeBtn: {
-    paddingVertical: 14,
-    borderRadius: 8,
+  assignBtn: {
     marginTop: 14,
+    padding: 14,
+    borderRadius: 12,
     alignItems: "center",
   },
-  closeBtnText: { fontSize: 15, fontWeight: "700" },
+
+  assignText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 15,
+  },
 });

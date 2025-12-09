@@ -129,7 +129,6 @@ export default function CasesScreen() {
 
   return (
     <BodyLayout type="screen" screenName={t("cases.screenTitle")}>
-
       {/* FILTER TABS */}
       <ScrollView
         ref={scrollRef}
@@ -140,7 +139,9 @@ export default function CasesScreen() {
         {tabs.map((tab, index) => (
           <TouchableOpacity
             key={index}
-            ref={(el) => (tabRefs.current[index] = el)}
+            ref={(el) => {
+              tabRefs.current[index] = el;
+            }}
             onPress={() => setActiveTab(index)}
             activeOpacity={0.8}
             style={[
@@ -197,15 +198,30 @@ export default function CasesScreen() {
               </View>
             </View>
 
-            <Text style={[styles.cardText, { color: theme.colors.colorTextSecondary }]}>
+            <Text
+              style={[
+                styles.cardText,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
               {t("cases.age")}: {item.age}
             </Text>
 
-            <Text style={[styles.cardText, { color: theme.colors.colorTextSecondary }]}>
+            <Text
+              style={[
+                styles.cardText,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
               {t("cases.category")}: {item.category}
             </Text>
 
-            <Text style={[styles.cardText, { color: theme.colors.colorTextSecondary }]}>
+            <Text
+              style={[
+                styles.cardText,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
               {t("cases.ticket")}: {item.ticket}
             </Text>
 
@@ -217,7 +233,10 @@ export default function CasesScreen() {
                   color={theme.colors.colorTextSecondary}
                 />
                 <Text
-                  style={[styles.metaText, { color: theme.colors.colorTextSecondary }]}
+                  style={[
+                    styles.metaText,
+                    { color: theme.colors.colorTextSecondary },
+                  ]}
                 >
                   {item.distance} {t("cases.away")}
                 </Text>
@@ -230,7 +249,10 @@ export default function CasesScreen() {
                   color={theme.colors.colorTextSecondary}
                 />
                 <Text
-                  style={[styles.metaText, { color: theme.colors.colorTextSecondary }]}
+                  style={[
+                    styles.metaText,
+                    { color: theme.colors.colorTextSecondary },
+                  ]}
                 >
                   {item.time}
                 </Text>

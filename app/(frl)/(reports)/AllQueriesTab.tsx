@@ -1,11 +1,11 @@
 import { useTheme } from "@/theme/ThemeContext";
-import React from "react";
+import React, { useMemo } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
@@ -26,7 +26,8 @@ const allQueriesData = [
     by: "Amit Verma (FRO-003)",
     status: "Pending",
     question: "Nearest NGO for legal aid support?",
-  }, {
+  },
+  {
     id: 3,
     time: "30 mins ago",
     by: "Gautam Rana (FRO-003)",
@@ -38,12 +39,22 @@ const allQueriesData = [
   },
 ];
 
-export default function AllQueriesTab() {
+// ✅ ACCEPT SEARCH PROP (ONLY LOGIC ADDED)
+export default function AllQueriesTab({ search = "" }) {
   const { theme } = useTheme();
+
+  // ✅ FILTER LOGIC (ONLY LOGIC ADDED)
+  const filteredData = useMemo(() => {
+    if (!search.trim()) return allQueriesData;
+
+    return allQueriesData.filter((item) =>
+      item.question.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
 
   return (
     <FlatList
-      data={allQueriesData}
+      data={filteredData}   
       keyExtractor={(item) => item.id.toString()}
       showsVerticalScrollIndicator={false}
       renderItem={({ item }) => (
@@ -107,12 +118,19 @@ export default function AllQueriesTab() {
                   size={16}
                   color={theme.colors.validationSuccessText}
                 />
-                <Text style={ [{color:theme.colors.validationSuccessText}]}>
+                <Text style={[{ color: theme.colors.validationSuccessText }]}>
                   Answer by {item.answerBy} • {item.answerTime}
                 </Text>
               </View>
 
-              <Text style={[styles.answerText,{color:theme.colors.colorTextSecondary}]}>{item.answer}</Text>
+              <Text
+                style={[
+                  styles.answerText,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                {item.answer}
+              </Text>
             </View>
           ) : (
             <TouchableOpacity

@@ -1,43 +1,17 @@
+import BodyLayout from "@/components/layout/BodyLayout";
 import React from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
 export default function LiveFROTracking() {
   return (
-    <View style={styles.container}>
-      {/* HEADER */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity>
-            <RemixIcon name="arrow-left-line" size={22} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Live FRO Tracking</Text>
-        </View>
-        
-        
 
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconCircle}>
-            <RemixIcon name="notification-3-line" size={18} color="#0f766e" />
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>3</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.iconCircle}>
-            <RemixIcon name="alert-line" size={18} color="#0f766e" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* LIVE LOCATION INFO */}
+        <BodyLayout type="screen" screenName="Live Tracking">
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Live Location Details</Text>
           <Text style={styles.sectionDesc}>
@@ -46,7 +20,7 @@ export default function LiveFROTracking() {
           </Text>
         </View>
 
-        {/* MAP PLACEHOLDER */}
+        
         <View style={styles.mapCard}>
           <View style={styles.legendBox}>
             <View style={styles.legendRow}>
@@ -80,7 +54,7 @@ export default function LiveFROTracking() {
           </View>
         </View>
 
-        {/* ACTIVE FRO LIST */}
+      
         <Text style={styles.listTitle}>Active FROs List</Text>
 
         <FROCard
@@ -118,8 +92,8 @@ export default function LiveFROTracking() {
           caseText=""
           updated="Just Now"
         />
-      </ScrollView>
-    </View>
+        </BodyLayout>
+   
   );
 }
 
