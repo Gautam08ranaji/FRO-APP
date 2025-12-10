@@ -1,8 +1,10 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
+import { router } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import {
   LayoutChangeEvent,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,11 +13,9 @@ import {
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
-/* ✅ STRONGLY TYPED FILTERS */
 const FILTERS = ["All Alerts", "Urgent", "Case Alerts", "FRO Alerts"] as const;
 type FilterType = (typeof FILTERS)[number];
 
-/* ✅ ALERT TYPE */
 type AlertType = {
   id: number;
   title: string;
@@ -25,6 +25,7 @@ type AlertType = {
   location?: string;
   caseId: string;
   actionText: string;
+  contactNumber?: string; // ✅ ADDED
   type: "danger" | "warning" | "info";
   outline?: boolean;
   category: "Case Alerts" | "FRO Alerts";
@@ -42,6 +43,7 @@ const ALERTS_DATA: AlertType[] = [
     location: "Hazratganj, Lucknow",
     caseId: "Case TKT-14567-001",
     actionText: "Assign to FRO",
+    contactNumber: "9876543210",
     type: "danger",
     category: "Case Alerts",
   },
@@ -54,6 +56,7 @@ const ALERTS_DATA: AlertType[] = [
     time: "15 min ago",
     caseId: "FRO ID: FRO-003",
     actionText: "View FRO Profile",
+    contactNumber: "9123456780",
     type: "danger",
     category: "FRO Alerts",
   },
@@ -61,12 +64,12 @@ const ALERTS_DATA: AlertType[] = [
     id: 3,
     title: "TAT Breach Warning",
     badge: "Medium",
-    description:
-      "Case TKT-14567-015 approaching SLA deadline in 10 minutes",
+    description: "Case TKT-14567-015 approaching SLA deadline in 10 minutes",
     time: "5 min ago",
     location: "Ghazipur, Lucknow",
     caseId: "Case: TKT-14567-015",
     actionText: "Assign Now",
+    contactNumber: "9988776655",
     type: "warning",
     category: "Case Alerts",
   },
@@ -74,11 +77,11 @@ const ALERTS_DATA: AlertType[] = [
     id: 4,
     title: "Case Successfully Resolved",
     badge: "Low",
-    description:
-      "Priya Singh (FRO-002) marked case TKT-14567-024 as resolved",
+    description: "Priya Singh (FRO-002) marked case TKT-14567-024 as resolved",
     time: "10 min ago",
     caseId: "Case: TKT-14567-024",
     actionText: "Mark as Read",
+    contactNumber: "9000011111",
     type: "info",
     outline: true,
     category: "Case Alerts",
@@ -94,18 +97,17 @@ export default function AlertsScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const tabLayouts = useRef<Record<FilterType, number>>({} as any);
 
-  /* ✅ TYPE-SAFE COUNTS */
   const counts: Record<FilterType, number> = useMemo(() => {
     return {
       "All Alerts": ALERTS_DATA.length,
       Urgent: ALERTS_DATA.filter((i) => i.badge === "High").length,
       "Case Alerts": ALERTS_DATA.filter((i) => i.category === "Case Alerts")
         .length,
-      "FRO Alerts": ALERTS_DATA.filter((i) => i.category === "FRO Alerts").length,
+      "FRO Alerts": ALERTS_DATA.filter((i) => i.category === "FRO Alerts")
+        .length,
     };
   }, []);
 
-  /* ✅ FILTER LOGIC */
   const filteredAlerts = useMemo(() => {
     switch (activeTab) {
       case "Urgent":
@@ -121,7 +123,6 @@ export default function AlertsScreen() {
 
   const handleTabPress = (tab: FilterType) => {
     setActiveTab(tab);
-
     const x = tabLayouts.current[tab];
     if (x !== undefined) {
       scrollRef.current?.scrollTo({ x: Math.max(x - 40, 0), animated: true });
@@ -130,7 +131,6 @@ export default function AlertsScreen() {
 
   return (
     <BodyLayout type="screen" screenName="Alerts">
-      {/* ✅ FILTER TABS WITH AUTO SCROLL */}
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -199,7 +199,6 @@ export default function AlertsScreen() {
         })}
       </ScrollView>
 
-      {/* ✅ ALERT LIST */}
       {filteredAlerts.map((alert) => (
         <AlertCard key={alert.id} {...alert} />
       ))}
@@ -217,6 +216,7 @@ const AlertCard = ({
   location,
   caseId,
   actionText,
+  contactNumber,
   type,
   outline = false,
 }: AlertType) => {
@@ -277,18 +277,40 @@ const AlertCard = ({
               borderColor: "#64748b",
             },
           ]}
+          onPress={() => {
+            if (actionText === "Assign to FRO" || actionText === "Assign Now") {
+              router.push("/assignScreen");
+              return;
+            }
+
+            if (actionText === "View FRO Profile") {
+              console.log("view profile");
+              return;
+            }
+
+            if (actionText === "Mark as Read") {
+              console.log("✅ Marked as read for:", caseId);
+              return;
+            }
+          }}
         >
-          <Text
-            style={[
-              styles.mainBtnText,
-              outline && { color: "#475569" },
-            ]}
-          >
+          <Text style={[styles.mainBtnText, outline && { color: "#475569" }]}>
             {actionText}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.callIcon}>
+        {/* ✅ REAL PHONE CALL USING LINKING */}
+        <TouchableOpacity
+          style={styles.callIcon}
+          onPress={() => {
+            if (!contactNumber) {
+              console.log("❌ No contact number available");
+              return;
+            }
+
+            Linking.openURL(`tel:${contactNumber}`);
+          }}
+        >
           <RemixIcon name="phone-line" size={18} color="#0f766e" />
         </TouchableOpacity>
       </View>
@@ -296,7 +318,6 @@ const AlertCard = ({
   );
 };
 
-/* ============================= STYLES ============================= */
 
 const styles = StyleSheet.create({
   tabsRow: { marginVertical: 8 },
@@ -305,7 +326,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingRight: 20,
   },
-
   tabPill: {
     flexDirection: "row",
     alignItems: "center",
@@ -317,13 +337,11 @@ const styles = StyleSheet.create({
     gap: 8,
     flexShrink: 0,
   },
-
   tabPillText: {
     fontSize: 14,
     fontWeight: "700",
     flexShrink: 0,
   },
-
   countCircle: {
     minWidth: 22,
     height: 22,
@@ -332,54 +350,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 6,
   },
-
   countText: {
     fontSize: 13,
     fontWeight: "800",
   },
-
   alertCard: {
     borderRadius: 14,
     padding: 14,
     marginTop: 12,
     borderWidth: 1,
   },
-
   alertHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-
   alertTitle: { fontSize: 14, fontWeight: "600" },
-
   badgePill: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 14,
   },
-
   badgeText: { color: "#fff", fontSize: 12, fontWeight: "700" },
-
   alertDesc: { fontSize: 13, marginTop: 6, color: "#475569" },
-
   metaRow: { flexDirection: "row", marginTop: 10, gap: 20 },
-
   metaItem: { flexDirection: "row", alignItems: "center", gap: 5 },
-
   metaText: { fontSize: 12, color: "#64748b" },
-
   caseBox: {
     backgroundColor: "#fff",
     padding: 10,
     borderRadius: 8,
     marginTop: 10,
   },
-
   caseText: { fontSize: 12, color: "#475569" },
-
   actionRow: { flexDirection: "row", marginTop: 12, gap: 10 },
-
   mainBtn: {
     flex: 1,
     backgroundColor: "#0f766e",
@@ -387,9 +391,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-
   mainBtnText: { color: "#fff", fontWeight: "600" },
-
   callIcon: {
     backgroundColor: "#e7f5f3",
     width: 46,

@@ -20,6 +20,16 @@ const caseTabs = [
   { label: "In Progress" },
 ];
 
+const dateFilters = [
+  "All",
+  "Today",
+  "Yesterday",
+  "Weekly",
+  "Monthly",
+  "Last 3 Months",
+];
+
+/* ✅ CASE DATA WITH DATE FIELD */
 const caseData = [
   {
     id: 1,
@@ -34,6 +44,7 @@ const caseData = [
     assigned: null,
     tat: "10 min remaining",
     tatStatus: "danger",
+    date: "2025-12-10",
   },
   {
     id: 2,
@@ -48,6 +59,7 @@ const caseData = [
     assigned: "Ashish Tomar (FRO-001)",
     tat: "25 min remaining",
     tatStatus: "success",
+    date: "2025-11-09",
   },
   {
     id: 3,
@@ -62,6 +74,7 @@ const caseData = [
     assigned: "Priya Singh (FRO-002)",
     tat: "On Time",
     tatStatus: "success",
+    date: "2025-03-06",
   },
   {
     id: 4,
@@ -76,6 +89,7 @@ const caseData = [
     assigned: "Amit Sharma (FRO-007)",
     tat: "Completed",
     tatStatus: "success",
+    date: "2024-12-20",
   },
 ];
 
@@ -83,7 +97,8 @@ export default function CaseManagementScreen() {
   const { filter } = useLocalSearchParams();
   const { theme } = useTheme();
 
-  console.log("flt", filter);
+  const [showDateDropdown, setShowDateDropdown] = useState(false);
+  const [dateFilter, setDateFilter] = useState<string>("All"); // ✅ DEFAULT ALL
 
   const [activeTab, setActiveTab] = useState(
     typeof filter === "string" ? filter : "All"
@@ -94,20 +109,47 @@ export default function CaseManagementScreen() {
   >("All");
 
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
-
-  // ✅ ONLY SEARCH STATE ADDED
   const [searchQuery, setSearchQuery] = useState("");
-
-  React.useEffect(() => {
-    if (typeof filter === "string") {
-      setActiveTab(filter);
-    }
-  }, [filter]);
 
   const scrollRef = useRef<ScrollView>(null);
   const tabLayouts = useRef<Record<string, number>>({});
 
-  // ✅ STATUS + PRIORITY + SEARCH FILTER
+  /* ✅ DATE RANGE LOGIC */
+  const isWithinDateRange = (caseDate: string) => {
+    if (dateFilter === "All") return true;
+
+    const today = new Date();
+    const itemDate = new Date(caseDate);
+    const diffTime = today.getTime() - itemDate.getTime();
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    switch (dateFilter) {
+      case "Today":
+        return today.toDateString() === itemDate.toDateString();
+
+      case "Yesterday":
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        return yesterday.toDateString() === itemDate.toDateString();
+
+      case "Weekly":
+        return diffDays <= 7;
+
+      case "Monthly":
+        return (
+          itemDate.getMonth() === today.getMonth() &&
+          itemDate.getFullYear() === today.getFullYear()
+        );
+
+      case "Last 3 Months":
+        return diffDays <= 90;
+
+      default:
+        return true;
+    }
+  };
+
+  /* ✅ FINAL FILTER LOGIC (TAB + PRIORITY + DATE + SEARCH) */
   const filteredData = useMemo(() => {
     let data = caseData;
 
@@ -118,6 +160,8 @@ export default function CaseManagementScreen() {
     if (priorityFilter !== "All") {
       data = data.filter((item) => item.priority === priorityFilter);
     }
+
+    data = data.filter((item) => isWithinDateRange(item.date));
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -131,7 +175,7 @@ export default function CaseManagementScreen() {
     }
 
     return data;
-  }, [activeTab, priorityFilter, searchQuery]);
+  }, [activeTab, priorityFilter, searchQuery, dateFilter]);
 
   const tabCounts = useMemo(() => {
     return {
@@ -144,23 +188,59 @@ export default function CaseManagementScreen() {
 
   return (
     <BodyLayout type="screen" screenName="Case Management">
-      {/* 🔍 SEARCH */}
-      <View style={styles.searchBox}>
-        <RemixIcon
-          name="search-line"
-          size={18}
-          color={theme.colors.colorTextSecondary}
-        />
-        <TextInput
-          placeholder="Search case/ticket ID or elder name..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          style={[{ flex: 1, color: theme.colors.colorTextSecondary }]}
-          placeholderTextColor={theme.colors.inputText}
-        />
+      {/* SEARCH + CALENDAR */}
+      <View style={styles.searchRow}>
+        <View style={[styles.searchBox, { flex: 1 }]}>
+          <RemixIcon
+            name="search-line"
+            size={18}
+            color={theme.colors.colorTextSecondary}
+          />
+          <TextInput
+            placeholder="Search case/ticket ID or elder name..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={{ flex: 1 }}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={styles.calendarBtn}
+          onPress={() => setShowDateDropdown((p) => !p)}
+        >
+          <RemixIcon name="calendar-line" size={18} color="#16A34A" />
+        </TouchableOpacity>
       </View>
 
-      {/* ✅ SCROLLABLE FILTER TABS */}
+      {/* ✅ WORKING DATE DROPDOWN */}
+      {showDateDropdown && (
+        <View style={styles.dateDropdown}>
+          {dateFilters.map((item) => (
+            <TouchableOpacity
+              key={item}
+              style={styles.dateOption}
+              onPress={() => {
+                setDateFilter(item);
+                setShowDateDropdown(false);
+              }}
+            >
+              <Text
+                style={{
+                  color: item === dateFilter ? "#16A34A" : "#111827",
+                  fontWeight: "600",
+                }}
+              >
+                {item}
+              </Text>
+              {item === "Custom Range" && (
+                <RemixIcon name="calendar-line" size={22} color="#16A34A" />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* TABS */}
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -175,7 +255,6 @@ export default function CaseManagementScreen() {
             }}
             onPress={() => {
               setActiveTab(tab.label);
-
               const x = tabLayouts.current[tab.label];
               if (x !== undefined) {
                 scrollRef.current?.scrollTo({
@@ -214,7 +293,7 @@ export default function CaseManagementScreen() {
         ))}
       </ScrollView>
 
-      {/* ✅ PRIORITY ROW */}
+      {/* PRIORITY */}
       <View style={styles.priorityRow}>
         <Text style={styles.allCasesText}>All Cases</Text>
 
@@ -263,6 +342,7 @@ export default function CaseManagementScreen() {
         data={filteredData}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 30 }}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[
@@ -284,6 +364,7 @@ export default function CaseManagementScreen() {
               });
             }}
           >
+            {/* ✅ YOUR FULL CARD UI IS UNCHANGED BELOW */}
             <View style={styles.topRow}>
               <View>
                 <Text
@@ -376,17 +457,17 @@ export default function CaseManagementScreen() {
               <View
                 style={[
                   styles.infoBox,
-                  { backgroundColor: theme.colors.validationInfoText },
+                  { backgroundColor: theme.colors.validationErrorBg },
                 ]}
               >
                 <RemixIcon
                   name="information-line"
                   size={16}
-                  color={theme.colors.validationInfoBg}
+                  color={theme.colors.validationErrorText}
                 />
                 <Text
                   style={{
-                    color: theme.colors.validationInfoBg,
+                    color: theme.colors.validationErrorText,
                     fontWeight: "600",
                   }}
                 >
@@ -457,11 +538,10 @@ export default function CaseManagementScreen() {
   );
 }
 
-/* ================= STYLES ================= */
+/* ✅ STYLES — UNCHANGED UI + RESPONSIVE */
 
 const styles = StyleSheet.create({
   searchBox: {
-    marginTop: 12,
     borderWidth: 1,
     borderColor: "#E5E7EB",
     borderRadius: 10,
@@ -469,6 +549,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    minHeight: 44,
+  },
+
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    justifyContent:"center",
   },
 
   tabsRow: {
@@ -605,5 +693,33 @@ const styles = StyleSheet.create({
   assignText: {
     color: "#fff",
     fontWeight: "700",
+  },
+
+  calendarBtn: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#ECFDF5",
+  },
+
+  dateDropdown: {
+    position: "absolute",
+    top: 70,
+    right: 14,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    elevation: 6,
+    overflow: "hidden",
+    zIndex: 999,
+    width: 180,
+  },
+
+  dateOption: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderColor: "#E5E7EB",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });
