@@ -1,4 +1,5 @@
 import BodyLayout from "@/components/layout/BodyLayout";
+import PunchInCard from "@/components/reusables/PunchInCard";
 import ReusableCard from "@/components/reusables/ReusableCard";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
@@ -15,10 +16,22 @@ export default function HomeScreen() {
     <BodyLayout type="dashboard">
 
       {/* Heading */}
+        <Text
+              style={[
+                theme.typography.fontH2,
+                { color: theme.colors.colorPrimary600 },
+              ]}
+            >
+              Attendance
+            </Text>
+      
+
+      <PunchInCard />
+
       <Text
         style={[
           theme.typography.fontH2,
-          { color: theme.colors.colorPrimary600 },
+          { color: theme.colors.colorPrimary600,marginTop:20 },
         ]}
       >
         {t("home.casesOverview")}

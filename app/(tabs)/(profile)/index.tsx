@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -18,10 +19,12 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [showAlert, setShowAlert] = useState(false);
 
-  // -------------------------
-  // Render Item Function
-  // -------------------------
-  const renderItem = (label: string, icon: string, onPress: () => void) => (
+  const renderItem = (
+    label: string,
+    icon: string,
+    onPress: () => void,
+    iconColor?: string
+  ) => (
     <TouchableOpacity
       onPress={onPress}
       style={[styles.item, { backgroundColor: theme.colors.colorBgPage }]}
@@ -37,9 +40,10 @@ export default function ProfileScreen() {
           <RemixIcon
             name={icon as any}
             size={26}
-            color={theme.colors.colorPrimary600}
+            color={iconColor || theme.colors.colorPrimary600}
           />
         </View>
+
         <Text
           style={[
             styles.itemText,
@@ -96,38 +100,61 @@ export default function ProfileScreen() {
         </Text>
       </View>
 
-      {/* ================= BODY ================= */}
-      <View style={styles.body}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 20 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {renderItem(
+          "Availablilty",
+          "user-settings-line",
+          () => router.push("/profileDetails"),
+          theme.colors.inputErrorBorder
+        )}
+
         {renderItem(
           t("profile.menuOfficerDetails"),
           "user-settings-line",
-          () => router.push("/profileDetails")
+          () => router.push("/profileDetails"),
+          theme.colors.validationInfoText
+        )}
+
+        {renderItem(
+          "Your Performance",
+          "bard-line",
+          () => router.push("/profileDetails"),
+          theme.colors.colorWarning400
         )}
 
         {renderItem(
           t("profile.menuWorkArea"),
           "map-pin-line",
-          () => router.push("/location")
+          () => router.push("/location"),
+          theme.colors.colorPrimary600
         )}
 
         {renderItem(
           t("profile.menuLanguage"),
           "translate-2",
-          () => router.push("/languageSelect")
+          () => router.push("/languageSelect"),
+          theme.colors.validationInfoText
         )}
 
         {renderItem(
           t("profile.menuSettings"),
           "settings-3-line",
-          () => router.push("/setting")
+          () => router.push("/setting"),
+          theme.colors.colorError400
         )}
 
         {renderItem(
           t("profile.menuChangePassword"),
           "lock-password-line",
-          () => router.push("/changePassword")
+          () => router.push("/changePassword"),
+          theme.colors.colorError600
         )}
 
+        {/* Logout */}
         <TouchableOpacity
           onPress={() => setShowAlert(true)}
           style={[
@@ -165,16 +192,13 @@ export default function ProfileScreen() {
           description={t("profile.logoutDescription")}
           confirmText={t("profile.logoutConfirm")}
           cancelText={t("profile.logoutCancel")}
-          onConfirm={() => {
-            setShowAlert(false);
-            // router.push("/(tabs)/(dashboard)/confirmLocationScreen");
-          }}
+          onConfirm={() => setShowAlert(false)}
           onCancel={() => setShowAlert(false)}
           cancelColor={theme.colors.colorBgPage}
           subtitleColor={theme.colors.colorTextSecondary}
           confirmColor={theme.colors.colorPrimary600}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -213,10 +237,6 @@ const styles = StyleSheet.create({
   role: {
     fontSize: 14,
     marginTop: 2,
-  },
-
-  body: {
-    padding: 20,
   },
 
   item: {
