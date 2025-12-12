@@ -1,65 +1,210 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
 export default function ScheduleFollowUpScreen() {
   const { theme } = useTheme();
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [notes, setNotes] = useState("");
+  const { t } = useTranslation();
+
+  // FIELDS
+  const [date, setDate] = useState<Date | null>(null);
+  const [time, setTime] = useState<Date | null>(null);
+  const [remarks, setRemarks] = useState("");
+
+  // PICKER STATES
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  // ERRORS
+  const [dateError, setDateError] = useState("");
+  const [timeError, setTimeError] = useState("");
+  const [remarksError, setRemarksError] = useState("");
+
+  const validateForm = () => {
+    let valid = true;
+
+    if (!date) {
+      setDateError("Please select a follow-up date.");
+      valid = false;
+    }
+
+    if (!time) {
+      setTimeError("Please select a follow-up time.");
+      valid = false;
+    }
+
+    if (!remarks.trim()) {
+      setRemarksError("Remarks are required.");
+      valid = false;
+    }
+
+    return valid;
+  };
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+
+    console.log("Follow-up Scheduled:", { date, time, remarks });
+  };
 
   return (
-    <BodyLayout type="screen" screenName="Schedule Follow-Up">
-      <View style={styles.container}>
-        {/* Select Date */}
-        <Text style={[styles.label, { color: theme.colors.colorTextSecondary }]}>Select Date</Text>
-        <TouchableOpacity style={[styles.inputBox, { borderColor: theme.colors.border }]}>
-          <Text style={[styles.inputText, { color: theme.colors.colorTextSecondary }]}>
-            {date || "Select date"}
+    <BodyLayout type="screen" screenName={t("caseDetail.scheduleFollowup")}>
+      <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
+
+        {/* DATE FIELD */}
+        <Text style={[styles.label, { color: theme.colors.colorTextSecondary }]}>
+          Select Follow-up Date *
+        </Text>
+
+        {dateError ? (
+          <Text style={[styles.errorText, { color: theme.colors.validationErrorText }]}>
+            {dateError}
           </Text>
-          <RemixIcon name="calendar-line" size={22} color={theme.colors.colorPrimary600} />
-        </TouchableOpacity>
+        ) : null}
 
-        {/* Select Time */}
-        <Text style={[styles.label, { color: theme.colors.colorTextSecondary }]}>Select Time</Text>
-        <TouchableOpacity style={[styles.inputBox, { borderColor: theme.colors.border }]}>
-          <Text style={[styles.inputText, { color: theme.colors.colorTextSecondary }]}>
-            {time || "Select time"}
-          </Text>
-          <RemixIcon name="time-line" size={22} color={theme.colors.colorPrimary600} />
-        </TouchableOpacity>
-
-        {/* Notes */}
-        <Text style={[styles.label, { color: theme.colors.colorTextSecondary }]}>Reason / Notes</Text>
-        <TextInput
-          style={[
-            styles.textArea,
-            { borderColor: theme.colors.border, color: theme.colors.colorTextSecondary },
-          ]}
-          placeholder="Enter reason for follow-up..."
-          placeholderTextColor={theme.colors.colorTextSecondary}
-          multiline
-          value={notes}
-          onChangeText={setNotes}
-        />
-
-        {/* Submit Button */}
         <TouchableOpacity
+          style={[styles.selector, { borderColor: theme.colors.colorPrimary600 }]}
+          onPress={() => {
+            setShowDatePicker(true);
+            setDateError("");
+          }}
+        >
+          <Text style={styles.selectorText}>
+            {date ? date.toDateString() : "Choose Date"}
+          </Text>
+
+          {/* ICON RIGHT */}
+          <RemixIcon
+            name="calendar-line"
+            size={22}
+            color={theme.colors.colorPrimary600}
+          />
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={date ?? new Date()}
+            mode="date"
+            display="calendar"
+            onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+              setShowDatePicker(false);
+              if (selectedDate) {
+                setDate(selectedDate);
+                setDateError("");
+              }
+            }}
+          />
+        )}
+
+        {/* TIME FIELD */}
+        <Text
           style={[
-            styles.submitButton,
-            { backgroundColor: theme.colors.btnDisabledBg },
+            styles.label,
+            { marginTop: 16, color: theme.colors.colorTextSecondary },
           ]}
         >
-          <Text style={[styles.submitText, { color: theme.colors.btnDisabledText }]}>
-            Set Follow-up
+          Select Follow-up Time *
+        </Text>
+
+        {timeError ? (
+          <Text style={[styles.errorText, { color: theme.colors.validationErrorText }]}>
+            {timeError}
+          </Text>
+        ) : null}
+
+        <TouchableOpacity
+          style={[styles.selector, { borderColor: theme.colors.colorPrimary600 }]}
+          onPress={() => {
+            setShowTimePicker(true);
+            setTimeError("");
+          }}
+        >
+          <Text style={styles.selectorText}>
+            {time
+              ? time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+              : "Choose Time"}
+          </Text>
+
+          {/* ICON RIGHT */}
+          <RemixIcon
+            name="time-line"
+            size={22}
+            color={theme.colors.colorPrimary600}
+          />
+        </TouchableOpacity>
+
+        {showTimePicker && (
+          <DateTimePicker
+            value={time ?? new Date()}
+            mode="time"
+            display={Platform.OS === "android" ? "spinner" : "default"}
+            onChange={(event: DateTimePickerEvent, selectedTime?: Date) => {
+              setShowTimePicker(false);
+              if (selectedTime) {
+                setTime(selectedTime);
+                setTimeError("");
+              }
+            }}
+          />
+        )}
+
+        {/* REMARKS FIELD */}
+        <Text
+          style={[
+            styles.label,
+            { marginTop: 16, color: theme.colors.colorTextSecondary },
+          ]}
+        >
+          Remarks *
+        </Text>
+
+        {remarksError ? (
+          <Text style={[styles.errorText, { color: theme.colors.validationErrorText }]}>
+            {remarksError}
+          </Text>
+        ) : null}
+
+        <TextInput
+          placeholder="Enter remarks"
+          placeholderTextColor={theme.colors.colorTextSecondary}
+          value={remarks}
+          onChangeText={(text) => {
+            setRemarks(text);
+            setRemarksError("");
+          }}
+          multiline
+          style={[
+            styles.input,
+            {
+              borderColor: theme.colors.colorPrimary600,
+              color: theme.colors.colorTextPrimary,
+            },
+          ]}
+        />
+
+        {/* SUBMIT */}
+        <TouchableOpacity
+          style={[
+            styles.submitBtn,
+            { backgroundColor: theme.colors.colorPrimary600 },
+          ]}
+          onPress={handleSubmit}
+        >
+          <Text style={[styles.submitBtnText, { color: theme.colors.colorBgPage }]}>
+            Schedule Follow-up
           </Text>
         </TouchableOpacity>
       </View>
@@ -68,48 +213,57 @@ export default function ScheduleFollowUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 10,
+  card: {
+    marginTop: 14,
+    padding: 18,
+    borderRadius: 12,
   },
 
   label: {
-    marginTop: 18,
-    marginBottom: 6,
     fontSize: 14,
+    fontWeight: "600",
+  },
+
+  errorText: {
+    marginTop: 4,
+    fontSize: 13,
     fontWeight: "500",
   },
 
-  inputBox: {
+  selector: {
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 14,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginTop: 6,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between", // <-- ICON RIGHT
   },
 
-  inputText: {
+  selectorText: {
     fontSize: 15,
+    fontWeight: "500",
   },
 
-  textArea: {
+  input: {
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 14,
-    height: 120,
-    textAlignVertical: "top",
+    borderRadius: 8,
+    padding: 12,
+    minHeight: 80,
+    marginTop: 6,
     fontSize: 15,
   },
 
-  submitButton: {
-    marginTop: 30,
-    paddingVertical: 16,
+  submitBtn: {
+    marginTop: 20,
+    paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
   },
 
-  submitText: {
-    fontSize: 15,
-    fontWeight: "600",
+  submitBtnText: {
+    fontSize: 16,
+    fontWeight: "700",
   },
 });

@@ -22,7 +22,7 @@ export default function CasesScreen() {
 
   // ---------------------- i18n Tabs ----------------------
   const tabs = [
-    { label: t("cases.tabAll"), key: "all" }, // NEW TAB
+    { label: "All", key: "all" }, // NEW TAB
     { label: t("cases.tabNew"), key: "new" },
     { label: t("cases.tabApproved"), key: "approved" },
     { label: t("cases.tabOnWay"), key: "onway" },
