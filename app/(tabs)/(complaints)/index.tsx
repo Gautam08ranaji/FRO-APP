@@ -22,6 +22,7 @@ export default function CasesScreen() {
 
   // ---------------------- i18n Tabs ----------------------
   const tabs = [
+    { label: t("cases.tabAll"), key: "all" }, // NEW TAB
     { label: t("cases.tabNew"), key: "new" },
     { label: t("cases.tabApproved"), key: "approved" },
     { label: t("cases.tabOnWay"), key: "onway" },
@@ -124,8 +125,23 @@ export default function CasesScreen() {
     },
   ];
 
+  // ---------------------- Status Badge Colors ----------------------
+  const statusColors: any = {
+    new: "#E53935", // red
+    approved: "#6D4C41", // brown / grey
+    onway: "#1E88E5", // blue
+    working: "#FDD835", // yellow
+    followup: "#FB8C00", // orange
+    closed: "#43A047", // green
+  };
+
+  // ---------------------- Filter Logic ----------------------
   const selectedFilterKey = tabs[activeTab].key;
-  const filteredData = data.filter((item) => item.status === selectedFilterKey);
+
+  const filteredData =
+    selectedFilterKey === "all"
+      ? data
+      : data.filter((item) => item.status === selectedFilterKey);
 
   return (
     <BodyLayout type="screen" screenName={t("cases.screenTitle")}>
@@ -184,10 +200,11 @@ export default function CasesScreen() {
                 {item.name}
               </Text>
 
+              {/* STATUS BADGE WITH COLORS */}
               <View
                 style={[
                   styles.tagBadge,
-                  { backgroundColor: theme.colors.validationInfoText },
+                  { backgroundColor: statusColors[item.status] },
                 ]}
               >
                 <Text

@@ -1,6 +1,5 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
-import { router } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -85,7 +84,6 @@ export default function StartNavigationScreen() {
       {/* OPEN GOOGLE MAPS */}
       <TouchableOpacity
         style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
-        onPress={() => router.push("/StatusUpdateScreen")}
       >
         <RemixIcon
           name={"navigation-fill" as IconName}

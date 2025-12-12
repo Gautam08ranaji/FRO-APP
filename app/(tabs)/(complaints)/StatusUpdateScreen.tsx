@@ -164,7 +164,7 @@ export default function StatusUpdateScreen() {
               />
             </View>
 
-            <Text style={[styles.title, { color: colors.colorError400 }]}>
+            <Text style={[styles.title, { color: colors.colorPrimary600 }]}>
               {t("statusUpdate.step3Title")}
             </Text>
 
@@ -220,7 +220,7 @@ export default function StatusUpdateScreen() {
             </TouchableOpacity>
 
             <ReusableButton
-              title={t("statusUpdate.step4No")}
+              title={"Call Durgesh"}
               containerStyle={{
                 width: "100%",
                 backgroundColor: colors.colorBgSurface,
@@ -300,7 +300,9 @@ export default function StatusUpdateScreen() {
             <ReusableButton
               title={t("statusUpdate.saveAndUpdate")}
               containerStyle={{ width: "100%" }}
-              onPress={() => setStep(1)}
+              onPress={() => {
+                router.push('/(tabs)/(complaints)')
+              }}
             />
           </View>
         )}
