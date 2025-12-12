@@ -160,7 +160,7 @@ export default function OnboardingSteps() {
             styles.fullBtn,
             { backgroundColor: theme.colors.colorPrimary600 }
           ]}
-          onPress={() => router.push("/(tabs)/(dashboard)")}
+          onPress={() => router.push("/(fro)/(dashboard)")}
         >
           <Text
             style={[

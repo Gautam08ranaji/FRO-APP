@@ -170,7 +170,7 @@ export default function UpdateTodayReportScreen() {
       <TouchableOpacity
         style={[styles.submitBtn, { backgroundColor: theme.colors.colorPrimary600 }]}
         onPress={()=>{
-            router.push('/(tabs)/(dashboard)')
+            router.push('/(fro)/(dashboard)')
         }}
       >
         <Text style={styles.submitText}>{t("Submit Report")}</Text>

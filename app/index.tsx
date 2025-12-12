@@ -17,7 +17,7 @@ export default function Index() {
       const user = JSON.parse(userData);
 
       if (user.role === "FRO") {
-        router.replace("/(tabs)/(dashboard)");
+        router.replace("/(fro)/(dashboard)");
       } else {
         router.replace("/(frl)/(dashboard)");
       }

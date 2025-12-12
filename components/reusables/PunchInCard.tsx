@@ -50,7 +50,7 @@ export default function PunchInCard() {
 
   const handlePunchOut = () => {
     // setIsPunchedIn(false);
-    router.push('/(tabs)/(dashboard)/updateReport')
+    router.push('/(fro)/(dashboard)/updateReport')
   };
 
   return (

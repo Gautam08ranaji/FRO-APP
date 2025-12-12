@@ -66,7 +66,7 @@ function ThemedStack() {
         <Stack.Screen name="(onboarding)" />
 
         {/* ✅ ROLE-BASED TAB LAYOUTS */}
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(fro)" />
         <Stack.Screen name="(frl)" />
 
         {/* ✅ MODAL */}

@@ -19,7 +19,7 @@ export default function SelectRoleScreen() {
         {/* ✅ FRO */}
         <TouchableOpacity
           style={styles.roleBox}
-          onPress={() => router.push("/(tabs)/(dashboard)")}
+          onPress={() => router.push("/(fro)/(dashboard)")}
         >
           <View style={[styles.iconCircle, { backgroundColor: "#e0f2f1" }]}>
             <RemixIcon name="user-3-line" size={26} color="#00695c" />

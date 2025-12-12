@@ -1,4 +1,4 @@
-// app/(tabs)/VoiceNoteScreen.tsx  (path as per your project)
+// app/(fro)/VoiceNoteScreen.tsx  (path as per your project)
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useAudioRecorder } from "@/hooks/AudioRecorderProvider";
 import { useTheme } from "@/theme/ThemeContext";

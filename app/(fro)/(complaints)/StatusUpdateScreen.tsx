@@ -301,7 +301,7 @@ export default function StatusUpdateScreen() {
               title={t("statusUpdate.saveAndUpdate")}
               containerStyle={{ width: "100%" }}
               onPress={() => {
-                router.push('/(tabs)/(complaints)')
+                router.push('/(fro)/(complaints)')
               }}
             />
           </View>

@@ -49,7 +49,7 @@ export default function HomeScreen() {
           titleColor={theme.colors.colorTextSecondary}
           onPress={() =>
             router.push({
-              pathname: "/(tabs)/(complaints)",
+              pathname: "/(fro)/(complaints)",
               params: { filter: "new" },
             })
           }
@@ -65,7 +65,7 @@ export default function HomeScreen() {
           titleColor={theme.colors.colorTextSecondary}
           onPress={() =>
             router.push({
-              pathname: "/(tabs)/(complaints)",
+              pathname: "/(fro)/(complaints)",
               params: { filter: "approved" },
             })
           }
@@ -84,7 +84,7 @@ export default function HomeScreen() {
           titleColor={theme.colors.colorTextSecondary}
           onPress={() =>
             router.push({
-              pathname: "/(tabs)/(complaints)",
+              pathname: "/(fro)/(complaints)",
               params: { filter: "onway" },
             })
           }
@@ -100,7 +100,7 @@ export default function HomeScreen() {
           titleColor={theme.colors.colorTextSecondary}
           onPress={() =>
             router.push({
-              pathname: "/(tabs)/(complaints)",
+              pathname: "/(fro)/(complaints)",
               params: { filter: "working" },
             })
           }
@@ -119,7 +119,7 @@ export default function HomeScreen() {
           titleColor={theme.colors.colorTextSecondary}
           onPress={() =>
             router.push({
-              pathname: "/(tabs)/(complaints)",
+              pathname: "/(fro)/(complaints)",
               params: { filter: "followup" },
             })
           }
@@ -135,7 +135,7 @@ export default function HomeScreen() {
           titleColor={theme.colors.colorTextSecondary}
           onPress={() =>
             router.push({
-              pathname: "/(tabs)/(complaints)",
+              pathname: "/(fro)/(complaints)",
               params: { filter: "closed" },
             })
           }
