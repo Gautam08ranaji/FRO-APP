@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
-// ✅ PURE STATIC JSON (NO COLORS)
+
 const knowledgeBaseData = [
   {
     id: 1,
@@ -16,6 +16,8 @@ const knowledgeBaseData = [
     title: "NGOs Supporting Elderly Care",
     subtitle: "Supportive Service",
     type: "ngo",
+
+
   },
   {
     id: 3,
@@ -31,7 +33,7 @@ const knowledgeBaseData = [
   },
 ];
 
-// ✅ UI STYLING MAP (ALL COLORS HERE)
+
 const uiMap: any = {
   health: {
     bg: "#FDECEC",
@@ -55,11 +57,11 @@ const uiMap: any = {
   },
 };
 
-// ✅ ACCEPT SEARCH PROP (ONLY LOGIC ADDED)
+
 export default function KnowledgeBaseTab({ search = "" }) {
   const { theme } = useTheme();
 
-  // ✅ FILTER LOGIC (ONLY LOGIC ADDED)
+
   const filteredData = useMemo(() => {
     if (!search.trim()) return knowledgeBaseData;
 
@@ -81,18 +83,18 @@ export default function KnowledgeBaseTab({ search = "" }) {
 
         return (
           <View style={[styles.card, { backgroundColor: ui.bg }]}>
-            {/* LEFT ICON */}
+           
             <View style={[styles.iconBox, { backgroundColor: ui.iconBg }]}>
               <RemixIcon name={ui.icon} size={20} color="#fff" />
             </View>
 
-            {/* TEXT */}
+           
             <View style={{ flex: 1 }}>
               <Text style={styles.title}>{item.title}</Text>
               <Text style={styles.subtitle}>{item.subtitle}</Text>
             </View>
 
-            {/* RIGHT ARROW */}
+            
             <RemixIcon
               name="arrow-right-up-line"
               size={20}
