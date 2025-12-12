@@ -35,12 +35,22 @@ export default function TabLayout() {
         }}
       />
 
+     
+
       <Tabs.Screen
         name="(complaints)"
         options={{
           title: 'Cases',
           tabBarIcon: ({ color }) =>
             <RemixIcon name="customer-service-line" size={28} color={color} />
+        }}
+      />
+        <Tabs.Screen
+        name="(community)"
+        options={{
+          title: 'Community',
+          tabBarIcon: ({ color }) =>
+            <RemixIcon name="team-line" size={28} color={color} />
         }}
       />
 
@@ -52,6 +62,7 @@ export default function TabLayout() {
             <RemixIcon name="article-line" size={28} color={color} />
         }}
       />
+     
 
       <Tabs.Screen
         name="(profile)"
