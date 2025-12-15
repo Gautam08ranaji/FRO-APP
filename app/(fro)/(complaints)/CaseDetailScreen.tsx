@@ -1,7 +1,8 @@
 import BodyLayout from "@/components/layout/BodyLayout";
+import RemarkActionModal from "@/components/reusables/RemarkActionModal";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Animated,
@@ -16,6 +17,7 @@ import RemixIcon from "react-native-remix-icon";
 export default function CaseDetailScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const [showModal, setShowModal] = useState(false);
 
   const ticketNo = "TKT-14567-001";
 
@@ -412,12 +414,17 @@ export default function CaseDetailScreen() {
             {
               backgroundColor: theme.colors.validationErrorBg,
               flexDirection: "row",
-              justifyContent:"center", gap:10,
-              alignItems:"center",
-              borderWidth:1,
-              borderColor:theme.colors.validationErrorText
+              justifyContent: "center",
+              gap: 10,
+              alignItems: "center",
+              borderWidth: 1,
+              borderColor: theme.colors.validationErrorText,
             },
           ]}
+
+          onPress={()=>{
+            setShowModal(true)
+          }}
         >
           <RemixIcon
             name="close-circle-line"
@@ -426,22 +433,28 @@ export default function CaseDetailScreen() {
           />
 
           <Text
-            style={[styles.closeBtnText, { color: theme.colors.validationErrorText }]}
+            style={[
+              styles.closeBtnText,
+              { color: theme.colors.validationErrorText },
+            ]}
           >
             Flag as Wrong Case
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[
             styles.closeBtn,
-            { backgroundColor: theme.colors.colorAccent500 ,
-                 flexDirection: "row",
-              justifyContent:"center", gap:10,
-              alignItems:"center"
+            {
+              backgroundColor: theme.colors.colorAccent500,
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 10,
+              alignItems: "center",
             },
           ]}
         >
-              <RemixIcon
+          <RemixIcon
             name="close-circle-line"
             size={22}
             color={theme.colors.colorBgPage}
@@ -453,6 +466,22 @@ export default function CaseDetailScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <RemarkActionModal
+      title="Reason for Marking as Incorrect"
+      subtitle="Provide details to help us understand what is wrong."
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={() => {
+            setShowModal(false)
+        }}
+        stylesOverride={{
+          // button: { backgroundColor: "#1565C0" },
+          // title: { color: "#0D47A1" },
+        }}
+      />
+
+      
     </BodyLayout>
   );
 }
