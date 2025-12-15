@@ -3,64 +3,40 @@ import React, { useMemo } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
-
 const knowledgeBaseData = [
   {
     id: 1,
-    title: "List of Government Hospitals",
-    subtitle: "Healthcare",
-    type: "health",
+    title: "Direct Support",
+    subtitle: "Abused Elderly, Missing/Homeless, Engagement Opportunities",
+    type: "Support",
   },
   {
     id: 2,
-    title: "NGOs Supporting Elderly Care",
-    subtitle: "Supportive Service",
-    type: "ngo",
-
-
-  },
-  {
-    id: 3,
-    title: "Legal Aid Services Directory",
-    subtitle: "Legal Support",
-    type: "legal",
-  },
-  {
-    id: 4,
-    title: "Emergency Contact Numbers",
-    subtitle: "Emergency",
-    type: "emergency",
+    title: "Indirect Support",
+    subtitle: "Wish Fulfilment, Charity/donation, Product, Service Needs, Other",
+    type: "Indirect",
   },
 ];
 
-
-const uiMap: any = {
-  health: {
-    bg: "#FDECEC",
-    iconBg: "#D32F2F",
-    icon: "heart-line",
-  },
-  ngo: {
-    bg: "#E3F2FD",
-    iconBg: "#1976D2",
-    icon: "team-line",
-  },
-  legal: {
-    bg: "#FFF3E0",
-    iconBg: "#FB8C00",
-    icon: "scales-3-line",
-  },
-  emergency: {
-    bg: "#E8F5E9",
-    iconBg: "#2E7D32",
-    icon: "home-5-line",
-  },
-};
-
-
-export default function KnowledgeBaseTab({ search = "" }) {
+export default function FieldInterventionTab({ search = "" }) {
   const { theme } = useTheme();
 
+  // ===============================
+  // THEME-BASED UI COLOR MAPPING
+  // ===============================
+  const uiMap: any = {
+    Support: {
+      bg: theme.colors.validationInfoBg,        // light blue bg
+      iconBg: theme.colors.validationInfoText, // deep blue icon bg
+      icon: "group-line",
+    },
+
+    Indirect: {
+      bg: theme.colors.validationWarningBg,         // light orange bg
+      iconBg: theme.colors.validationWarningText, // deep orange icon bg
+      icon: "shake-hands-line",
+    },
+  };
 
   const filteredData = useMemo(() => {
     if (!search.trim()) return knowledgeBaseData;
@@ -74,7 +50,7 @@ export default function KnowledgeBaseTab({ search = "" }) {
 
   return (
     <FlatList
-      data={filteredData}   
+      data={filteredData}
       keyExtractor={(item) => item.id.toString()}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 40 }}
@@ -83,22 +59,31 @@ export default function KnowledgeBaseTab({ search = "" }) {
 
         return (
           <View style={[styles.card, { backgroundColor: ui.bg }]}>
-           
+            {/* ICON BOX */}
             <View style={[styles.iconBox, { backgroundColor: ui.iconBg }]}>
-              <RemixIcon name={ui.icon} size={20} color="#fff" />
+              <RemixIcon name={ui.icon} size={20} color={theme.colors.colorBgSurface} />
             </View>
 
-           
+            {/* TEXTS */}
             <View style={{ flex: 1 }}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.subtitle}>{item.subtitle}</Text>
+              <Text style={[styles.title, { color: theme.colors.colorTextSecondary }]}>
+                {item.title}
+              </Text>
+              <Text
+                style={[
+                  styles.subtitle,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                {item.subtitle}
+              </Text>
             </View>
 
-            
+            {/* ARROW */}
             <RemixIcon
               name="arrow-right-up-line"
               size={20}
-              color={theme.colors.colorTextSecondary}
+              color={ui.iconBg}
             />
           </View>
         );
@@ -128,12 +113,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#111",
   },
 
   subtitle: {
     fontSize: 12,
-    color: "#666",
     marginTop: 2,
   },
 });

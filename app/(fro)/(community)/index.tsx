@@ -1,103 +1,120 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
-import RemixIcon from "react-native-remix-icon";
+import { useTranslation } from "react-i18next";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 
-import AllQueriesTab from "@/app/(frl)/(reports)/AllQueriesTab";
-import KnowledgeBaseTab from "@/app/(frl)/(reports)/KnowledgeBaseTab";
+// IMPORT ALL TAB SCREENS
+import InformationTab from "./InformationTabs";
+import EmotionalSupportTab from "./emotionalSupport";
+import FieldInterventionTab from "./fieldIntervention";
+import GuidanceTab from "./guidance";
+import SchemeTab from "./scheme";
 
-const queryTabs = ["All Queries", "Knowledge Base"];
-
-export default function CommunityScreen() {
+export default function InfoScreen() {
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState("All Queries");
+  const { t } = useTranslation();
 
-  // ✅ SEARCH STATE (NEW)
-  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState("information");
+
+  const tabs = [
+    { key: "scheme", label: t("Article") },
+    { key: "information", label: t("Information") },
+    { key: "guidance", label: t("Guidance") },
+    { key: "field_intervention", label: t("Field Intervention") },
+    { key: "emotional_support", label: t("Emotional Support") },
+  ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "information":
+        return <InformationTab />;
+      case "guidance":
+        return <GuidanceTab />;
+      case "field_intervention":
+        return <FieldInterventionTab />;
+      case "emotional_support":
+        return <EmotionalSupportTab />;
+      case "scheme":
+        return <SchemeTab />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <BodyLayout type="screen" screenName="Community & Knowledge">
-      {/* ✅ SEARCH BAR */}
-      <View
-        style={[
-          styles.searchBox,
-          { borderColor: theme.colors.inputPlaceholder },
+    <BodyLayout scrollContentStyle={{ paddingHorizontal: 0, paddingBottom: 0 }}  type="screen" screenName="Community">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.scrollTabs,
+          {
+            backgroundColor: theme.colors.colorPrimary50,
+            borderColor: theme.colors.btnPrimaryBg
+          }
         ]}
       >
-        <RemixIcon
-          name="search-line"
-          size={18}
-          color={theme.colors.colorTextSecondary}
-        />
-        <TextInput
-          placeholder="Search queries"
-          style={{ flex: 1, color: theme.colors.colorTextSecondary }}
-          placeholderTextColor={theme.colors.inputPlaceholder}
-          value={search}                    // ✅ Dynamic value
-          onChangeText={setSearch}          // ✅ Dynamic update
-        />
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.key;
+
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              onPress={() => setActiveTab(tab.key)}
+              style={[
+                styles.tab,
+                { borderColor: theme.colors.btnPrimaryBg },
+                isActive && {
+                  backgroundColor: theme.colors.primary,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  { color: theme.colors.colorPrimary600 },
+                  isActive && { color: theme.colors.btnPrimaryText },
+                ]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      {/* TAB CONTENT */}
+      <View style={{ padding: 16 }}>
+        {renderTabContent()}
       </View>
 
-      {/* ✅ TAB BUTTONS */}
-      <View style={styles.tabsRow}>
-        {queryTabs.map((tab) => (
-          <Text
-            key={tab}
-            onPress={() => setActiveTab(tab)}
-            style={[
-              styles.tab,
-              {
-                backgroundColor:
-                  activeTab === tab
-                    ? theme.colors.btnPrimaryBg
-                    : theme.colors.colorBgSurface,
-                borderColor: theme.colors.btnPrimaryBg,
-                color:
-                  activeTab === tab
-                    ? theme.colors.btnPrimaryText
-                    : theme.colors.btnPrimaryBg,
-              },
-            ]}
-          >
-            {tab}
-          </Text>
-        ))}
-      </View>
-
-      {/* ✅ TAB SCREENS (Search Passed Dynamically) */}
-      {activeTab === "All Queries" ? (
-        <AllQueriesTab search={search} />
-      ) : (
-        <KnowledgeBaseTab search={search} />
-      )}
     </BodyLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  searchBox: {
-    marginTop: 12,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
+  scrollTabs: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+    paddingTop: 6,
+    borderBottomWidth: 2
   },
-
-  tabsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 12,
-  },
-
   tab: {
-    flex: 1,
-    textAlign: "center",
     paddingVertical: 10,
-    fontWeight: "700",
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingHorizontal: 18,
+    borderRightWidth: 2
+  },
+  tabText: {
+    fontSize: 14,
+    color: "#555",
+    maxWidth: 140,
   },
 });
