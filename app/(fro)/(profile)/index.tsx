@@ -254,7 +254,7 @@ export default function ProfileScreen() {
         {renderItem(
           "Your Performance",
           "bar-chart-line",
-          () => router.push("/profileDetails"),
+          () => router.push("/(fro)/(profile)/teamOverView"),
           theme.colors.colorWarning400
         )}
 

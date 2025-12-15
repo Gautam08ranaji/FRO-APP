@@ -3,13 +3,7 @@ import ReusableCard from "@/components/reusables/ReusableCard";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React from "react";
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 
 /* ================= STATIC DATA WITH PROPER TYPES ================= */
@@ -123,301 +117,346 @@ export default function ProfileScreen() {
 
   return (
     <BodyLayout type="screen" screenName="Profile">
-     
-        <View
-          style={[
-            styles.profileCard,
-            { backgroundColor: theme.colors.colorPrimary600 },
-          ]}
-        >
-          <Image
-            source={{ uri: "https://randomuser.me/api/portraits/men/32.jpg" }}
-            style={styles.avatar}
-          />
+      <View
+        style={[
+          styles.profileCard,
+          { backgroundColor: theme.colors.colorPrimary600 },
+        ]}
+      >
+        <Image
+          source={{ uri: "https://randomuser.me/api/portraits/men/32.jpg" }}
+          style={styles.avatar}
+        />
 
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.name,{color:theme.colors.inputBg}]}>Pramod Rai</Text>
-            <Text style={[styles.role,{color:theme.colors.inputBg}]}>Field Response Leader</Text>
-            <Text style={[styles.code,{color:theme.colors.inputBg}]}>FRL-LKO-001</Text>
-
-            <View style={styles.contactRow}>
-              <Text style={[styles.contact,{color:theme.colors.inputBg}]}>+91-94534 16629</Text>
-              <Text style={[styles.contact,{color:theme.colors.inputBg}]}>pramodrai@gov.in</Text>
-            </View>
-
-            <View style={styles.zoneRow}>
-              <Text style={[styles.zoneText,{color:theme.colors.inputBg}]}>Zone{"\n"}Central Lucknow</Text>
-              <Text style={[styles.zoneText,{color:theme.colors.inputBg}]}>Since{"\n"}Jan 2023</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ================= REPORTS CTA ================= */}
-        <View
-          style={[
-            styles.reportsCard,
-            { backgroundColor: theme.colors.validationInfoBg },
-          ]}
-        >
-          <Text style={[styles.reportTitle,{color:theme.colors.validationInfoText}]}>Team Reports & Analytics</Text>
-          <Text style={[styles.reportDesc,{color:theme.colors.validationInfoText}]}>
-            You can track all of your team’s and cases reports from here
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.name, { color: theme.colors.inputBg }]}>
+            Pramod Rai
+          </Text>
+          <Text style={[styles.role, { color: theme.colors.inputBg }]}>
+            Field Response Leader
+          </Text>
+          <Text style={[styles.code, { color: theme.colors.inputBg }]}>
+            FRL-LKO-001
           </Text>
 
-          <TouchableOpacity
-            style={[
-              styles.reportBtn,
-              { backgroundColor: theme.colors.validationInfoText },
-            ]}
-
-            onPress={()=>{
-              router.push('/(frl)/(profile)/TeamOverviewScreen')
-            }}
-          >
-            <Text style={[styles.reportBtnText,{color:theme.colors.validationInfoBg}]}>See Reports</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={[styles.sectionTitle,{color:theme.colors.colorTextSecondary}]}>Leadership Statistics</Text>
-
-        <View style={styles.row}>
-   <ReusableCard
-            icon="group-line"
-            count={""}
-            title={"Team Size"}
-            subTitle={"24 FROs"}
-            subTitleColor={theme.colors.validationInfoText}
-            bg={theme.colors.colorBgPage}
-            iconBg={theme.colors.validationInfoText}
-            titleColor={theme.colors.colorTextSecondary}
-          />
-
-          <ReusableCard
-            icon="map-pin-2-line"
-            count={""}
-            title={"Zone Coverage"}
-            subTitle={"12 Areas"}
-            subTitleColor={"#FF6900"}
-            bg={theme.colors.colorBgPage}
-            iconBg={theme.colors.validationErrorText}
-            titleColor={theme.colors.colorTextSecondary}
-          />
-
-       
-        </View>
-        <View style={styles.row}>
-          <ReusableCard
-            icon="award-line"
-            count={""}
-         
-            title={"Team Rating"}
-            subTitle={"4.7/5.0"}
-            subTitleColor={"#FF6900"}
-            bg={theme.colors.colorBgPage}
-            iconBg={theme.colors.colorWarning400}
-            titleColor={theme.colors.colorTextSecondary}
-          />
-
-          <ReusableCard
-            icon="line-chart-line"
-            count={""}
-            title={"Resolution Rate"}
-            subTitle={"87%"}
-            subTitleColor={theme.colors.validationInfoText}
-            bg={theme.colors.colorBgPage}
-            iconBg={theme.colors.validationSuccessText}
-            titleColor={theme.colors.colorTextSecondary}
-          />
-        </View>
-
-        <Text
-          style={[
-            styles.sectionTitle,
-            { color: theme.colors.colorTextSecondary },
-          ]}
-        >
-          Your Team (Top 5)
-        </Text>
-
-        {teamData.map((member) => (
-          <View
-            key={member.id}
-            style={[
-              styles.teamRow,
-              { backgroundColor: theme.colors.colorBgAlt },
-            ]}
-          >
-            <View
-              style={[
-                styles.initialCircle,
-                { backgroundColor: theme.colors.colorPrimary600 },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.initialText,
-                  { color: theme.colors.colorPrimary50 },
-                ]}
-              >
-                {member.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </Text>
-            </View>
-
-            <View style={{ flex: 1 }}>
-              <Text
-                style={[
-                  styles.memberName,
-                  { color: theme.colors.colorTextSecondary },
-                ]}
-              >
-                {member.name}
-              </Text>
-              <Text
-                style={[
-                  styles.memberMeta,
-                  { color: theme.colors.colorTextTertiary },
-                ]}
-              >
-                {member.code} • {member.cases} Cases
-              </Text>
-            </View>
-
-            <View style={{ alignItems: "flex-end" }}>
-              <View
-                style={[
-                  styles.statusBadge,
-                  member.status === "Active"
-                    ? { backgroundColor: theme.colors.validationSuccessBg }
-                    : { backgroundColor: theme.colors.validationErrorBg },
-                ]}
-              >
-                <Text
-                  style={{
-                    color:
-                      member.status === "Active"
-                        ? theme.colors.validationSuccessText
-                        : theme.colors.validationErrorText,
-                    fontWeight: "700",
-                  }}
-                >
-                  {member.status}
-                </Text>
-              </View>
-
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
-              >
-                <RemixIcon name="star-fill" size={12} color="#FACC15" />
-                <Text
-                  style={[
-                    styles.ratingText,
-                    { color: theme.colors.colorTextTertiary },
-                  ]}
-                >
-                  {member.rating}
-                </Text>
-              </View>
-            </View>
+          <View style={styles.contactRow}>
+            <Text style={[styles.contact, { color: theme.colors.inputBg }]}>
+              +91-94534 16629
+            </Text>
+            <Text style={[styles.contact, { color: theme.colors.inputBg }]}>
+              pramodrai@gov.in
+            </Text>
           </View>
-        ))}
 
-        <Text
-          style={[
-            styles.sectionTitle,
-            { color: theme.colors.colorTextSecondary },
-          ]}
-        >
-          Leadership Achievements
-        </Text>
-
-        {achievements.map((item) => (
-          <View key={item.id} style={[styles.achievementRow,{backgroundColor:theme.colors.validationWarningBg}]}>
-            <RemixIcon
-              name={item.icon}
-              size={22}
-              color={theme.colors.validationWarningText}
-            />
-            <View>
-              <Text
-                style={[
-                  styles.achievementTitle,
-                  { color: theme.colors.colorTextSecondary },
-                ]}
-              >
-                {item.title}
-              </Text>
-              <Text
-                style={[
-                  styles.achievementDate,
-                  { color: theme.colors.colorTextTertiary },
-                ]}
-              >
-                {item.date}
-              </Text>
-            </View>
+          <View style={styles.zoneRow}>
+            <Text style={[styles.zoneText, { color: theme.colors.inputBg }]}>
+              Zone{"\n"}Central Lucknow
+            </Text>
+            <Text style={[styles.zoneText, { color: theme.colors.inputBg }]}>
+              Since{"\n"}Jan 2023
+            </Text>
           </View>
-        ))}
+        </View>
+      </View>
 
+      {/* ================= REPORTS CTA ================= */}
+      <View
+        style={[
+          styles.reportsCard,
+          { backgroundColor: theme.colors.validationInfoBg },
+        ]}
+      >
         <Text
           style={[
-            styles.sectionTitle,
-            { color: theme.colors.colorTextSecondary },
+            styles.reportTitle,
+            { color: theme.colors.validationInfoText },
           ]}
         >
-          Settings & Performance
+          {/* Team Reports & Analytics */}
         </Text>
-
-        {settings.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={[
-              styles.settingRow,
-              { backgroundColor: theme.colors.colorBgAlt },
-            ]}
-          >
-            <View style={styles.settingLeft}>
-              <RemixIcon
-                name={item.icon}
-                size={18}
-                color={theme.colors.colorPrimary600}
-              />
-              <Text
-                style={[
-                  styles.settingText,
-                  { color: theme.colors.colorTextSecondary },
-                ]}
-              >
-                {item.label}
-              </Text>
-            </View>
-            <RemixIcon
-              name="arrow-right-s-line"
-              size={20}
-              color={theme.colors.colorTextSecondary}
-            />
-          </TouchableOpacity>
-        ))}
+        <Text
+          style={[
+            styles.reportDesc,
+            { color: theme.colors.validationInfoText },
+          ]}
+        >
+          You can track all of your team’s and cases reports from here
+        </Text>
 
         <TouchableOpacity
           style={[
-            styles.logoutBtn,
-            {
-              backgroundColor: theme.colors.colorError100,
-              borderColor: theme.colors.validationErrorText,
-            },
+            styles.reportBtn,
+            { backgroundColor: theme.colors.validationInfoText },
+          ]}
+          onPress={() => {
+            router.push("/(frl)/(profile)/TeamOverviewScreen");
+          }}
+        >
+          <Text
+            style={[
+              styles.reportBtnText,
+              { color: theme.colors.validationInfoBg },
+            ]}
+          >
+            See Reports
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: theme.colors.colorTextSecondary },
+        ]}
+      >
+        Leadership Statistics
+      </Text>
+
+      <View style={styles.row}>
+        <ReusableCard
+          icon="group-line"
+          count={""}
+          title={"Team Size"}
+          subTitle={"24 FROs"}
+          subTitleColor={theme.colors.validationInfoText}
+          bg={theme.colors.colorBgPage}
+          iconBg={theme.colors.validationInfoText}
+          titleColor={theme.colors.colorTextSecondary}
+        />
+
+        <ReusableCard
+          icon="map-pin-2-line"
+          count={""}
+          title={"Zone Coverage"}
+          subTitle={"12 Areas"}
+          subTitleColor={"#FF6900"}
+          bg={theme.colors.colorBgPage}
+          iconBg={theme.colors.validationErrorText}
+          titleColor={theme.colors.colorTextSecondary}
+        />
+      </View>
+      <View style={styles.row}>
+        <ReusableCard
+          icon="award-line"
+          count={""}
+          title={"Team Rating"}
+          subTitle={"4.7/5.0"}
+          subTitleColor={"#FF6900"}
+          bg={theme.colors.colorBgPage}
+          iconBg={theme.colors.colorWarning400}
+          titleColor={theme.colors.colorTextSecondary}
+        />
+
+        <ReusableCard
+          icon="line-chart-line"
+          count={""}
+          title={"Resolution Rate"}
+          subTitle={"87%"}
+          subTitleColor={theme.colors.validationInfoText}
+          bg={theme.colors.colorBgPage}
+          iconBg={theme.colors.validationSuccessText}
+          titleColor={theme.colors.colorTextSecondary}
+        />
+      </View>
+
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: theme.colors.colorTextSecondary },
+        ]}
+      >
+        Your Team (Top 5)
+      </Text>
+
+      {teamData.map((member) => (
+        <View
+          key={member.id}
+          style={[styles.teamRow, { backgroundColor: theme.colors.colorBgAlt }]}
+        >
+          <View
+            style={[
+              styles.initialCircle,
+              { backgroundColor: theme.colors.colorPrimary600 },
+            ]}
+          >
+            <Text
+              style={[
+                styles.initialText,
+                { color: theme.colors.colorPrimary50 },
+              ]}
+            >
+              {member.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </Text>
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[
+                styles.memberName,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {member.name}
+            </Text>
+            <Text
+              style={[
+                styles.memberMeta,
+                { color: theme.colors.colorTextTertiary },
+              ]}
+            >
+              {member.code} • {member.cases} Cases
+            </Text>
+          </View>
+
+          <View style={{ alignItems: "flex-end" }}>
+            <View
+              style={[
+                styles.statusBadge,
+                member.status === "Active"
+                  ? { backgroundColor: theme.colors.validationSuccessBg }
+                  : { backgroundColor: theme.colors.validationErrorBg },
+              ]}
+            >
+              <Text
+                style={{
+                  color:
+                    member.status === "Active"
+                      ? theme.colors.validationSuccessText
+                      : theme.colors.validationErrorText,
+                  fontWeight: "700",
+                }}
+              >
+                {member.status}
+              </Text>
+            </View>
+
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+            >
+              <RemixIcon name="star-fill" size={12} color="#FACC15" />
+              <Text
+                style={[
+                  styles.ratingText,
+                  { color: theme.colors.colorTextTertiary },
+                ]}
+              >
+                {member.rating}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ))}
+
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: theme.colors.colorTextSecondary },
+        ]}
+      >
+        Leadership Achievements
+      </Text>
+
+      {achievements.map((item) => (
+        <View
+          key={item.id}
+          style={[
+            styles.achievementRow,
+            { backgroundColor: theme.colors.validationWarningBg },
           ]}
         >
           <RemixIcon
-            name="logout-circle-r-line"
-            size={20}
-            color={theme.colors.validationErrorText}
+            name={item.icon}
+            size={22}
+            color={theme.colors.validationWarningText}
           />
+          <View>
+            <Text
+              style={[
+                styles.achievementTitle,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {item.title}
+            </Text>
+            <Text
+              style={[
+                styles.achievementDate,
+                { color: theme.colors.colorTextTertiary },
+              ]}
+            >
+              {item.date}
+            </Text>
+          </View>
+        </View>
+      ))}
 
-          <Text style={[styles.logoutText,{color:theme.colors.validationErrorText}]}>Logout</Text>
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: theme.colors.colorTextSecondary },
+        ]}
+      >
+        Settings & Performance
+      </Text>
+
+      {settings.map((item) => (
+        <TouchableOpacity
+          key={item.id}
+          style={[
+            styles.settingRow,
+            { backgroundColor: theme.colors.colorBgAlt },
+          ]}
+        >
+          <View style={styles.settingLeft}>
+            <RemixIcon
+              name={item.icon}
+              size={18}
+              color={theme.colors.colorPrimary600}
+            />
+            <Text
+              style={[
+                styles.settingText,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {item.label}
+            </Text>
+          </View>
+          <RemixIcon
+            name="arrow-right-s-line"
+            size={20}
+            color={theme.colors.colorTextSecondary}
+          />
         </TouchableOpacity>
+      ))}
+
+      <TouchableOpacity
+        style={[
+          styles.logoutBtn,
+          {
+            backgroundColor: theme.colors.colorError100,
+            borderColor: theme.colors.validationErrorText,
+          },
+        ]}
+      >
+        <RemixIcon
+          name="logout-circle-r-line"
+          size={20}
+          color={theme.colors.validationErrorText}
+        />
+
+        <Text
+          style={[
+            styles.logoutText,
+            { color: theme.colors.validationErrorText },
+          ]}
+        >
+          Logout
+        </Text>
+      </TouchableOpacity>
     </BodyLayout>
   );
 }
@@ -431,9 +470,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  headerTitle: {  fontSize: 18, fontWeight: "700" },
+  headerTitle: { fontSize: 18, fontWeight: "700" },
 
-  iconBadge: {  padding: 8, borderRadius: 20 },
+  iconBadge: { padding: 8, borderRadius: 20 },
   badgeDot: {
     position: "absolute",
     top: -4,
@@ -462,19 +501,19 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
 
-  name: {  fontWeight: "700", fontSize: 16 },
-  role: {  fontSize: 12 },
-  code: {  fontSize: 11 },
+  name: { fontWeight: "700", fontSize: 16 },
+  role: { fontSize: 12 },
+  code: { fontSize: 11 },
 
   contactRow: { marginTop: 6 },
-  contact: {  fontSize: 12 },
+  contact: { fontSize: 12 },
 
   zoneRow: {
     marginTop: 8,
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  zoneText: {  fontSize: 12 },
+  zoneText: { fontSize: 12 },
 
   reportsCard: {
     marginTop: 16,
@@ -483,8 +522,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 
-  reportTitle: { fontWeight: "700"},
-  reportDesc: { marginVertical: 6,  fontSize: 12 },
+  reportTitle: { fontWeight: "700" },
+  reportDesc: { marginVertical: 6, fontSize: 12 },
 
   reportBtn: {
     marginTop: 10,
@@ -492,7 +531,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
   },
-  reportBtnText: {  fontWeight: "700" },
+  reportBtnText: { fontWeight: "700" },
 
   sectionTitle: {
     marginTop: 22,
@@ -517,11 +556,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  initialText: {  fontWeight: "700" },
+  initialText: { fontWeight: "700" },
 
   memberName: { fontWeight: "700" },
-  memberMeta: { fontSize: 12,  },
-  ratingText: { fontSize: 12,  },
+  memberMeta: { fontSize: 12 },
+  ratingText: { fontSize: 12 },
 
   statusBadge: {
     paddingHorizontal: 10,
@@ -540,7 +579,7 @@ const styles = StyleSheet.create({
   },
 
   achievementTitle: { fontWeight: "700" },
-  achievementDate: { fontSize: 12, },
+  achievementDate: { fontSize: 12 },
 
   settingRow: {
     marginHorizontal: 12,
