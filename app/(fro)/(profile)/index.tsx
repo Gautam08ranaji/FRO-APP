@@ -13,11 +13,52 @@ import {
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
+type AvailabilityStatus =
+  | "available"
+  | "busy"
+  | "in_meeting"
+  | "unavailable";
+
 export default function ProfileScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
+
   const [showAlert, setShowAlert] = useState(false);
+  const [showAvailability, setShowAvailability] = useState(false);
+  const [availability, setAvailability] =
+    useState<AvailabilityStatus>("available");
+
+  const availabilityOptions = [
+    {
+      key: "available" as AvailabilityStatus,
+      label: "Available",
+      color: theme.colors.colorSuccess600,
+      icon: "checkbox-circle-line",
+    },
+    {
+      key: "busy" as AvailabilityStatus,
+      label: "Busy",
+      color: theme.colors.colorWarning600,
+      icon: "time-line",
+    },
+    {
+      key: "in_meeting" as AvailabilityStatus,
+      label: "In Meeting",
+      color: theme.colors.validationInfoText,
+      icon: "group-line",
+    },
+    {
+      key: "unavailable" as AvailabilityStatus,
+      label: "Unavailable",
+      color: theme.colors.colorError600,
+      icon: "close-circle-line",
+    },
+  ];
+
+  const selectedAvailability = availabilityOptions.find(
+    a => a.key === availability
+  );
 
   const renderItem = (
     label: string,
@@ -55,7 +96,7 @@ export default function ProfileScreen() {
       </View>
 
       <RemixIcon
-        name={"arrow-right-s-line" as any}
+        name="arrow-right-s-line"
         size={26}
         color={theme.colors.colorPrimary600}
       />
@@ -101,16 +142,107 @@ export default function ProfileScreen() {
       </View>
 
       <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 20 }}
+        contentContainerStyle={{ padding: 20 }}
         showsVerticalScrollIndicator={false}
       >
-        {renderItem(
-          "Availablilty",
-          "user-settings-line",
-          () => router.push("/profileDetails"),
-          theme.colors.inputErrorBorder
-        )}
+        {/* ===== Availability Dropdown Card ===== */}
+        <View>
+          <TouchableOpacity
+            onPress={() => setShowAvailability(!showAvailability)}
+            style={[styles.item, { backgroundColor: theme.colors.colorBgPage }]}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <View
+                style={{
+                  padding: 10,
+                  borderRadius: 10,
+                  backgroundColor: theme.colors.colorBgSurface,
+                }}
+              >
+                <RemixIcon
+                  name="user-settings-line"
+                  size={26}
+                  color={selectedAvailability?.color}
+                />
+              </View>
+
+              <View>
+                <Text
+                  style={[
+                    styles.itemText,
+                    { color: theme.colors.colorTextSecondary },
+                  ]}
+                >
+                  Availability
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    marginTop: 2,
+                    color: selectedAvailability?.color,
+                  }}
+                >
+                  {selectedAvailability?.label}
+                </Text>
+              </View>
+            </View>
+
+            <RemixIcon
+              name={
+                showAvailability
+                  ? "arrow-up-s-line"
+                  : "arrow-down-s-line"
+              }
+              size={26}
+              color={theme.colors.colorPrimary600}
+            />
+          </TouchableOpacity>
+
+          {showAvailability && (
+            <View
+              style={{
+                marginTop: -8,
+                marginBottom: 12,
+                backgroundColor: theme.colors.colorBgPage,
+                borderRadius: 12,
+                elevation: 3,
+                overflow: "hidden",
+              }}
+            >
+              {availabilityOptions.map(option => (
+                <TouchableOpacity
+                  key={option.key}
+                  onPress={() => {
+                    setAvailability(option.key);
+                    setShowAvailability(false);
+                  }}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: 14,
+                    borderBottomWidth: 0.5,
+                    borderColor: theme.colors.colorBorder,
+                  }}
+                >
+                  <RemixIcon
+                    name={option.icon as any}
+                    size={22}
+                    color={option.color}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      color: theme.colors.colorTextPrimary,
+                    }}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
 
         {renderItem(
           t("profile.menuOfficerDetails"),
@@ -121,7 +253,7 @@ export default function ProfileScreen() {
 
         {renderItem(
           "Your Performance",
-          "bard-line",
+          "bar-chart-line",
           () => router.push("/profileDetails"),
           theme.colors.colorWarning400
         )}
@@ -154,7 +286,7 @@ export default function ProfileScreen() {
           theme.colors.colorError600
         )}
 
-        {/* Logout */}
+        {/* ===== Logout ===== */}
         <TouchableOpacity
           onPress={() => setShowAlert(true)}
           style={[
@@ -162,15 +294,9 @@ export default function ProfileScreen() {
             { backgroundColor: theme.colors.colorError100 },
           ]}
         >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              gap: 10,
-            }}
-          >
+          <View style={{ flexDirection: "row", gap: 10 }}>
             <RemixIcon
-              name={"login-box-line"}
+              name="login-box-line"
               size={26}
               color={theme.colors.colorError600}
             />
@@ -194,9 +320,9 @@ export default function ProfileScreen() {
           cancelText={t("profile.logoutCancel")}
           onConfirm={() => setShowAlert(false)}
           onCancel={() => setShowAlert(false)}
+          confirmColor={theme.colors.colorPrimary600}
           cancelColor={theme.colors.colorBgPage}
           subtitleColor={theme.colors.colorTextSecondary}
-          confirmColor={theme.colors.colorPrimary600}
         />
       </ScrollView>
     </SafeAreaView>
@@ -204,9 +330,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
 
   header: {
     paddingVertical: 30,
@@ -225,19 +349,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  name: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginTop: 5,
-  },
-  code: {
-    fontSize: 14,
-    marginTop: 2,
-  },
-  role: {
-    fontSize: 14,
-    marginTop: 2,
-  },
+  name: { fontSize: 20, fontWeight: "600", marginTop: 5 },
+  code: { fontSize: 14, marginTop: 2 },
+  role: { fontSize: 14, marginTop: 2 },
 
   item: {
     flexDirection: "row",
@@ -249,9 +363,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  itemText: {
-    fontSize: 16,
-  },
+  itemText: { fontSize: 16 },
 
   logoutBtn: {
     marginTop: 15,

@@ -1,7 +1,9 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import ReusableButton from "@/components/reusables/ReusableButton";
+import StatusModal from "@/components/reusables/StatusModal";
 import { useTheme } from "@/theme/ThemeContext";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -23,6 +25,8 @@ export default function EscalationScreen() {
   const [selectedReason, setSelectedReason] = useState("");
   const [notes, setNotes] = useState("");
   const [focusField, setFocusField] = useState("");
+    const [showDeclinedStatusModal, setShowDeclinedStatusModal] = useState(false);
+  
 
   const [file, setFile] = useState<ImagePicker.ImagePickerAsset | null>(null);
 
@@ -224,11 +228,28 @@ export default function EscalationScreen() {
         }}
         textStyle={{
           color: isFormValid
-            ? theme.colors.colorTextSecondary
+            ? theme.colors.btnPrimaryText
             : theme.colors.colorOverlay,
         }}
         disabled={!isFormValid}
+        onPress={()=>{
+          setShowDeclinedStatusModal(true)
+        }}
       />
+
+       <StatusModal
+              visible={showDeclinedStatusModal}
+              title="Report Submitted"
+              iconName="check-line"
+              iconColor={theme.colors.colorPrimary600}
+              iconBgColor={theme.colors.colorPrimary600 +22}
+              autoCloseAfter={2000}
+              onClose={() => {
+                setShowDeclinedStatusModal(false)
+                router.push('/(fro)/(dashboard)')
+              }}
+              titleColor={theme.colors.colorPrimary600}
+            />
     </BodyLayout>
   );
 }
