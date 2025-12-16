@@ -2,6 +2,7 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import Card from "@/components/reusables/Card";
 import PunchInCard from "@/components/reusables/PunchInCard";
 import ReusableCard from "@/components/reusables/ReusableCard";
+import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React from "react";
@@ -14,6 +15,9 @@ import {
   View,
 } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
+
+
+
 
 
 const caseStatusData = [
@@ -118,6 +122,9 @@ export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const screenWidth = Dimensions.get("window").width;
+  const authState = useAppSelector(state => state.auth);
+
+console.log("REDUX AUTH STATE 👉", authState);
 
   const getAlertColor = (title: string) => {
     if (title.toLowerCase().includes("high")) {
@@ -142,6 +149,9 @@ export default function HomeScreen() {
 
     return theme.colors.validationInfoBg;
   };
+
+  console.log("kmhdkjvhc");
+  
 
   return (
     <BodyLayout type="frl">

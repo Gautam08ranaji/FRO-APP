@@ -1,8 +1,13 @@
+import { useLoginMutation } from "@/features/auth/authApi";
+import { setAuth } from "@/features/auth/authSlice";
+import { useAppDispatch } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next"; // 👈 added
+
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,16 +21,78 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function LoginScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation(); // 👈 i18n hook
+  const dispatch = useAppDispatch();
+  const [login, { isLoading }] = useLoginMutation();
 
   const [officerId, setOfficerId] = useState("");
   const [phone, setPhone] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      const res = await login({
+        userName: "frodev@gmail.com",
+        password: "User@123",
+        remoteIp: "127.0.0.1",
+        latitude: "28.6139",
+        longitude: "77.2090",
+      }).unwrap();
+
+      console.log("res", res);
+
+      if (!res.success || !res.data) {
+        const message = res.errors?.length ? res.errors[0] : "Login failed";
+
+        Alert.alert("Login Error", message);
+        return;
+      }
+
+      const user = res.data;
+
+      const role = user.userRoles.some(
+        (r) => r.roleName.toUpperCase() === "FRO"
+      )
+        ? "FRO"
+        : "FRL";
+
+      dispatch(
+        setAuth({
+          id: user.id,
+          userName: user.userName,
+          bearerToken: user.bearerToken,
+          firstName: user.firstName ?? null,
+          lastName: user.lastName ?? null,
+          role,
+        })
+      );
+
+      router.replace(
+        role === "FRO" ? "/(fro)/(dashboard)" : "/(frl)/(dashboard)"
+      );
+    } catch (err: any) {
+      console.log("LOGIN ERROR 👉", err);
+
+      let message: string | undefined;
+
+      if (typeof err?.data === "string") {
+        message = err.data;
+      } else if (err?.data?.errors?.length) {
+        message = err.data.errors[0];
+      } else if (Array.isArray(err?.data)) {
+        message = err.data[0];
+      }
+
+      Alert.alert(
+        "Login Error",
+        message ?? "Something went wrong. Please try again."
+      );
+    }
+  };
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView contentContainerStyle={styles.inner}>
-        
         {/* Top Icon */}
         <View style={styles.iconWrapper}>
           <RemixIcon
@@ -121,7 +188,8 @@ export default function LoginScreen() {
             styles.button,
             { backgroundColor: theme.colors.btnPrimaryBg },
           ]}
-          onPress={() => router.push("/(onboarding)/otpVerify")}
+          // onPress={() => router.push("/(onboarding)/otpVerify")}
+          onPress={handleLogin}
         >
           <Text
             style={[
@@ -183,7 +251,6 @@ export default function LoginScreen() {
             {t("login.contactSupervisor")}
           </Text>
         </TouchableOpacity>
-
       </ScrollView>
     </SafeAreaView>
   );

@@ -7,11 +7,15 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Platform, StatusBar as RNStatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Provider } from "react-redux";
+
+import { persistor, store } from "@/store";
 
 import { AudioRecorderProvider } from "@/hooks/AudioRecorderProvider";
 import { CameraPermissionProvider } from "@/hooks/CameraPermissionProvider";
 import { LocationProvider } from "@/hooks/LocationContext";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
+import { PersistGate } from "redux-persist/integration/react";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,32 +24,39 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function prepare() {
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 800));
       setAppIsReady(true);
     }
     prepare();
   }, []);
 
   const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) await SplashScreen.hideAsync();
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
   }, [appIsReady]);
 
   if (!appIsReady) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <SafeAreaProvider>
-        <LocationProvider>
-          <CameraPermissionProvider>
-            <ThemeProvider>
-              <AudioRecorderProvider>
-                <ThemedStack />
-              </AudioRecorderProvider>
-            </ThemeProvider>
-          </CameraPermissionProvider>
-        </LocationProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    // ✅ REDUX PROVIDER (TOP LEVEL)
+    <Provider store={store}>
+       <PersistGate loading={null} persistor={persistor}>
+      <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <SafeAreaProvider>
+          <LocationProvider>
+            <CameraPermissionProvider>
+              <ThemeProvider>
+                <AudioRecorderProvider>
+                  <ThemedStack />
+                </AudioRecorderProvider>
+              </ThemeProvider>
+            </CameraPermissionProvider>
+          </LocationProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+      </PersistGate>
+    </Provider>
   );
 }
 

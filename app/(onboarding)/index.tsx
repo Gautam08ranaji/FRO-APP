@@ -1,3 +1,4 @@
+import { useAppSelector } from '@/store/hooks';
 import { useTheme } from '@/theme/ThemeContext';
 import { useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -15,6 +16,9 @@ export default function OnboardingScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [appReady, setAppReady] = useState(false);
+    const authState = useAppSelector(state => state.auth);
+  
+  console.log("REDUX AUTH STATE 👉", authState);
 
   useEffect(() => {
     const prepare = async () => {

@@ -47,8 +47,8 @@ export default function LanguageSelection() {
  
       // router.push('/(frl)/(dashboard)');
       // router.push('/(fro)/(dashboard)');
-      // router.push('/welcomeScreen');
-      router.push('/roleSelect');
+      router.push('/welcomeScreen');
+      // router.push('/roleSelect');
     } catch (err) {
       console.error('Error changing language:', err);
     } finally {

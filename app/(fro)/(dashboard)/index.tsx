@@ -12,6 +12,9 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const screenWidth = Dimensions.get("window").width;
 
+  console.log("dro dashboard");
+  
+
   return (
     <BodyLayout type="dashboard">
 
