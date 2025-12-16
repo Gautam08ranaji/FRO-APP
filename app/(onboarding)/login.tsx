@@ -4,9 +4,9 @@ import { useAppDispatch } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next"; // 👈 added
-
+import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -18,36 +18,69 @@ import {
 import RemixIcon from "react-native-remix-icon";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+const PASSWORD_REGEX =
+  /^[A-Z](?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{7,}$/;
+
 export default function LoginScreen() {
   const { theme } = useTheme();
-  const { t } = useTranslation(); // 👈 i18n hook
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [login, { isLoading }] = useLoginMutation();
 
-  const [officerId, setOfficerId] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  /* ---------------- VALIDATION ---------------- */
+  const validate = () => {
+    let valid = true;
+    const trimmedEmail = email.trim();
+
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      setEmailError(t("login.errors.invalidEmail"));
+      valid = false;
+    } else {
+      setEmailError("");
+    }
+
+    if (!PASSWORD_REGEX.test(password)) {
+      setPasswordError(t("login.errors.invalidPassword"));
+      valid = false;
+    } else {
+      setPasswordError("");
+    }
+
+    return valid;
+  };
 
   const handleLogin = async () => {
+    if (isLoading) return; 
+    if (!validate()) return;
+
     try {
       const res = await login({
-        userName: "frodev@gmail.com",
-        password: "User@123",
+        userName: email.trim(),
+        password,
         remoteIp: "127.0.0.1",
         latitude: "28.6139",
         longitude: "77.2090",
       }).unwrap();
 
-      console.log("res", res);
-
       if (!res.success || !res.data) {
-        const message = res.errors?.length ? res.errors[0] : "Login failed";
-
-        Alert.alert("Login Error", message);
+        Alert.alert(
+          t("login.errorTitle"),
+          res.errors?.[0] ?? t("login.errors.loginFailed")
+        );
         return;
       }
 
       const user = res.data;
-
       const role = user.userRoles.some(
         (r) => r.roleName.toUpperCase() === "FRO"
       )
@@ -66,24 +99,14 @@ export default function LoginScreen() {
       );
 
       router.replace(
-        role === "FRO" ? "/(fro)/(dashboard)" : "/(frl)/(dashboard)"
+        role === "FRO"
+          ? "/(fro)/(dashboard)"
+          : "/(frl)/(dashboard)"
       );
     } catch (err: any) {
-      console.log("LOGIN ERROR 👉", err);
-
-      let message: string | undefined;
-
-      if (typeof err?.data === "string") {
-        message = err.data;
-      } else if (err?.data?.errors?.length) {
-        message = err.data.errors[0];
-      } else if (Array.isArray(err?.data)) {
-        message = err.data[0];
-      }
-
       Alert.alert(
-        "Login Error",
-        message ?? "Something went wrong. Please try again."
+        t("login.errorTitle"),
+        err?.data?.errors?.[0] ?? t("login.errors.generic")
       );
     }
   };
@@ -93,7 +116,6 @@ export default function LoginScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView contentContainerStyle={styles.inner}>
-        {/* Top Icon */}
         <View style={styles.iconWrapper}>
           <RemixIcon
             name="contract-right-line"
@@ -102,7 +124,6 @@ export default function LoginScreen() {
           />
         </View>
 
-        {/* Title */}
         <Text
           style={[
             theme.typography.fontH1,
@@ -113,7 +134,6 @@ export default function LoginScreen() {
           {t("login.title")}
         </Text>
 
-        {/* Subtitle */}
         <Text
           style={[
             theme.typography.fontBodySmall,
@@ -124,132 +144,120 @@ export default function LoginScreen() {
           {t("login.subtitle")}
         </Text>
 
-        {/* Officer ID */}
         <View style={styles.inputWrapper}>
-          <Text
-            style={[
-              theme.typography.fontBodySmall,
-              styles.label,
-              { color: theme.colors.text },
-            ]}
-          >
-            {t("login.officerId")}
+          {emailError ? (
+            <Text
+              style={[
+                styles.errorText,
+                { color: theme.colors.colorError400 },
+              ]}
+            >
+              {emailError}
+            </Text>
+          ) : null}
+
+          <Text style={[styles.label, { color: theme.colors.text }]}>
+            {t("login.email")}
           </Text>
 
           <TextInput
             style={[
               styles.input,
               {
-                borderColor: theme.colors.border,
+                borderColor: emailError
+                  ? theme.colors.colorError400
+                  : theme.colors.border,
                 backgroundColor: theme.colors.card,
                 color: theme.colors.text,
               },
             ]}
-            placeholder={t("login.officerIdPlaceholder")}
+            placeholder="example@email.com"
             placeholderTextColor={theme.colors.inputPlaceholder}
-            value={officerId}
-            onChangeText={setOfficerId}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={(t) => setEmail(t.trimStart())}
           />
         </View>
 
-        {/* Mobile Number */}
         <View style={styles.inputWrapper}>
-          <Text
-            style={[
-              theme.typography.fontBodySmall,
-              styles.label,
-              { color: theme.colors.text },
-            ]}
-          >
-            {t("login.mobile")}
+          {passwordError ? (
+            <Text
+              style={[
+                styles.errorText,
+                { color: theme.colors.colorError400 },
+              ]}
+            >
+              {passwordError}
+            </Text>
+          ) : null}
+
+          <Text style={[styles.label, { color: theme.colors.text }]}>
+            {t("login.password")}
           </Text>
 
-          <TextInput
+          <View
             style={[
-              styles.input,
+              styles.passwordContainer,
               {
-                borderColor: theme.colors.border,
+                borderColor: passwordError
+                  ? theme.colors.colorError400
+                  : theme.colors.border,
                 backgroundColor: theme.colors.card,
-                color: theme.colors.text,
               },
             ]}
-            placeholder="+91..."
-            placeholderTextColor={theme.colors.inputPlaceholder}
-            keyboardType="numeric"
-            value={phone}
-            onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ""))}
-            maxLength={10}
-          />
+          >
+            <TextInput
+              style={[styles.passwordInput, { color: theme.colors.text }]}
+              placeholder="••••••••"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={(t) => setPassword(t.replace(/\s/g, ""))}
+            />
+
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <RemixIcon
+                name={showPassword ? "eye-off-line" : "eye-line"}
+                size={20}
+                color={theme.colors.colorTextSecondary}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* CTA Button */}
-        <TouchableOpacity
-          style={[
-            styles.button,
-            { backgroundColor: theme.colors.btnPrimaryBg },
-          ]}
-          // onPress={() => router.push("/(onboarding)/otpVerify")}
-          onPress={handleLogin}
-        >
-          <Text
-            style={[
-              theme.typography.fontButton,
-              styles.buttonText,
-              { color: theme.colors.btnPrimaryText },
-            ]}
-          >
-            {t("login.sendOtp")}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Forgot Password */}
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            marginTop: 20,
-            gap: 10,
-            alignSelf: "center",
-          }}
-        >
-          <RemixIcon
-            name="question-line"
-            size={18}
-            color={theme.colors.btnPrimaryBg}
-          />
-          <Text
-            style={[
-              theme.typography.fontBodySmall,
-              { color: theme.colors.primary },
-            ]}
-          >
+        <TouchableOpacity style={styles.forgotWrapper}>
+          <Text style={{ color: theme.colors.primary }}>
             {t("login.forgotPassword")}
           </Text>
         </TouchableOpacity>
 
-        {/* Contact Supervisor */}
         <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            marginTop: 20,
-            gap: 10,
-            alignSelf: "center",
-          }}
+          onPress={handleLogin}
+          activeOpacity={0.8}
+          style={[
+            styles.button,
+            {
+              backgroundColor: theme.colors.btnPrimaryBg,
+              opacity: isLoading ? 0.85 : 1,
+            },
+          ]}
         >
-          <RemixIcon
-            name="phone-line"
-            size={18}
-            color={theme.colors.btnPrimaryBg}
-          />
-          <Text
-            style={[
-              theme.typography.fontBodySmall,
-              { color: theme.colors.primary },
-            ]}
-          >
-            {t("login.contactSupervisor")}
-          </Text>
+          {isLoading ? (
+            <ActivityIndicator
+              size="small"
+              color={theme.colors.btnPrimaryText}
+            />
+          ) : (
+            <Text
+              style={[
+                styles.buttonText,
+                { color: theme.colors.btnPrimaryText },
+              ]}
+            >
+              {t("login.login")}
+            </Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -258,7 +266,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  inner: { padding: 20, paddingTop: 0 },
+  inner: { padding: 20 },
 
   iconWrapper: {
     width: 70,
@@ -270,14 +278,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  title: { marginTop: 20 },
-  subtitle: { marginTop: 10, width: "100%" },
+  title: { marginTop: 10 },
+  subtitle: { marginTop: 10 },
 
-  inputWrapper: { width: "100%", marginTop: 35 },
+  inputWrapper: { marginTop: 30 },
   label: { marginBottom: 8 },
 
   input: {
-    width: "100%",
     paddingVertical: 16,
     paddingHorizontal: 15,
     borderWidth: 1,
@@ -285,13 +292,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+  },
+
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 16,
+  },
+
+  forgotWrapper: {
+    alignSelf: "flex-end",
+    marginTop: 15,
+  },
+
   button: {
-    width: "100%",
     borderRadius: 10,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 35,
   },
 
-  buttonText: { fontSize: 16, fontWeight: "600" },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  errorText: {
+    fontSize: 12,
+    marginBottom: 6,
+  },
 });

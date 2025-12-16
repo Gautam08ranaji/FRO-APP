@@ -124,8 +124,6 @@ export default function HomeScreen() {
   const screenWidth = Dimensions.get("window").width;
   const authState = useAppSelector(state => state.auth);
 
-console.log("REDUX AUTH STATE 👉", authState);
-
   const getAlertColor = (title: string) => {
     if (title.toLowerCase().includes("high")) {
       return theme.colors.validationErrorText;
@@ -150,7 +148,6 @@ console.log("REDUX AUTH STATE 👉", authState);
     return theme.colors.validationInfoBg;
   };
 
-  console.log("kmhdkjvhc");
   
 
   return (

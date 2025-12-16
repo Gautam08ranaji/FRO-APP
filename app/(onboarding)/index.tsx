@@ -18,7 +18,7 @@ export default function OnboardingScreen() {
   const [appReady, setAppReady] = useState(false);
     const authState = useAppSelector(state => state.auth);
   
-  console.log("REDUX AUTH STATE 👉", authState);
+  // console.log("REDUX AUTH STATE 👉", authState);
 
   useEffect(() => {
     const prepare = async () => {

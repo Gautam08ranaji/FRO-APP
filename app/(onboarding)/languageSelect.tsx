@@ -45,10 +45,9 @@ export default function LanguageSelection() {
     setLoading(true);
     try {
  
-      // router.push('/(frl)/(dashboard)');
-      // router.push('/(fro)/(dashboard)');
-      router.push('/welcomeScreen');
-      // router.push('/roleSelect');
+  
+      router.push('/login');
+
     } catch (err) {
       console.error('Error changing language:', err);
     } finally {

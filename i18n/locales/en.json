@@ -10,15 +10,26 @@
     "title2": "Support Center",
     "chooseLanguage": "Choose Language"
   },
-  "login": {
-    "title": "Login",
-    "subtitle": "Enter your officer ID and mobile number.",
-    "officerId": "Officer ID",
-    "officerIdPlaceholder": "Enter your officer code",
-    "mobile": "Mobile Number",
-    "sendOtp": "Send OTP",
+ "login": {
+    "title": "Welcome Back",
+    "subtitle": "Login to continue to your account",
+
+    "email": "Email Address",
+    "password": "Password",
+
+    "login": "Login",
+    "loggingIn": "Logging in...",
+
     "forgotPassword": "Forgot password?",
-    "contactSupervisor": "Contact Supervisor"
+
+    "errorTitle": "Login Error",
+
+    "errors": {
+      "invalidEmail": "Please enter a valid email address",
+      "invalidPassword": "Password must be at least 8 characters, start with a capital letter, and include at least one number and one special symbol",
+      "loginFailed": "Invalid email or password",
+      "generic": "Something went wrong. Please try again."
+    }
   },
   "onboarding": {
   "step1Title": "Receive new cases instantly",
