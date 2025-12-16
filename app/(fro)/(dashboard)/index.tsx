@@ -12,29 +12,25 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const screenWidth = Dimensions.get("window").width;
 
-  console.log("dro dashboard");
-  
 
   return (
     <BodyLayout type="dashboard">
-
       {/* Heading */}
-        <Text
-              style={[
-                theme.typography.fontH2,
-                { color: theme.colors.colorPrimary600 },
-              ]}
-            >
-              Attendance
-            </Text>
-      
+      <Text
+        style={[
+          theme.typography.fontH2,
+          { color: theme.colors.colorPrimary600 },
+        ]}
+      >
+        Attendance
+      </Text>
 
       <PunchInCard />
 
       <Text
         style={[
           theme.typography.fontH2,
-          { color: theme.colors.colorPrimary600,marginTop:20 },
+          { color: theme.colors.colorPrimary600, marginTop: 20 },
         ]}
       >
         {t("home.casesOverview")}
@@ -48,8 +44,9 @@ export default function HomeScreen() {
           title={t("home.newCases")}
           bg={theme.colors.colorBgPage}
           iconBg={theme.colors.validationInfoText}
-          countColor={theme.colors.colorPrimary600}
+          countColor={theme.colors.validationInfoText}
           titleColor={theme.colors.colorTextSecondary}
+          cardBg={theme.colors.validationInfoBg}
           onPress={() =>
             router.push({
               pathname: "/(fro)/(complaints)",
@@ -66,6 +63,7 @@ export default function HomeScreen() {
           iconBg="#00C950"
           countColor={theme.colors.colorPrimary600}
           titleColor={theme.colors.colorTextSecondary}
+          cardBg={theme.colors.validationSuccessBg}
           onPress={() =>
             router.push({
               pathname: "/(fro)/(complaints)",
@@ -81,10 +79,11 @@ export default function HomeScreen() {
           icon="arrow-right-box-line"
           count={12}
           title={t("home.onTheWay")}
-          bg={theme.colors.colorBgPage}
-          iconBg="#AD46FF"
-          countColor={theme.colors.colorPrimary600}
+          bg={theme.colors.colorHeadingH1 + 22}
+          iconBg={theme.colors.colorHeadingH1}
+          countColor={theme.colors.colorHeadingH1}
           titleColor={theme.colors.colorTextSecondary}
+          cardBg={theme.colors.validationInfoBg}
           onPress={() =>
             router.push({
               pathname: "/(fro)/(complaints)",
@@ -98,8 +97,9 @@ export default function HomeScreen() {
           count={12}
           title={t("home.working")}
           bg={theme.colors.colorBgPage}
-          iconBg="#FF6900"
-          countColor={theme.colors.colorPrimary600}
+          iconBg={theme.colors.validationWarningText}
+          countColor={theme.colors.validationWarningText}
+          cardBg={theme.colors.validationWarningBg}
           titleColor={theme.colors.colorTextSecondary}
           onPress={() =>
             router.push({
@@ -117,9 +117,10 @@ export default function HomeScreen() {
           count={12}
           title={t("home.followup")}
           bg={theme.colors.colorBgPage}
-          iconBg="#F0B100"
-          countColor={theme.colors.colorPrimary600}
+          iconBg={theme.colors.colorWarning400}
+          countColor={theme.colors.colorWarning400}
           titleColor={theme.colors.colorTextSecondary}
+          cardBg={theme.colors.validationWarningBg}
           onPress={() =>
             router.push({
               pathname: "/(fro)/(complaints)",
@@ -133,8 +134,9 @@ export default function HomeScreen() {
           count={12}
           title={t("home.closedCases")}
           bg={theme.colors.colorBgPage}
+          cardBg={theme.colors.navDivider}
           iconBg="#6A7282"
-          countColor={theme.colors.colorPrimary600}
+          countColor={theme.colors.colorTextSecondary}
           titleColor={theme.colors.colorTextSecondary}
           onPress={() =>
             router.push({
@@ -145,7 +147,6 @@ export default function HomeScreen() {
         />
       </View>
 
-      {/* BOTTOM INFO CARD */}
       <View
         style={[
           styles.bottomSection,
@@ -235,7 +236,6 @@ export default function HomeScreen() {
   );
 }
 
-/* ---------------- STYLES ---------------- */
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",

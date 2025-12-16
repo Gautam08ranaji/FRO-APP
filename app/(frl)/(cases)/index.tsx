@@ -29,7 +29,6 @@ const dateFilters = [
   "Last 3 Months",
 ];
 
-/* ✅ CASE DATA WITH DATE FIELD */
 const caseData = [
   {
     id: 1,

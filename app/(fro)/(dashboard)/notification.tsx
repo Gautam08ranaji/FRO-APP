@@ -70,7 +70,6 @@ export default function NotificationScreen() {
             ]}
           >
             <View style={styles.topRow}>
-              {/* Icon */}
               <View
                 style={[
                   styles.iconBox,

@@ -23,7 +23,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-
 const PASSWORD_REGEX =
   /^[A-Z](?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{7,}$/;
 
@@ -32,7 +31,7 @@ export default function LoginScreen() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [login, { isLoading }] = useLoginMutation();
-  const { location,  } = useLocation();
+  const { location } = useLocation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,7 +73,6 @@ export default function LoginScreen() {
   };
 
   // console.log("login loc",address,location?.coords?.latitude,location?.coords?.longitude);
-  
 
   const handleLogin = async () => {
     if (isLoading) return;
@@ -133,8 +131,6 @@ export default function LoginScreen() {
     }
   };
 
-  
-
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -170,14 +166,6 @@ export default function LoginScreen() {
 
         {/* EMAIL */}
         <View style={styles.inputWrapper}>
-          {emailError ? (
-            <Text
-              style={[styles.errorText, { color: theme.colors.colorError400 }]}
-            >
-              {emailError}
-            </Text>
-          ) : null}
-
           <Text style={[styles.label, { color: theme.colors.text }]}>
             {t("login.email")}
           </Text>
@@ -200,18 +188,17 @@ export default function LoginScreen() {
             value={email}
             onChangeText={(t) => setEmail(t.trimStart())}
           />
+          {emailError ? (
+            <Text
+              style={[styles.errorText, { color: theme.colors.colorError400 }]}
+            >
+              {emailError}
+            </Text>
+          ) : null}
         </View>
 
         {/* PASSWORD */}
         <View style={styles.inputWrapper}>
-          {passwordError ? (
-            <Text
-              style={[styles.errorText, { color: theme.colors.colorError400 }]}
-            >
-              {passwordError}
-            </Text>
-          ) : null}
-
           <Text style={[styles.label, { color: theme.colors.text }]}>
             {t("login.password")}
           </Text>
@@ -244,6 +231,13 @@ export default function LoginScreen() {
               />
             </TouchableOpacity>
           </View>
+          {passwordError ? (
+            <Text
+              style={[styles.errorText, { color: theme.colors.colorError400 }]}
+            >
+              {passwordError}
+            </Text>
+          ) : null}
         </View>
 
         <TouchableOpacity style={styles.forgotWrapper}>
@@ -345,6 +339,6 @@ const styles = StyleSheet.create({
 
   errorText: {
     fontSize: 12,
-    marginBottom: 6,
+    marginTop: 6,
   },
 });

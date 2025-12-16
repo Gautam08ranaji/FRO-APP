@@ -4,7 +4,7 @@ export default function DashBoardLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false, // 🔹 This hides the header
+        headerShown: false, 
         contentStyle: { backgroundColor: '#121212' },
       }}
     />

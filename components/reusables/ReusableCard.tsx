@@ -1,11 +1,11 @@
 import React from "react";
 import {
-    StyleProp,
-    Text,
-    TextStyle,
-    TouchableOpacity,
-    View,
-    ViewStyle,
+  StyleProp,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
@@ -13,6 +13,9 @@ interface Props {
   icon: string;
   count: number | string;
   title: string;
+
+  // ✅ Card background
+  cardBg?: string;
   bg?: string;
 
   iconBg?: string;
@@ -39,7 +42,11 @@ export default function ReusableCard({
   icon,
   count,
   title,
+
+  // ✅ Card background priority
+  cardBg,
   bg = "#FFFFFF",
+
   iconBg = "#2F80ED20",
   iconColor = "#FFFFFF",
 
@@ -48,7 +55,6 @@ export default function ReusableCard({
   countContainerStyle,
   countTextStyle,
 
-  // ✅ New Optional Title Props
   subTitle,
   subTitleColor = "#666",
   subTitleStyle,
@@ -60,9 +66,10 @@ export default function ReusableCard({
 }: Props) {
   return (
     <TouchableOpacity
+      activeOpacity={0.85}
       onPress={onPress}
       style={{
-        backgroundColor: bg,
+        backgroundColor: cardBg ?? bg, // ✅ priority applied
         padding: 16,
         borderRadius: 14,
         flex: 1,
@@ -74,7 +81,7 @@ export default function ReusableCard({
         shadowOffset: { width: 0, height: 3 },
       }}
     >
-      {/* ✅ TOP ROW */}
+      {/* ---------------- TOP ROW ---------------- */}
       <View
         style={{
           flexDirection: "row",
@@ -133,22 +140,23 @@ export default function ReusableCard({
         )}
       </View>
 
-      {/* ✅ TITLES SECTION */}
-       {subTitle ? (
-          <Text
-            style={[
-              {
-                marginTop: 14,
-                fontSize: 24,
-                color: subTitleColor,
-              },
-              subTitleStyle,
-            ]}
-          >
-            {subTitle}
-          </Text>
-        ) : null}
-      <View style={{ marginTop: subTitle ? 10 :15 }}>
+      {/* ---------------- TITLES ---------------- */}
+      {subTitle ? (
+        <Text
+          style={[
+            {
+              marginTop: 14,
+              fontSize: 24,
+              color: subTitleColor,
+            },
+            subTitleStyle,
+          ]}
+        >
+          {subTitle}
+        </Text>
+      ) : null}
+
+      <View style={{ marginTop: subTitle ? 10 : 15 }}>
         <Text
           style={[
             {
@@ -160,9 +168,6 @@ export default function ReusableCard({
         >
           {title}
         </Text>
-
-        {/* ✅ Only renders if subTitle is passed */}
-       
       </View>
     </TouchableOpacity>
   );
