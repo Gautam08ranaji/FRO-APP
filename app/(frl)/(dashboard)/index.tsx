@@ -19,7 +19,6 @@ import RemixIcon, { IconName } from "react-native-remix-icon";
 
 
 
-
 const caseStatusData = [
   {
     id: 1,
@@ -123,6 +122,14 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const screenWidth = Dimensions.get("window").width;
   const authState = useAppSelector(state => state.auth);
+
+//   const antiforgeryToken = useSelector(
+//   (state: RootState) => state.antiForgery.antiforgeryToken
+// );
+
+
+
+
 
   const getAlertColor = (title: string) => {
     if (title.toLowerCase().includes("high")) {

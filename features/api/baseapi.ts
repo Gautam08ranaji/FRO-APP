@@ -1,15 +1,19 @@
+// app/api/baseApi.ts
 import type { RootState } from "@/store";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { baseUrl } from "../api/baseUrl.ts";
 
+/* ---------------- PUBLIC APIs (No Token) ---------------- */
 export const publicBaseQuery = fetchBaseQuery({
-  baseUrl: "http://43.230.203.249:99/api",
+  baseUrl,
   headers: {
     accept: "application/json",
   },
 });
 
+/* ---------------- AUTH APIs (Bearer Token) ---------------- */
 export const authBaseQuery = fetchBaseQuery({
-  baseUrl: "http://43.230.203.249:99/api",
+  baseUrl,
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
 

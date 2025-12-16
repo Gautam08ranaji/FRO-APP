@@ -5,15 +5,17 @@ import { persistReducer, persistStore } from "redux-persist";
 import { authApi } from "@/features/auth/authApi";
 import authReducer from "@/features/auth/authSlice";
 import { availabilityApi } from "@/features/availability/availabilityApi";
+import antiForgeryReducer from "@/features/security/antiForgerySlice"; // ✅ ADD THIS
 
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  whitelist: ["auth"], // ✅ only auth is persisted
+  whitelist: ["auth"], // 👈 keep antiforgery in memory only (recommended)
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  antiForgery: antiForgeryReducer, // ✅ REGISTER HERE
   [authApi.reducerPath]: authApi.reducer,
   [availabilityApi.reducerPath]: availabilityApi.reducer,
 });
@@ -22,7 +24,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: getDefaultMiddleware =>
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     }).concat(authApi.middleware, availabilityApi.middleware),

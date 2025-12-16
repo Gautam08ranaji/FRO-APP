@@ -1,5 +1,8 @@
 import { useLoginMutation } from "@/features/auth/authApi";
 import { setAuth } from "@/features/auth/authSlice";
+import { fetchAntiForgeryToken } from "@/features/security/antiForgeryService";
+import { setAntiForgeryToken } from "@/features/security/antiForgerySlice";
+import { useLocation } from "@/hooks/LocationContext";
 import { useAppDispatch } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
@@ -29,6 +32,7 @@ export default function LoginScreen() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [login, { isLoading }] = useLoginMutation();
+  const { location,  } = useLocation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,7 +41,17 @@ export default function LoginScreen() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  /* ---------------- VALIDATION ---------------- */
+  const loadAntiForgeryToken = async (bearerToken: string) => {
+    try {
+      const res = await fetchAntiForgeryToken(bearerToken);
+
+      dispatch(setAntiForgeryToken(res.token));
+    } catch (e) {
+      console.log("❌ Anti-forgery fetch failed", e);
+      throw e;
+    }
+  };
+
   const validate = () => {
     let valid = true;
     const trimmedEmail = email.trim();
@@ -59,17 +73,21 @@ export default function LoginScreen() {
     return valid;
   };
 
+  // console.log("login loc",address,location?.coords?.latitude,location?.coords?.longitude);
+  
+
   const handleLogin = async () => {
-    if (isLoading) return; 
+    if (isLoading) return;
     if (!validate()) return;
 
     try {
+      // 1️⃣ LOGIN
       const res = await login({
         userName: email.trim(),
         password,
         remoteIp: "127.0.0.1",
-        latitude: "28.6139",
-        longitude: "77.2090",
+        latitude: location?.coords?.latitude || "",
+        longitude: location?.coords?.longitude || "",
       }).unwrap();
 
       if (!res.success || !res.data) {
@@ -81,12 +99,14 @@ export default function LoginScreen() {
       }
 
       const user = res.data;
+
       const role = user.userRoles.some(
         (r) => r.roleName.toUpperCase() === "FRO"
       )
         ? "FRO"
         : "FRL";
 
+      // 2️⃣ STORE AUTH DATA
       dispatch(
         setAuth({
           id: user.id,
@@ -98,10 +118,12 @@ export default function LoginScreen() {
         })
       );
 
+      // 3️⃣ CALL ANTIFORGERY API (PASS TOKEN DIRECTLY)
+      await loadAntiForgeryToken(user.bearerToken);
+
+      // 4️⃣ NAVIGATE AFTER SUCCESS
       router.replace(
-        role === "FRO"
-          ? "/(fro)/(dashboard)"
-          : "/(frl)/(dashboard)"
+        role === "FRO" ? "/(fro)/(dashboard)" : "/(frl)/(dashboard)"
       );
     } catch (err: any) {
       Alert.alert(
@@ -110,6 +132,8 @@ export default function LoginScreen() {
       );
     }
   };
+
+  
 
   return (
     <SafeAreaView
@@ -144,13 +168,11 @@ export default function LoginScreen() {
           {t("login.subtitle")}
         </Text>
 
+        {/* EMAIL */}
         <View style={styles.inputWrapper}>
           {emailError ? (
             <Text
-              style={[
-                styles.errorText,
-                { color: theme.colors.colorError400 },
-              ]}
+              style={[styles.errorText, { color: theme.colors.colorError400 }]}
             >
               {emailError}
             </Text>
@@ -180,13 +202,11 @@ export default function LoginScreen() {
           />
         </View>
 
+        {/* PASSWORD */}
         <View style={styles.inputWrapper}>
           {passwordError ? (
             <Text
-              style={[
-                styles.errorText,
-                { color: theme.colors.colorError400 },
-              ]}
+              style={[styles.errorText, { color: theme.colors.colorError400 }]}
             >
               {passwordError}
             </Text>
