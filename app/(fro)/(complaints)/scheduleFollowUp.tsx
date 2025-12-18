@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between", // <-- ICON RIGHT
+    justifyContent: "space-between", 
   },
 
   selectorText: {

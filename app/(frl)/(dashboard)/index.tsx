@@ -2,6 +2,7 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import Card from "@/components/reusables/Card";
 import PunchInCard from "@/components/reusables/PunchInCard";
 import ReusableCard from "@/components/reusables/ReusableCard";
+import { RootState } from "@/store";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
@@ -15,6 +16,7 @@ import {
   View,
 } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
+import { useSelector } from "react-redux";
 
 
 
@@ -123,10 +125,13 @@ export default function HomeScreen() {
   const screenWidth = Dimensions.get("window").width;
   const authState = useAppSelector(state => state.auth);
 
-//   const antiforgeryToken = useSelector(
-//   (state: RootState) => state.antiForgery.antiforgeryToken
-// );
+  const antiforgeryToken = useSelector(
+  (state: RootState) => state.antiForgery.antiforgeryToken
+);
 
+console.log("antiforgeryToken",antiforgeryToken);
+console.log(authState.userId);
+console.log(authState.token);
 
 
 

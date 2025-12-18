@@ -1,8 +1,13 @@
 import ConfirmationAlert from "@/components/reusables/ConfirmationAlert";
+import { logout } from "@/features/auth/authSlice";
+import { logoutUser } from "@/features/auth/logoutApi";
+import { RootState } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+
 import {
   SafeAreaView,
   ScrollView,
@@ -12,6 +17,7 @@ import {
   View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
+import { useSelector } from "react-redux";
 
 type AvailabilityStatus =
   | "available"
@@ -23,11 +29,37 @@ export default function ProfileScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
+    const authState = useAppSelector((state) => state.auth);
+      const dispatch = useAppDispatch();
+  
+  
+    const antiforgeryToken = useSelector(
+      (state: RootState) => state.antiForgery.antiforgeryToken
+    );
 
   const [showAlert, setShowAlert] = useState(false);
   const [showAvailability, setShowAvailability] = useState(false);
   const [availability, setAvailability] =
     useState<AvailabilityStatus>("available");
+
+
+       const logOutApi = async () => {
+        try {
+          const response = await logoutUser(
+            String(authState.userId),
+            String(authState.token),
+            String(antiforgeryToken)
+          );
+    
+          console.log("Logout API response:", response);
+    
+          dispatch(logout());
+          router.replace("/login");
+        } catch (error: any) {
+          console.error("Logout failed:", error.message);
+        }
+      };
+    
 
   const availabilityOptions = [
     {
@@ -318,7 +350,10 @@ export default function ProfileScreen() {
           description={t("profile.logoutDescription")}
           confirmText={t("profile.logoutConfirm")}
           cancelText={t("profile.logoutCancel")}
-          onConfirm={() => setShowAlert(false)}
+          onConfirm={() => {
+            setShowAlert(false)
+            logOutApi()
+          }}
           onCancel={() => setShowAlert(false)}
           confirmColor={theme.colors.colorPrimary600}
           cancelColor={theme.colors.colorBgPage}

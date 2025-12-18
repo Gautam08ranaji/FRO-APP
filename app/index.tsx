@@ -1,30 +1,30 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import { useEffect } from "react";
+// app/index.tsx
+import { useAppSelector } from "@/store/hooks";
+import { Redirect } from "expo-router";
+import React from "react";
 
 export default function Index() {
-  const router = useRouter();
+  const { token, role } = useAppSelector((state) => state.auth);
 
-  useEffect(() => {
-    const boot = async () => {
-      const userData = await AsyncStorage.getItem("user");
+  // ⏳ Wait until redux-persist rehydrates
+  if (token === undefined) {
+    return null;
+  }
 
-      if (!userData) {
-        router.replace("/(onboarding)");
-        return;
-      }
+  // ❌ Not logged in
+  if (!token) {
+    return <Redirect href="/(onboarding)" />;
+  }
 
-      const user = JSON.parse(userData);
+  // ✅ Logged in → role based redirect
+  if (role === "FRO") {
+    return <Redirect href="/(fro)/(dashboard)" />;
+  }
 
-      if (user.role === "FRO") {
-        router.replace("/(fro)/(dashboard)");
-      } else {
-        router.replace("/(frl)/(dashboard)");
-      }
-    };
+  if (role === "FRL") {
+    return <Redirect href="/(frl)/(dashboard)" />;
+  }
 
-    boot();
-  }, []);
-
-  return null;
+  // Safety fallback
+  return <Redirect href="/(onboarding)" />;
 }

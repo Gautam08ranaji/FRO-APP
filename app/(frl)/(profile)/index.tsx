@@ -1,10 +1,22 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import ReusableCard from "@/components/reusables/ReusableCard";
+import { logout } from "@/features/auth/authSlice";
+import { logoutUser } from "@/features/auth/logoutApi";
+import { RootState } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
+import { useSelector } from "react-redux";
 
 /* ================= STATIC DATA WITH PROPER TYPES ================= */
 
@@ -28,6 +40,7 @@ type SettingItem = {
   id: number;
   label: string;
   icon: IconName;
+  onPress: () => void;
 };
 
 const teamData: TeamMember[] = [
@@ -101,19 +114,93 @@ const achievements: Achievement[] = [
 ];
 
 const settings: SettingItem[] = [
-  { id: 1, label: "Edit Profile", icon: "edit-line" },
-  { id: 2, label: "Manage Zone", icon: "map-pin-line" },
-  { id: 3, label: "Team Settings", icon: "team-line" },
-  { id: 4, label: "Notification Settings", icon: "notification-3-line" },
-  { id: 5, label: "Change Password", icon: "lock-line" },
-  { id: 6, label: "Help & Support", icon: "question-line" },
-  { id: 7, label: "App Settings", icon: "settings-3-line" },
+  {
+    id: 1,
+    label: "Notification Settings",
+    icon: "notification-3-line",
+    onPress: () => router.push("/(frl)/(profile)/NotificationsScreen"),
+  },
+  {
+    id: 2,
+    label: "Change Password",
+    icon: "lock-line",
+    onPress: () => router.push("/(frl)/(profile)/changePassword"),
+  },
+  {
+    id: 3,
+    label: "Help & Support",
+    icon: "question-line",
+    onPress: () => router.push("/(frl)/(profile)/helpAndSupport"),
+  },
+  {
+    id: 4,
+    label: "App Settings",
+    icon: "settings-3-line",
+     onPress: () => router.push("/(frl)/(profile)/appSetting"),
+  },
+  {
+    id: 5,
+    label: "About",
+    icon: "information-line",
+     onPress: () => router.push("/(frl)/(profile)/about"),
+  },
 ];
 
 /* ================= SCREEN ================= */
 
 export default function ProfileScreen() {
   const { theme } = useTheme();
+  const authState = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+
+  const antiforgeryToken = useSelector(
+    (state: RootState) => state.antiForgery.antiforgeryToken
+  );
+
+  console.log(authState.userId);
+  console.log("anttt", antiforgeryToken);
+
+  const logOutApi = async () => {
+    try {
+      const response = await logoutUser(
+        String(authState.userId),
+        String(authState.token),
+        String(antiforgeryToken)
+      );
+
+      console.log("Logout API response:", response);
+
+      // ✅ Normal logout
+      dispatch(logout());
+      router.replace("/login");
+    } catch (error: any) {
+      console.error("Logout failed:", error);
+
+      const status = error?.status || error?.response?.status;
+      const message =
+        error?.data?.data ||
+        error?.response?.data?.data ||
+        "Your session has expired. Please login again.";
+
+      // ✅ Handle Session Expired / Logged in elsewhere
+      if (status === 440) {
+        Alert.alert("Session Expired", message, [{ text: "OK" }], {
+          cancelable: false,
+        });
+
+        // ⏳ Wait 3 seconds → clear auth → go to login
+        setTimeout(() => {
+          dispatch(logout()); // clear redux auth
+          router.replace("/login"); // redirect
+        }, 3000);
+
+        return;
+      }
+
+      // ❌ Fallback error
+      Alert.alert("Logout Failed", "Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <BodyLayout type="screen" screenName="Profile">
@@ -405,6 +492,7 @@ export default function ProfileScreen() {
       {settings.map((item) => (
         <TouchableOpacity
           key={item.id}
+          onPress={item.onPress}
           style={[
             styles.settingRow,
             { backgroundColor: theme.colors.colorBgAlt },
@@ -425,6 +513,7 @@ export default function ProfileScreen() {
               {item.label}
             </Text>
           </View>
+
           <RemixIcon
             name="arrow-right-s-line"
             size={20}
@@ -441,6 +530,9 @@ export default function ProfileScreen() {
             borderColor: theme.colors.validationErrorText,
           },
         ]}
+        onPress={() => {
+          logOutApi();
+        }}
       >
         <RemixIcon
           name="logout-circle-r-line"

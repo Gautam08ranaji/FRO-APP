@@ -32,7 +32,6 @@ export default function CasesScreen() {
   // 🔑 IMPORTANT FLAG
   const [hasShownPopup, setHasShownPopup] = useState(false);
 
-  /* ---------------- SHOW POPUP ONLY ONCE ---------------- */
   useFocusEffect(
     useCallback(() => {
       setShowPopUp(true);
@@ -40,7 +39,6 @@ export default function CasesScreen() {
     }, [])
   );
 
-  /* ---------------- TABS ---------------- */
   const tabs = [
     { label: "All", key: "all" },
     { label: t("cases.tabNew"), key: "new" },
@@ -79,7 +77,6 @@ export default function CasesScreen() {
     }
   }, [activeTab]);
 
-  /* ---------------- DATA ---------------- */
   const data = [
     {
       name: "रामलाल शर्मा",

@@ -1,3 +1,4 @@
+import { RootState } from '@/store';
 import { useAppSelector } from '@/store/hooks';
 import { useTheme } from '@/theme/ThemeContext';
 import { useRouter } from 'expo-router';
@@ -17,6 +18,10 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const [appReady, setAppReady] = useState(false);
     const authState = useAppSelector(state => state.auth);
+      const antiforgeryToken = useAppSelector(
+        (state: RootState) => state.antiForgery.antiforgeryToken
+      );
+  console.log("ba",antiforgeryToken);
   
   // console.log("REDUX AUTH STATE 👉", authState);
 

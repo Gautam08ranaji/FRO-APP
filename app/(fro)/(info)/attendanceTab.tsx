@@ -18,7 +18,6 @@ type AttendanceItem = {
   status: AttendanceStatus;
 };
 
-/* ------------------ ✅ MOCK API DATA (REPLACE WITH REAL API) ------------------ */
 
 const attendanceHistory: AttendanceItem[] = [
   {

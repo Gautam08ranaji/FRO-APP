@@ -51,6 +51,9 @@ export default function LoginScreen() {
     }
   };
 
+  console.log();
+  
+
   const validate = () => {
     let valid = true;
     const trimmedEmail = email.trim();
