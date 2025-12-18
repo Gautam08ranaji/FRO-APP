@@ -1,7 +1,6 @@
 import ConfirmationAlert from "@/components/reusables/ConfirmationAlert";
 import { logout } from "@/features/auth/authSlice";
 import { logoutUser } from "@/features/auth/logoutApi";
-import { RootState } from "@/store";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { useRouter } from "expo-router";
@@ -9,6 +8,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
+  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -17,7 +17,6 @@ import {
   View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
-import { useSelector } from "react-redux";
 
 type AvailabilityStatus =
   | "available"
@@ -33,32 +32,65 @@ export default function ProfileScreen() {
       const dispatch = useAppDispatch();
   
   
-    const antiforgeryToken = useSelector(
-      (state: RootState) => state.antiForgery.antiforgeryToken
-    );
 
   const [showAlert, setShowAlert] = useState(false);
   const [showAvailability, setShowAvailability] = useState(false);
   const [availability, setAvailability] =
     useState<AvailabilityStatus>("available");
 
+    console.log(authState);
+    
 
+
+      const antiforgeryToken = useAppSelector(
+       (state) => state.auth.antiforgeryToken
+     );
+     
+     
+       console.log(authState.userId);
+       console.log("anttt", antiforgeryToken);
+     
        const logOutApi = async () => {
-        try {
-          const response = await logoutUser(
-            String(authState.userId),
-            String(authState.token),
-            String(antiforgeryToken)
-          );
-    
-          console.log("Logout API response:", response);
-    
-          dispatch(logout());
-          router.replace("/login");
-        } catch (error: any) {
-          console.error("Logout failed:", error.message);
-        }
-      };
+         try {
+           const response = await logoutUser(
+             String(authState.userId),
+             String(authState.token),
+             String(antiforgeryToken)
+           );
+     
+           console.log("Logout API response:", response);
+     
+           // ✅ Normal logout
+           dispatch(logout());
+           router.replace("/login");
+         } catch (error: any) {
+           console.error("Logout failed:", error);
+     
+           const status = error?.status || error?.response?.status;
+           const message =
+             error?.data?.data ||
+             error?.response?.data?.data ||
+             "Your session has expired. Please login again.";
+     
+           // ✅ Handle Session Expired / Logged in elsewhere
+           if (status === 440) {
+             Alert.alert("Session Expired", message, [{ text: "OK" }], {
+               cancelable: false,
+             });
+     
+             // ⏳ Wait 3 seconds → clear auth → go to login
+             setTimeout(() => {
+               dispatch(logout()); // clear redux auth
+               router.replace("/login"); // redirect
+             }, 3000);
+     
+             return;
+           }
+     
+           // ❌ Fallback error
+           Alert.alert("Logout Failed", "Something went wrong. Please try again.");
+         }
+       };
     
 
   const availabilityOptions = [

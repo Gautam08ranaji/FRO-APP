@@ -40,16 +40,19 @@ export default function LoginScreen() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const loadAntiForgeryToken = async (bearerToken: string) => {
-    try {
-      const res = await fetchAntiForgeryToken(bearerToken);
+ const loadAntiForgeryToken = async (bearerToken: string) => {
+  try {
+    const res = await fetchAntiForgeryToken(bearerToken);
 
-      dispatch(setAntiForgeryToken(res.token));
-    } catch (e) {
-      console.log("❌ Anti-forgery fetch failed", e);
-      throw e;
-    }
-  };
+    dispatch(setAntiForgeryToken(res.token));
+
+    return res; // ✅ IMPORTANT
+  } catch (e) {
+    console.log("❌ Anti-forgery fetch failed", e);
+    throw e;
+  }
+};
+
 
   console.log();
   
@@ -77,62 +80,67 @@ export default function LoginScreen() {
 
   // console.log("login loc",address,location?.coords?.latitude,location?.coords?.longitude);
 
-  const handleLogin = async () => {
-    if (isLoading) return;
-    if (!validate()) return;
+ const handleLogin = async () => {
+  if (isLoading) return;
+  if (!validate()) return;
 
-    try {
-      // 1️⃣ LOGIN
-      const res = await login({
-        userName: email.trim(),
-        password,
-        remoteIp: "127.0.0.1",
-        latitude: location?.coords?.latitude || "",
-        longitude: location?.coords?.longitude || "",
-      }).unwrap();
+  try {
+    // 1️⃣ LOGIN
+    const res = await login({
+      userName: email.trim(),
+      password,
+      remoteIp: "127.0.0.1",
+      latitude: location?.coords?.latitude || "",
+      longitude: location?.coords?.longitude || "",
+    }).unwrap();
 
-      if (!res.success || !res.data) {
-        Alert.alert(
-          t("login.errorTitle"),
-          res.errors?.[0] ?? t("login.errors.loginFailed")
-        );
-        return;
-      }
-
-      const user = res.data;
-
-      const role = user.userRoles.some(
-        (r) => r.roleName.toUpperCase() === "FRO"
-      )
-        ? "FRO"
-        : "FRL";
-
-      // 2️⃣ STORE AUTH DATA
-      dispatch(
-        setAuth({
-          id: user.id,
-          userName: user.userName,
-          bearerToken: user.bearerToken,
-          firstName: user.firstName ?? null,
-          lastName: user.lastName ?? null,
-          role,
-        })
-      );
-
-      // 3️⃣ CALL ANTIFORGERY API (PASS TOKEN DIRECTLY)
-      await loadAntiForgeryToken(user.bearerToken);
-
-      // 4️⃣ NAVIGATE AFTER SUCCESS
-      router.replace(
-        role === "FRO" ? "/(fro)/(dashboard)" : "/(frl)/(dashboard)"
-      );
-    } catch (err: any) {
+    if (!res.success || !res.data) {
       Alert.alert(
         t("login.errorTitle"),
-        err?.data?.errors?.[0] ?? t("login.errors.generic")
+        res.errors?.[0] ?? t("login.errors.loginFailed")
       );
+      return;
     }
-  };
+
+    const user = res.data;
+
+    const role = user.userRoles.some(
+      (r) => r.roleName.toUpperCase() === "FRO"
+    )
+      ? "FRO"
+      : "FRL";
+
+    // 2️⃣ FETCH ANTIFORGERY TOKEN USING BEARER TOKEN
+    const antiRes = await loadAntiForgeryToken(user.bearerToken);
+    // antiRes => { token: string }
+
+    // 3️⃣ STORE AUTH + ANTIFORGERY TOGETHER ✅
+    dispatch(
+      setAuth({
+        id: user.id,
+        userName: user.userName,
+        bearerToken: user.bearerToken,
+        firstName: user.firstName ?? null,
+        lastName: user.lastName ?? null,
+        role,
+        antiforgeryToken: antiRes.token, // ✅ NOW VALID
+      })
+    );
+
+    // 4️⃣ NAVIGATE
+    router.replace(
+      role === "FRO"
+        ? "/(fro)/(dashboard)"
+        : "/(frl)/(dashboard)"
+    );
+  } catch (err: any) {
+    Alert.alert(
+      t("login.errorTitle"),
+      err?.data?.errors?.[0] ?? t("login.errors.generic")
+    );
+  }
+};
+
 
   return (
     <SafeAreaView

@@ -2,7 +2,6 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import ReusableCard from "@/components/reusables/ReusableCard";
 import { logout } from "@/features/auth/authSlice";
 import { logoutUser } from "@/features/auth/logoutApi";
-import { RootState } from "@/store";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
@@ -16,7 +15,6 @@ import {
   View,
 } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
-import { useSelector } from "react-redux";
 
 /* ================= STATIC DATA WITH PROPER TYPES ================= */
 
@@ -153,9 +151,10 @@ export default function ProfileScreen() {
   const authState = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
 
-  const antiforgeryToken = useSelector(
-    (state: RootState) => state.antiForgery.antiforgeryToken
-  );
+ const antiforgeryToken = useAppSelector(
+  (state) => state.auth.antiforgeryToken
+);
+
 
   console.log(authState.userId);
   console.log("anttt", antiforgeryToken);

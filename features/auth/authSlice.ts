@@ -1,3 +1,4 @@
+// app/features/auth/authSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type UserRole = "FRO" | "FRL";
@@ -9,6 +10,9 @@ interface AuthState {
   userName: string | null;
   firstName: string | null;
   lastName: string | null;
+
+  // ✅ NEW
+  antiforgeryToken: string | null;
 }
 
 const initialState: AuthState = {
@@ -18,6 +22,8 @@ const initialState: AuthState = {
   userName: null,
   firstName: null,
   lastName: null,
+
+  antiforgeryToken: null,
 };
 
 const authSlice = createSlice({
@@ -33,6 +39,9 @@ const authSlice = createSlice({
         role: UserRole;
         firstName?: string | null;
         lastName?: string | null;
+
+        // ✅ NEW
+        antiforgeryToken?: string | null;
       }>
     ) {
       state.userId = action.payload.id;
@@ -41,6 +50,10 @@ const authSlice = createSlice({
       state.userName = action.payload.userName;
       state.firstName = action.payload.firstName ?? null;
       state.lastName = action.payload.lastName ?? null;
+
+      // ✅ STORE ANTIFORGERY
+      state.antiforgeryToken =
+        action.payload.antiforgeryToken ?? null;
     },
 
     logout(state) {
@@ -50,6 +63,7 @@ const authSlice = createSlice({
       state.userName = null;
       state.firstName = null;
       state.lastName = null;
+      state.antiforgeryToken = null;
     },
   },
 });
