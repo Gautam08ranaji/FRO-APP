@@ -12,6 +12,7 @@ import {
 
 // IMPORT ALL TAB SCREENS
 import InformationTab from "./InformationTabs";
+import DocumentsTab from "./documents";
 import EmotionalSupportTab from "./emotionalSupport";
 import FieldInterventionTab from "./fieldIntervention";
 import GuidanceTab from "./guidance";
@@ -29,6 +30,7 @@ export default function InfoScreen() {
     { key: "guidance", label: t("Guidance") },
     { key: "field_intervention", label: t("Field Intervention") },
     { key: "emotional_support", label: t("Emotional Support") },
+    { key: "Documents", label: "Documents" },
   ];
 
   const renderTabContent = () => {
@@ -43,6 +45,8 @@ export default function InfoScreen() {
         return <EmotionalSupportTab />;
       case "scheme":
         return <SchemeTab />;
+      case "Documents":
+        return <DocumentsTab />;
       default:
         return null;
     }
