@@ -485,7 +485,7 @@ export default function ProfileScreen() {
           { color: theme.colors.colorTextSecondary },
         ]}
       >
-        Settings & Performance
+        Settings 
       </Text>
 
       {settings.map((item) => (

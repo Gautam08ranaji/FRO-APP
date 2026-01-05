@@ -314,6 +314,12 @@ export default function ProfileScreen() {
           () => router.push("/profileDetails"),
           theme.colors.validationInfoText
         )}
+        {renderItem(
+          "Knowledge Management",
+          "building-line",
+          () => router.push("/knowledgeManagement"),
+          theme.colors.colorAccent500
+        )}
 
         {renderItem(
           "Your Performance",

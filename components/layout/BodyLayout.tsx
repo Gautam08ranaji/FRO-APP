@@ -12,7 +12,10 @@ import {
   ViewStyle,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
@@ -33,6 +36,7 @@ export default function BodyLayout({
 }: BodyLayoutProps) {
   const { theme } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   // ✅ CENTRALIZED ICON NAVIGATION (NORMAL vs FRL)
   const handleIconPress = (
@@ -43,24 +47,22 @@ export default function BodyLayout({
         router.push("/(frl)/(dashboard)/notification");
       } else if (iconType === "escalation") {
         router.push("/(frl)/(dashboard)/alert");
-      } else if (iconType === "call") {
-        // router.push("/frl/call");
       }
     } else {
       if (iconType === "notification") {
         router.push("/notification");
       } else if (iconType === "escalation") {
         router.push("/escalation");
-      } else if (iconType === "call") {
-        // router.push("/call");
       }
     }
   };
 
   return (
-    <SafeAreaView
-      style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
-    >
+ <SafeAreaView
+  edges={["top"]}
+  style={[styles.safeArea, { backgroundColor: theme.colors.colorBgSurface }]}
+>
+
       {type === "dashboard" || type === "frl" ? (
         <View
           style={[
@@ -76,7 +78,7 @@ export default function BodyLayout({
               <Text
                 style={[
                   theme.typography.fontH2,
-                  { color: theme.colors.colorBgPage, paddingHorizontal: 1 },
+                  { color: theme.colors.colorBgPage },
                 ]}
               >
                 Hello , Rejesh
@@ -97,7 +99,6 @@ export default function BodyLayout({
             </View>
 
             <View style={styles.iconRow}>
-              {/* 🔔 Notification */}
               <TouchableOpacity
                 style={[
                   styles.iconCircle,
@@ -115,7 +116,6 @@ export default function BodyLayout({
                 </View>
               </TouchableOpacity>
 
-              {/* ⚠️ Escalation */}
               <TouchableOpacity
                 style={[
                   styles.iconCircle,
@@ -130,14 +130,12 @@ export default function BodyLayout({
                 />
               </TouchableOpacity>
 
-              {/* ✅ Call icon hidden for FRL */}
               {type !== "frl" && (
                 <TouchableOpacity
                   style={[
                     styles.iconCircle,
                     { backgroundColor: theme.colors.colorBgSurface },
                   ]}
-                  onPress={() => handleIconPress("call")}
                 >
                   <RemixIcon
                     name="phone-line"
@@ -149,7 +147,6 @@ export default function BodyLayout({
             </View>
           </View>
 
-          {/* ✅ Bottom section hidden for FRL */}
           {type !== "frl" && (
             <View
               style={[
@@ -164,16 +161,13 @@ export default function BodyLayout({
                     { color: theme.colors.colorPrimary600 },
                   ]}
                 >
-                    {"Today's Duty"}
+                 {" Today's Duty"}
                 </Text>
 
                 <Text
                   style={[
                     theme.typography.fontBody,
-                    {
-                      color: theme.colors.colorPrimary600,
-                      paddingHorizontal: 1,
-                    },
+                    { color: theme.colors.colorPrimary600 },
                   ]}
                 >
                   Total Cases
@@ -228,7 +222,6 @@ export default function BodyLayout({
               {
                 color: theme.colors.colorBgPage,
                 fontSize: width * 0.05,
-                paddingHorizontal: 1,
               },
             ]}
           >
@@ -241,11 +234,14 @@ export default function BodyLayout({
         showsVerticalScrollIndicator={false}
         style={[
           styles.bodyContainer,
-          scrollViewStyle,
           { backgroundColor: theme.colors.colorBgSurface },
+          scrollViewStyle,
         ]}
         contentContainerStyle={[
-          styles.contentPadding,
+          {
+            flexGrow: 1,
+            paddingBottom: insets.bottom + 16,
+          },
           scrollContentStyle,
         ]}
       >
@@ -332,10 +328,5 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     padding: 16,
-    marginTop: 10,
-  },
-
-  contentPadding: {
-    paddingBottom: 60,
   },
 });

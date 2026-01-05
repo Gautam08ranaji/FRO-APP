@@ -1,0 +1,16 @@
+export const fieldLabelMap: Record<string, string> = {
+  name: "Full Name",
+  dob: "Date of Birth",
+  gender: "Gender",
+  phoneNumber: "Phone Number",
+  emergencyContactNumber: "Emergency Contact Number",
+  country: "Country",
+  state: "State",
+  city: "City",
+  pincode: "Pincode",
+  addressLine1: "Address Line 1",
+  addressLine2: "Address Line 2",
+  landmark: "Landmark",
+  additionalInfo: "Additional Information",
+  adharNumber: "Aadhaar Number",
+};
