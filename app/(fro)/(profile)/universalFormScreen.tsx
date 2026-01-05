@@ -1,35 +1,25 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import FormRenderer from "@/forms/FormRenderer";
+import { useLocalSearchParams } from "expo-router";
 import React from "react";
 
 export default function DynamicFormScreen() {
-  const payload = {
-
-  name: "",
-  descriptions: "",
-  state: "",
-  stateId: null,
-  district: "",
-  districtId: null,
-  city: "",
-  latLong: "",
-  address: "",
-  contactName: "",
-  contactPhone: "",
-  contactWebsite: "",
-  contactEmail: "",
-  isEnabled: true,
+  const params = useLocalSearchParams();
+  
 
 
+  const handleSubmit = (data: any) => {
+    console.log("FORM DATA SUBMITTED:", data);
+    // Your submission logic here
   };
 
+  // Get screen title from params or use default
+  const screenTitle = (params.title as string) || "Dynamic Form";
+
   return (
-    <BodyLayout type={"screen"} screenName="Dynamic Form">
+    <BodyLayout type="screen" screenName={screenTitle}>
       <FormRenderer
-        payload={payload}
-        onSubmit={(data) => {
-          console.log("FORM DATA", data);
-        }}
+        onSubmit={handleSubmit}
       />
     </BodyLayout>
   );

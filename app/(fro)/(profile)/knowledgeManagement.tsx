@@ -1,5 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
+import { getFormPayload } from "@/services/payload"; // Import the payload utility
 import { useTheme } from "@/theme/ThemeContext";
+import { useRouter } from "expo-router"; // or your navigation method
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -9,7 +11,6 @@ import {
   View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
-
 import AddCentreTab from "./AddCentreTab";
 import SubmittedCentreTab from "./SubmittedCentreTab";
 
@@ -20,46 +21,47 @@ type CentreType = {
 
 const CENTRE_TYPES: CentreType[] = [
   { id: "old_age_homes", label: "Old Age Homes" },
-  { id: "caregivers", label: "Caregivers" },
-  { id: "day_care_centres", label: "Day Care Centres" },
-  { id: "elder_friendly_products", label: "Elder-friendly Products" },
-
-  { id: "list_of_hospitals", label: "List of Hospitals" },
-  { id: "psychiatric_clinics", label: "Psychiatric Clinics" },
-  { id: "counselling_centres", label: "Counselling Centres" },
-  { id: "palliative_care_units", label: "Palliative Care Units" },
-
-  { id: "organ_donation_organizations", label: "Organ Donation Organizations" },
-  { id: "diagnostic_centres", label: "Diagnostic Centres" },
-  { id: "senior_citizens_directory", label: "Senior Citizens Directory" },
-  { id: "health_centres", label: "Health Centres" },
-
-  { id: "blood_banks", label: "Blood Banks" },
-  { id: "volunteers", label: "Volunteers" },
-  { id: "para_legal_volunteers", label: "Para Legal Volunteers" },
-  { id: "ngos_cbos_elder_care", label: "NGOs / CBOs  " },
-
-  { id: "district_officials", label: "District Officials" },
-  { id: "other_helplines", label: "Other Helplines" },
-  { id: "resident_welfare_associations", label: "Resident Welfare Associations" },
-  { id: "police_stations", label: "Police Stations" },
+  { id: "ngos", label: "NGOs" },
 ];
-
 
 export default function AddNewCentreScreen() {
   const { theme } = useTheme();
+  const router = useRouter(); // or useNavigation() depending on your setup
 
   const [activeTab, setActiveTab] = useState<"add" | "submitted">("add");
-  const [selectedId, setSelectedId] = useState("old_age");
+  const [selectedId, setSelectedId] = useState("old_age_homes");
   const [search, setSearch] = useState("");
 
   const filteredData = CENTRE_TYPES.filter((item) =>
     item.label.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleCentreSelect = (id: string) => {
+    setSelectedId(id);
+    
+    const payload = getFormPayload(id);
+    
+    navigateToFormScreen(id, payload);
+  };
+
+  const navigateToFormScreen = (centreType: string, payload: any) => {
+    const payloadString = JSON.stringify(payload);
+
+    router.push({
+      pathname: "/universalFormScreen", 
+      params: {
+        centreType: centreType,
+        payload: payloadString,
+        title: CENTRE_TYPES.find(item => item.id === centreType)?.label || "Add Centre"
+      }
+    });
+  };
+
   return (
-    <BodyLayout type="screen" screenName="Knowldge Management"
-    scrollContentStyle={{ paddingHorizontal: 16 , }}
+    <BodyLayout 
+      type="screen" 
+      screenName="Knowledge Management"
+      scrollContentStyle={{ paddingHorizontal: 16 }}
     >
       {/* Tabs */}
       <View style={styles.tabRow}>
@@ -119,13 +121,11 @@ export default function AddNewCentreScreen() {
         <AddCentreTab
           data={filteredData}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={handleCentreSelect} // Updated to use the new handler
         />
       )}
 
       {activeTab === "submitted" && <SubmittedCentreTab search={search} />}
-
-    
     </BodyLayout>
   );
 }
@@ -162,5 +162,4 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
   },
- 
 });
