@@ -1,6 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import PunchInCard from "@/components/reusables/PunchInCard";
 import ReusableCard from "@/components/reusables/ReusableCard";
+import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React from "react";
@@ -11,6 +12,10 @@ export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const screenWidth = Dimensions.get("window").width;
+  const authState = useAppSelector((state) => state.auth);
+
+console.log(authState.userId);
+console.log(authState.antiforgeryToken);
 
 
   return (
@@ -35,6 +40,8 @@ export default function HomeScreen() {
       >
         {t("home.casesOverview")}
       </Text>
+
+
 
       {/* ROW 1 */}
       <View style={styles.row}>

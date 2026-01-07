@@ -129,9 +129,9 @@ export default function HomeScreen() {
   (state: RootState) => state.antiForgery.antiforgeryToken
 );
 
-console.log("antiforgeryToken",antiforgeryToken);
-console.log(authState.userId);
-console.log(authState.token);
+// console.log("antiforgeryToken",antiforgeryToken);
+// console.log(authState.userId);
+// console.log(authState.token);
 
 
 

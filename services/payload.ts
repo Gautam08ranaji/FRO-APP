@@ -8,7 +8,6 @@ export const NGO_FORM_PAYLOAD = {
   stateId: null as number | null,
   district: "",
   districtId: null as number | null,
-  city: "",
   latLong: "",
   address: "",
   contactName: "",

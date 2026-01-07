@@ -18,80 +18,69 @@ import {
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
-type AvailabilityStatus =
-  | "available"
-  | "busy"
-  | "in_meeting"
-  | "unavailable";
+type AvailabilityStatus = "available" | "busy" | "in_meeting" | "unavailable";
 
 export default function ProfileScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
-    const authState = useAppSelector((state) => state.auth);
-      const dispatch = useAppDispatch();
-  
-  
+  const authState = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
 
   const [showAlert, setShowAlert] = useState(false);
   const [showAvailability, setShowAvailability] = useState(false);
   const [availability, setAvailability] =
     useState<AvailabilityStatus>("available");
 
-    console.log(authState);
-    
+  // console.log(authState);
+
+  const antiforgeryToken = useAppSelector(
+    (state) => state.auth.antiforgeryToken
+  );
 
 
-      const antiforgeryToken = useAppSelector(
-       (state) => state.auth.antiforgeryToken
-     );
-     
-     
-       console.log(authState.userId);
-       console.log("anttt", antiforgeryToken);
-     
-       const logOutApi = async () => {
-         try {
-           const response = await logoutUser(
-             String(authState.userId),
-             String(authState.token),
-             String(antiforgeryToken)
-           );
-     
-           console.log("Logout API response:", response);
-     
-           // ✅ Normal logout
-           dispatch(logout());
-           router.replace("/login");
-         } catch (error: any) {
-           console.error("Logout failed:", error);
-     
-           const status = error?.status || error?.response?.status;
-           const message =
-             error?.data?.data ||
-             error?.response?.data?.data ||
-             "Your session has expired. Please login again.";
-     
-           // ✅ Handle Session Expired / Logged in elsewhere
-           if (status === 440) {
-             Alert.alert("Session Expired", message, [{ text: "OK" }], {
-               cancelable: false,
-             });
-     
-             // ⏳ Wait 3 seconds → clear auth → go to login
-             setTimeout(() => {
-               dispatch(logout()); // clear redux auth
-               router.replace("/login"); // redirect
-             }, 3000);
-     
-             return;
-           }
-     
-           // ❌ Fallback error
-           Alert.alert("Logout Failed", "Something went wrong. Please try again.");
-         }
-       };
-    
+
+  const logOutApi = async () => {
+    try {
+      const response = await logoutUser(
+        String(authState.userId),
+        String(authState.token),
+        String(antiforgeryToken)
+      );
+
+      console.log("Logout API response:", response);
+
+      // ✅ Normal logout
+      dispatch(logout());
+      router.replace("/login");
+    } catch (error: any) {
+      console.error("Logout failed:", error);
+
+      const status = error?.status || error?.response?.status;
+      const message =
+        error?.data?.data ||
+        error?.response?.data?.data ||
+        "Your session has expired. Please login again.";
+
+      // ✅ Handle Session Expired / Logged in elsewhere
+      if (status === 440) {
+        Alert.alert("Session Expired", message, [{ text: "OK" }], {
+          cancelable: false,
+        });
+
+        // ⏳ Wait 3 seconds → clear auth → go to login
+        setTimeout(() => {
+          dispatch(logout()); // clear redux auth
+          router.replace("/login"); // redirect
+        }, 3000);
+
+        return;
+      }
+
+      // ❌ Fallback error
+      Alert.alert("Logout Failed", "Something went wrong. Please try again.");
+    }
+  };
 
   const availabilityOptions = [
     {
@@ -121,7 +110,7 @@ export default function ProfileScreen() {
   ];
 
   const selectedAvailability = availabilityOptions.find(
-    a => a.key === availability
+    (a) => a.key === availability
   );
 
   const renderItem = (
@@ -150,10 +139,7 @@ export default function ProfileScreen() {
         </View>
 
         <Text
-          style={[
-            styles.itemText,
-            { color: theme.colors.colorTextSecondary },
-          ]}
+          style={[styles.itemText, { color: theme.colors.colorTextSecondary }]}
         >
           {label}
         </Text>
@@ -215,7 +201,9 @@ export default function ProfileScreen() {
             onPress={() => setShowAvailability(!showAvailability)}
             style={[styles.item, { backgroundColor: theme.colors.colorBgPage }]}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+            >
               <View
                 style={{
                   padding: 10,
@@ -252,11 +240,7 @@ export default function ProfileScreen() {
             </View>
 
             <RemixIcon
-              name={
-                showAvailability
-                  ? "arrow-up-s-line"
-                  : "arrow-down-s-line"
-              }
+              name={showAvailability ? "arrow-up-s-line" : "arrow-down-s-line"}
               size={26}
               color={theme.colors.colorPrimary600}
             />
@@ -273,7 +257,7 @@ export default function ProfileScreen() {
                 overflow: "hidden",
               }}
             >
-              {availabilityOptions.map(option => (
+              {availabilityOptions.map((option) => (
                 <TouchableOpacity
                   key={option.key}
                   onPress={() => {
@@ -371,10 +355,7 @@ export default function ProfileScreen() {
               color={theme.colors.colorError600}
             />
             <Text
-              style={[
-                styles.logoutText,
-                { color: theme.colors.colorError600 },
-              ]}
+              style={[styles.logoutText, { color: theme.colors.colorError600 }]}
             >
               {t("profile.logout")}
             </Text>
@@ -389,8 +370,9 @@ export default function ProfileScreen() {
           confirmText={t("profile.logoutConfirm")}
           cancelText={t("profile.logoutCancel")}
           onConfirm={() => {
-            setShowAlert(false)
-            logOutApi()
+            setShowAlert(false);
+            // logOutApi();
+            router.push('/(onboarding)/login')
           }}
           onCancel={() => setShowAlert(false)}
           confirmColor={theme.colors.colorPrimary600}

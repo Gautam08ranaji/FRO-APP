@@ -157,7 +157,7 @@ export default function ProfileScreen() {
 
 
   console.log(authState.userId);
-  console.log("anttt", antiforgeryToken);
+  // console.log("anttt", antiforgeryToken);
 
   const logOutApi = async () => {
     try {
