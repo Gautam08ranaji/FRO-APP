@@ -36,6 +36,7 @@ const CENTRE_TYPES: CentreType[] = [
   { id: "AddBloodBank", label: "Blood Banks" },
 ];
 
+
 /* ================= SCREEN ================= */
 
 export default function SelectCentreTypeScreen() {
