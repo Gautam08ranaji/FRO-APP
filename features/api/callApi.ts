@@ -13,13 +13,13 @@ export const apiClient: AxiosInstance = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    console.log("🚀 [API REQUEST]", {
-      url: `${config.baseURL}${config.url}`,
-      method: config.method?.toUpperCase(),
-      headers: config.headers,
-      data: config.data,
-      timestamp: new Date().toISOString(),
-    });
+    // console.log("🚀 [API REQUEST]", {
+    //   url: `${config.baseURL}${config.url}`,
+    //   method: config.method?.toUpperCase(),
+    //   headers: config.headers,
+    //   data: config.data,
+    //   timestamp: new Date().toISOString(),
+    // });
     return config;
   },
   (error) => {

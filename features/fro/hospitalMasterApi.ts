@@ -34,23 +34,24 @@ export interface AddMobileAppMasterParams {
 /* ================= PAYLOAD MAPPER (BACKEND FIX) ================= */
 
 const mapMobileAppPayload = (data: AddMobileAppMasterPayload) => {
-  const mapped = {
-    name: data.name,
-    discriptions: data.description, // ❗ backend typo
-    state: data.state,
-    stateId: data.stateId,
-    distrinct: data.district,       // ❗ backend typo
-    distrinctId: data.districtId,   // ❗ backend typo
-    city: data.city,
-    latLong: data.latLong,
-    address: data.address,
-    contactName: data.contactName,
-    contactPhone: data.contactPhone,
-    contactWebsite: data.contactWebsite,
-    contactEmail: data.contactEmail,
-    userId: data.userId,
-    isEnabled: data.isEnabled,
-  };
+const mapped = {
+  name: data.name,
+  description: data.description,
+  state: data.state,
+  stateId: data.stateId,
+  district: data.district,
+  districtId: data.districtId,
+  city: data.city,
+  latLong: data.latLong,
+  address: data.address,
+  contactName: data.contactName,
+  contactPhone: data.contactPhone,
+  contactWebsite: data.contactWebsite,
+  contactEmail: data.contactEmail,
+  userId: data.userId,
+  isEnabled: data.isEnabled,
+};
+
   
   console.log('📦 [PAYLOAD MAPPING]', {
     original: data,

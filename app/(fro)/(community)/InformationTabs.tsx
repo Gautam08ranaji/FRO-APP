@@ -60,7 +60,7 @@ export default function InformationTab({ search = "" }) {
 
 
   const routeMap: any = {
-    health: "/detailCardScreen",
+    health: "/health",
     shelter: "/detailCardScreen",
     nutrition: "/detailCardScreen",
     dayCare: "/detailCardScreen",

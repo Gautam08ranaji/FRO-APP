@@ -1,7 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { addMobileAppMaster } from "@/features/fro/hospitalMasterApi";
 import { useAppSelector } from "@/store/hooks";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -104,7 +104,7 @@ export default function AddNewCentreScreen() {
 
     if (res?.success) {
       Alert.alert("Success", res.data?.message || "Centre added");
-      router.replace("/(fro)/(profile)")
+      // router.replace("/(fro)/(profile)")
     } else {
       Alert.alert("Failed", "Centre creation failed");
     }

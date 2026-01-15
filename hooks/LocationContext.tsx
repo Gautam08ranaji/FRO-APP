@@ -61,7 +61,7 @@ export const LocationProvider = ({ children }: { children: React.ReactNode }) =>
           .join(", ");
 
         setAddress(readableAddress);
-        console.log("🏠 Address:", readableAddress);
+        console.log("🏠 Address:", currentLocation.coords);
       }
 
       return true;

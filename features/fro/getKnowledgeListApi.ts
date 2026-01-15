@@ -1,38 +1,45 @@
 import { apiRequest } from "@/features/api/callApi";
 
-
-// app/services/apiContext.ts
+/* ================= API CONTEXT ================= */
 
 export interface ApiAuthContext {
   bearerToken: string;
   antiForgeryToken: string;
 }
 
+/* ================= PARAM TYPES ================= */
 
-/* ================= STATIC QUERY ================= */
-
-const STATIC_FAQ_QUERY = {
-  PageNumber: 1,
-  PageSize: 10,
-  UserId: "19389acb-f897-453d-b94b-b56587954c32",
-};
+interface GetStaticListParams {
+  endpoint: string;        // after /MobileApp
+  auth: ApiAuthContext;
+  userId: string;          // ✅ passed from screen
+}
 
 /* ================= API FUNCTION ================= */
 
-export const getFaqListStatic = (auth: ApiAuthContext) => {
-  console.log("🔧 [GET FAQ LIST – STATIC]", {
-    hasBearerToken: !!auth.bearerToken,
-    hasAntiForgeryToken: !!auth.antiForgeryToken,
-  });
+export const getListStatic = ({
+  endpoint,
+  auth,
+  userId,
+}: GetStaticListParams) => {
+  const finalUrl = `/MobileApp/${endpoint}`;
+
+  const params = {
+    PageNumber: 1,
+    PageSize: 10,
+    UserId: userId,
+  };
+
+
 
   return apiRequest({
-    url: "/MobileApp/GetFaqList",
+    url: finalUrl,
     method: "GET",
     headers: {
       Authorization: `Bearer ${auth.bearerToken}`,
       "X-CSRF-TOKEN": auth.antiForgeryToken,
       Accept: "application/json",
     },
-    params: STATIC_FAQ_QUERY,
+    params,
   });
 };
