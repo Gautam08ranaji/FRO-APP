@@ -22,8 +22,8 @@ const DESTINATION = {
   longitude: 77.320892
 };
 
-// 🔑 Use UNRESTRICTED (WEB) key for Directions
-const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY";
+// ⚠️ Use UNRESTRICTED (WEB) Google Directions API key
+const GOOGLE_MAPS_API_KEY = "AIzaSyDVl4s2zlYODWTIpEfzYePa_hj5nrWksuE";
 
 /* ================= SCREEN ================= */
 
@@ -33,8 +33,12 @@ export default function StartNavigationScreen() {
   const colors = theme.colors;
 
   const mapRef = useRef<MapView>(null);
+
   const [userLocation, setUserLocation] =
     useState<Location.LocationObjectCoords | null>(null);
+
+  const [distance, setDistance] = useState<number | null>(null); // KM
+  const [duration, setDuration] = useState<number | null>(null); // MIN
 
   /* ================= GET USER LOCATION ================= */
 
@@ -44,7 +48,7 @@ export default function StartNavigationScreen() {
         await Location.requestForegroundPermissionsAsync();
 
       if (status !== "granted") {
-        console.log("Location permission denied");
+        console.log("❌ Location permission denied");
         return;
       }
 
@@ -52,12 +56,11 @@ export default function StartNavigationScreen() {
         accuracy: Location.Accuracy.High
       });
 
-      console.log("USER LOCATION:", location.coords);
       setUserLocation(location.coords);
     })();
   }, []);
 
-  /* ================= AUTO ZOOM TO USER + DESTINATION ================= */
+  /* ================= AUTO ZOOM ================= */
 
   useEffect(() => {
     if (!userLocation || !mapRef.current) return;
@@ -68,10 +71,7 @@ export default function StartNavigationScreen() {
           latitude: userLocation.latitude,
           longitude: userLocation.longitude
         },
-        {
-          latitude: DESTINATION.latitude,
-          longitude: DESTINATION.longitude
-        }
+        DESTINATION
       ],
       {
         edgePadding: {
@@ -110,7 +110,6 @@ export default function StartNavigationScreen() {
         ]}
       >
         <MapView
-          key={userLocation ? "with-location" : "no-location"}
           ref={mapRef}
           provider={PROVIDER_GOOGLE}
           style={StyleSheet.absoluteFillObject}
@@ -124,7 +123,7 @@ export default function StartNavigationScreen() {
             description={t("navigation.fullAddress")}
           />
 
-          {/* Route (Optional but recommended) */}
+          {/* Route */}
           {userLocation && (
             <MapViewDirections
               origin={userLocation}
@@ -133,11 +132,10 @@ export default function StartNavigationScreen() {
               strokeWidth={5}
               strokeColor="#1E90FF"
               mode="DRIVING"
-              onError={(err) => {
-                console.log("DIRECTIONS ERROR:", err);
-              }}
               onReady={(result) => {
-                // Refine zoom using actual route
+                setDistance(result.distance);   // KM
+                setDuration(result.duration);   // MIN
+
                 mapRef.current?.fitToCoordinates(
                   result.coordinates,
                   {
@@ -150,6 +148,9 @@ export default function StartNavigationScreen() {
                     animated: true
                   }
                 );
+              }}
+              onError={(err) => {
+                console.log("❌ DIRECTIONS ERROR:", err);
               }}
             />
           )}
@@ -176,13 +177,9 @@ export default function StartNavigationScreen() {
             size={18}
             color={colors.colorTextSecondary}
           />
-          <Text
-            style={[
-              styles.rowText,
-              { color: colors.colorTextSecondary }
-            ]}
-          >
-            {t("navigation.distance")}: {t("navigation.distanceValue")}
+          <Text style={[styles.rowText, { color: colors.colorTextSecondary }]}>
+            {t("navigation.distance")}:{" "}
+            {distance ? `${distance.toFixed(1)} km` : "--"}
           </Text>
         </View>
 
@@ -192,13 +189,9 @@ export default function StartNavigationScreen() {
             size={18}
             color={colors.colorTextSecondary}
           />
-          <Text
-            style={[
-              styles.rowText,
-              { color: colors.colorTextSecondary }
-            ]}
-          >
-            {t("navigation.eta")}: {t("navigation.etaValue")}
+          <Text style={[styles.rowText, { color: colors.colorTextSecondary }]}>
+            {t("navigation.eta")}:{" "}
+            {duration ? `${Math.ceil(duration)} min` : "--"}
           </Text>
         </View>
 
@@ -206,12 +199,7 @@ export default function StartNavigationScreen() {
           {t("navigation.address")}:
         </Text>
 
-        <Text
-          style={[
-            styles.address,
-            { color: colors.colorTextPrimary }
-          ]}
-        >
+        <Text style={[styles.address, { color: colors.colorTextPrimary }]}>
           {t("navigation.fullAddress")}
         </Text>
       </View>
