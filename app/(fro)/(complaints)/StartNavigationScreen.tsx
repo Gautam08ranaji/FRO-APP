@@ -1,6 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
-import React from "react";
+import * as Location from "expo-location";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Linking,
@@ -11,14 +12,18 @@ import {
   View
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapViewDirections from "react-native-maps-directions";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 
 /* ================= CONSTANTS ================= */
 
 const DESTINATION = {
-  latitude: 12.9716,
-  longitude: 77.5946
+  latitude: 28.56719,
+  longitude: 77.320892
 };
+
+// 🔑 Use UNRESTRICTED (WEB) key for Directions
+const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY";
 
 /* ================= SCREEN ================= */
 
@@ -26,6 +31,59 @@ export default function StartNavigationScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const colors = theme.colors;
+
+  const mapRef = useRef<MapView>(null);
+  const [userLocation, setUserLocation] =
+    useState<Location.LocationObjectCoords | null>(null);
+
+  /* ================= GET USER LOCATION ================= */
+
+  useEffect(() => {
+    (async () => {
+      const { status } =
+        await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        console.log("Location permission denied");
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High
+      });
+
+      console.log("USER LOCATION:", location.coords);
+      setUserLocation(location.coords);
+    })();
+  }, []);
+
+  /* ================= AUTO ZOOM TO USER + DESTINATION ================= */
+
+  useEffect(() => {
+    if (!userLocation || !mapRef.current) return;
+
+    mapRef.current.fitToCoordinates(
+      [
+        {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude
+        },
+        {
+          latitude: DESTINATION.latitude,
+          longitude: DESTINATION.longitude
+        }
+      ],
+      {
+        edgePadding: {
+          top: 60,
+          right: 40,
+          bottom: 60,
+          left: 40
+        },
+        animated: true
+      }
+    );
+  }, [userLocation]);
 
   /* ================= OPEN GOOGLE MAPS ================= */
 
@@ -35,9 +93,7 @@ export default function StartNavigationScreen() {
       android: `google.navigation:q=${DESTINATION.latitude},${DESTINATION.longitude}`
     });
 
-    if (url) {
-      Linking.openURL(url);
-    }
+    if (url) Linking.openURL(url);
   };
 
   return (
@@ -46,33 +102,57 @@ export default function StartNavigationScreen() {
       screenName={t("navigation.screenTitle")}
       scrollContentStyle={{ paddingHorizontal: 0 }}
     >
-      {/* ================= REAL MAP ================= */}
+      {/* ================= MAP ================= */}
       <View
         style={[
           styles.mapContainer,
-          {
-            borderColor: colors.colorBorder
-          }
+          { borderColor: colors.colorBorder }
         ]}
       >
         <MapView
+          key={userLocation ? "with-location" : "no-location"}
+          ref={mapRef}
           provider={PROVIDER_GOOGLE}
           style={StyleSheet.absoluteFillObject}
-          initialRegion={{
-            latitude: DESTINATION.latitude,
-            longitude: DESTINATION.longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01
-          }}
           showsUserLocation
           showsMyLocationButton
-          loadingEnabled
         >
+          {/* Destination Marker */}
           <Marker
             coordinate={DESTINATION}
             title={t("navigation.name")}
             description={t("navigation.fullAddress")}
           />
+
+          {/* Route (Optional but recommended) */}
+          {userLocation && (
+            <MapViewDirections
+              origin={userLocation}
+              destination={DESTINATION}
+              apikey={GOOGLE_MAPS_API_KEY}
+              strokeWidth={5}
+              strokeColor="#1E90FF"
+              mode="DRIVING"
+              onError={(err) => {
+                console.log("DIRECTIONS ERROR:", err);
+              }}
+              onReady={(result) => {
+                // Refine zoom using actual route
+                mapRef.current?.fitToCoordinates(
+                  result.coordinates,
+                  {
+                    edgePadding: {
+                      top: 60,
+                      right: 40,
+                      bottom: 60,
+                      left: 40
+                    },
+                    animated: true
+                  }
+                );
+              }}
+            />
+          )}
         </MapView>
       </View>
 
@@ -90,44 +170,59 @@ export default function StartNavigationScreen() {
           {t("navigation.name")}
         </Text>
 
-        {/* Distance */}
         <View style={styles.row}>
           <RemixIcon
             name={"map-pin-2-line" as IconName}
             size={18}
             color={colors.colorTextSecondary}
           />
-          <Text style={[styles.rowText, { color: colors.colorTextSecondary }]}>
+          <Text
+            style={[
+              styles.rowText,
+              { color: colors.colorTextSecondary }
+            ]}
+          >
             {t("navigation.distance")}: {t("navigation.distanceValue")}
           </Text>
         </View>
 
-        {/* ETA */}
         <View style={styles.row}>
           <RemixIcon
             name={"navigation-line" as IconName}
             size={18}
             color={colors.colorTextSecondary}
           />
-          <Text style={[styles.rowText, { color: colors.colorTextSecondary }]}>
+          <Text
+            style={[
+              styles.rowText,
+              { color: colors.colorTextSecondary }
+            ]}
+          >
             {t("navigation.eta")}: {t("navigation.etaValue")}
           </Text>
         </View>
 
-        {/* Address */}
         <Text style={[styles.label, { color: colors.colorTextSecondary }]}>
           {t("navigation.address")}:
         </Text>
 
-        <Text style={[styles.address, { color: colors.colorTextPrimary }]}>
+        <Text
+          style={[
+            styles.address,
+            { color: colors.colorTextPrimary }
+          ]}
+        >
           {t("navigation.fullAddress")}
         </Text>
       </View>
 
-      {/* ================= OPEN GOOGLE MAPS ================= */}
+      {/* ================= BUTTONS ================= */}
       <TouchableOpacity
         onPress={openGoogleMaps}
-        style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
+        style={[
+          styles.primaryBtn,
+          { backgroundColor: colors.btnPrimaryBg }
+        ]}
       >
         <RemixIcon
           name={"navigation-fill" as IconName}
@@ -135,12 +230,16 @@ export default function StartNavigationScreen() {
           color={colors.btnPrimaryText}
           style={{ marginRight: 6 }}
         />
-        <Text style={[styles.primaryBtnText, { color: colors.btnPrimaryText }]}>
+        <Text
+          style={[
+            styles.primaryBtnText,
+            { color: colors.btnPrimaryText }
+          ]}
+        >
           {t("navigation.openMaps")}
         </Text>
       </TouchableOpacity>
 
-      {/* ================= ON THE WAY ================= */}
       <TouchableOpacity
         style={[
           styles.secondaryBtn,
@@ -171,45 +270,38 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     marginTop: 12,
-    overflow: "hidden" // REQUIRED for rounded corners
+    overflow: "hidden"
   },
-
   card: {
     borderRadius: 16,
     padding: 16,
     marginTop: 18,
     borderWidth: 1
   },
-
   name: {
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 10
   },
-
   row: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 6
   },
-
   rowText: {
     marginLeft: 6,
     fontSize: 14
   },
-
   label: {
     marginTop: 12,
     fontSize: 13,
     fontWeight: "500"
   },
-
   address: {
     marginTop: 4,
     fontSize: 14,
     lineHeight: 20
   },
-
   primaryBtn: {
     height: 50,
     borderRadius: 10,
@@ -218,12 +310,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 22
   },
-
   primaryBtnText: {
     fontSize: 16,
     fontWeight: "600"
   },
-
   secondaryBtn: {
     height: 50,
     borderRadius: 10,
@@ -232,7 +322,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 14
   },
-
   secondaryBtnText: {
     fontSize: 16,
     fontWeight: "600"
