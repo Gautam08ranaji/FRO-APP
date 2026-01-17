@@ -1,4 +1,5 @@
 import { useTheme } from "@/theme/ThemeContext";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -49,7 +50,7 @@ export default function PunchInCard() {
 
   const handlePunchOut = () => {
     // setIsPunchedIn(false);
-    // router.push('/(fro)/(dashboard)/updateReport')
+    router.push('/(fro)/(complaints)/StartNavigationScreen')
   };
 
   return (

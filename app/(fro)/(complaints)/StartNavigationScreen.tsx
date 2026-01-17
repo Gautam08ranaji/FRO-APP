@@ -2,13 +2,43 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Linking,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import RemixIcon, { IconName } from "react-native-remix-icon";
+
+/* ================= CONSTANTS ================= */
+
+const DESTINATION = {
+  latitude: 12.9716,
+  longitude: 77.5946
+};
+
+/* ================= SCREEN ================= */
 
 export default function StartNavigationScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const colors = theme.colors;
+
+  /* ================= OPEN GOOGLE MAPS ================= */
+
+  const openGoogleMaps = () => {
+    const url = Platform.select({
+      ios: `http://maps.apple.com/?daddr=${DESTINATION.latitude},${DESTINATION.longitude}`,
+      android: `google.navigation:q=${DESTINATION.latitude},${DESTINATION.longitude}`
+    });
+
+    if (url) {
+      Linking.openURL(url);
+    }
+  };
 
   return (
     <BodyLayout
@@ -16,24 +46,37 @@ export default function StartNavigationScreen() {
       screenName={t("navigation.screenTitle")}
       scrollContentStyle={{ paddingHorizontal: 0 }}
     >
-      {/* MAP PREVIEW */}
+      {/* ================= REAL MAP ================= */}
       <View
         style={[
-          styles.mapBox,
+          styles.mapContainer,
           {
-            backgroundColor: colors.btnPrimaryBg + "22",
             borderColor: colors.colorBorder
           }
         ]}
       >
-        <RemixIcon
-          name={"map-pin-line" as IconName}
-          size={40}
-          color={colors.colorPrimary500}
-        />
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={StyleSheet.absoluteFillObject}
+          initialRegion={{
+            latitude: DESTINATION.latitude,
+            longitude: DESTINATION.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01
+          }}
+          showsUserLocation
+          showsMyLocationButton
+          loadingEnabled
+        >
+          <Marker
+            coordinate={DESTINATION}
+            title={t("navigation.name")}
+            description={t("navigation.fullAddress")}
+          />
+        </MapView>
       </View>
 
-      {/* DETAILS CARD */}
+      {/* ================= DETAILS CARD ================= */}
       <View
         style={[
           styles.card,
@@ -81,8 +124,9 @@ export default function StartNavigationScreen() {
         </Text>
       </View>
 
-      {/* OPEN GOOGLE MAPS */}
+      {/* ================= OPEN GOOGLE MAPS ================= */}
       <TouchableOpacity
+        onPress={openGoogleMaps}
         style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
       >
         <RemixIcon
@@ -96,7 +140,7 @@ export default function StartNavigationScreen() {
         </Text>
       </TouchableOpacity>
 
-      {/* I AM ON THE WAY */}
+      {/* ================= ON THE WAY ================= */}
       <TouchableOpacity
         style={[
           styles.secondaryBtn,
@@ -106,7 +150,12 @@ export default function StartNavigationScreen() {
           }
         ]}
       >
-        <Text style={[styles.secondaryBtnText, { color: colors.colorPrimary500 }]}>
+        <Text
+          style={[
+            styles.secondaryBtnText,
+            { color: colors.colorPrimary500 }
+          ]}
+        >
           {t("navigation.onTheWay")}
         </Text>
       </TouchableOpacity>
@@ -114,14 +163,15 @@ export default function StartNavigationScreen() {
   );
 }
 
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
-  mapBox: {
+  mapContainer: {
     height: 180,
     borderRadius: 16,
     borderWidth: 1,
     marginTop: 12,
-    justifyContent: "center",
-    alignItems: "center"
+    overflow: "hidden" // REQUIRED for rounded corners
   },
 
   card: {
