@@ -21,7 +21,6 @@ export default function OnboardingScreen() {
       const antiforgeryToken = useAppSelector(
         (state: RootState) => state.antiForgery.antiforgeryToken
       );
-  console.log("ba",antiforgeryToken);
   
   // console.log("REDUX AUTH STATE 👉", authState);
 

@@ -27,6 +27,7 @@ export interface BackendUserRole {
 
 /* ---------- USER TYPE ---------- */
 export interface LoginUser {
+  userType: string;
   id: string;
   userName: string;
   firstName?: string;

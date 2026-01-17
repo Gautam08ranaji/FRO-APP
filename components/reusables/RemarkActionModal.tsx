@@ -1,12 +1,12 @@
 import { useTheme } from "@/theme/ThemeContext";
 import React, { ReactNode, useState } from "react";
 import {
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 

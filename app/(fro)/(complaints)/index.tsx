@@ -2,9 +2,11 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import NewCasePopupModal from "@/components/reusables/NewCasePopupModal";
 import RemarkActionModal from "@/components/reusables/RemarkActionModal";
 import StatusModal from "@/components/reusables/StatusModal";
+import { getInteractionsListByAssignToId } from "@/features/fro/interactionApi";
+import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
@@ -18,10 +20,22 @@ import RemixIcon from "react-native-remix-icon";
 
 const { width } = Dimensions.get("window");
 
+/* ================= STATUS MAP ================= */
+
+const STATUS_MAP: Record<string, string> = {
+  Open: "new",
+  Approved: "approved",
+  "On The Way": "onway",
+  "In Progress": "working",
+  "Follow Up": "followup",
+  Closed: "closed",
+};
+
 export default function CasesScreen() {
   const { theme } = useTheme();
-  const params = useLocalSearchParams();
   const { t } = useTranslation();
+  const params = useLocalSearchParams();
+  const authState = useAppSelector((state) => state.auth);
 
   /* ---------------- MODAL STATES ---------------- */
   const [showPopUp, setShowPopUp] = useState(false);
@@ -29,16 +43,11 @@ export default function CasesScreen() {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showDeclinedStatusModal, setShowDeclinedStatusModal] = useState(false);
 
-  // 🔑 IMPORTANT FLAG
-  const [hasShownPopup, setHasShownPopup] = useState(false);
+  /* ---------------- DATA STATE ---------------- */
+  const [interactions, setInteractions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      setShowPopUp(true);
-    
-    }, [])
-  );
-
+  /* ---------------- TABS ---------------- */
   const tabs = [
     { label: "All", key: "all" },
     { label: t("cases.tabNew"), key: "new" },
@@ -57,10 +66,43 @@ export default function CasesScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const tabRefs = useRef<(View | null)[]>([]);
 
+  /* ---------------- FETCH DATA ---------------- */
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchInteractions();
+      setShowPopUp(true);
+    }, [])
+  );
+
+  const fetchInteractions = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getInteractionsListByAssignToId({
+        assignToId: String(authState.userId),
+        pageNumber: 1,
+        pageSize: 100,
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
+
+      setInteractions(res?.data?.interactions || []);
+    } catch (error) {
+      console.error("❌ Failed to fetch cases:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ---------------- SYNC TAB FROM ROUTE ---------------- */
+
   useEffect(() => {
     const index = tabs.findIndex((t) => t.key === params.filter);
     if (index !== -1) setActiveTab(index);
   }, [params.filter]);
+
+  /* ---------------- AUTO SCROLL TAB ---------------- */
 
   useEffect(() => {
     const tabEl = tabRefs.current[activeTab];
@@ -77,28 +119,19 @@ export default function CasesScreen() {
     }
   }, [activeTab]);
 
-  const data = [
-    {
-      name: "रामलाल शर्मा",
-      age: 72,
-      category: "स्वास्थ्य सहायता",
-      ticket: "TKT-14567-001",
-      distance: "2.3 km",
-      time: `10 ${t("cases.timeMinutesAgo")}`,
-      status: "new",
-      tag: t("cases.tabNew"),
-    },
-    {
-      name: "सीता देवी",
-      age: 68,
-      category: "पेंशन सहायता",
-      ticket: "TKT-14567-002",
-      distance: "5.1 km",
-      time: `25 ${t("cases.timeMinutesAgo")}`,
-      status: "approved",
-      tag: t("cases.tabApproved"),
-    },
-  ];
+  /* ---------------- FILTER DATA ---------------- */
+
+  const selectedFilterKey = tabs[activeTab].key;
+
+  const filteredData = useMemo(() => {
+    if (selectedFilterKey === "all") return interactions;
+
+    return interactions.filter(
+      (item) => STATUS_MAP[item.caseStatusName] === selectedFilterKey
+    );
+  }, [interactions, selectedFilterKey]);
+
+  /* ---------------- STATUS COLORS ---------------- */
 
   const statusColors: any = {
     new: "#E53935",
@@ -109,11 +142,7 @@ export default function CasesScreen() {
     closed: "#43A047",
   };
 
-  const selectedFilterKey = tabs[activeTab].key;
-  const filteredData =
-    selectedFilterKey === "all"
-      ? data
-      : data.filter((item) => item.status === selectedFilterKey);
+  /* ================= UI ================= */
 
   return (
     <BodyLayout type="screen" screenName={t("cases.screenTitle")}>
@@ -126,10 +155,8 @@ export default function CasesScreen() {
       >
         {tabs.map((tab, index) => (
           <TouchableOpacity
-            key={index}
-            ref={(el) => {
-              tabRefs.current[index] = el;
-            }}
+            key={tab.key}
+            ref={(el:any) => (tabRefs.current[index] = el)}
             onPress={() => setActiveTab(index)}
             style={[
               styles.tab,
@@ -155,82 +182,78 @@ export default function CasesScreen() {
       </ScrollView>
 
       {/* ---------------- CASE LIST ---------------- */}
-      {filteredData.map((item, idx) => (
-        <View
-          key={idx}
-          style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
-        >
-          <View style={styles.rowBetween}>
-            <Text
-              style={[
-                styles.cardTitle,
-                { color: theme.colors.colorTextSecondary },
-              ]}
-            >
-              {item.name}
+      {filteredData.map((item, idx) => {
+        const statusKey = STATUS_MAP[item.caseStatusName];
+
+        return (
+          <View
+            key={idx}
+            style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
+          >
+            <View style={styles.rowBetween}>
+              <Text style={[styles.cardTitle, { color: theme.colors.colorTextSecondary }]}>
+                {item.name}
+              </Text>
+
+              <View
+                style={[
+                  styles.tagBadge,
+                  { backgroundColor: statusColors[statusKey] },
+                ]}
+              >
+                <Text style={styles.tagText}>{item.caseStatusName}</Text>
+              </View>
+            </View>
+
+            <Text style={styles.cardText}>
+              {t("cases.age")}: {item.ageofTheElder || "-"}
+            </Text>
+            <Text style={styles.cardText}>
+              {t("cases.category")}: {item.categoryName}
+            </Text>
+            <Text style={styles.cardText}>
+              {t("cases.ticket")}: {item.transactionNumber}
             </Text>
 
-            <View
+            <View style={styles.metaRow}>
+              <View style={styles.metaItem}>
+                <RemixIcon name="map-pin-line" size={16} />
+                <Text style={styles.metaText}>{item.districtName}</Text>
+              </View>
+              <View style={styles.metaItem}>
+                <RemixIcon name="time-line" size={16} />
+                <Text style={styles.metaText}>
+                  {new Date(item.callBackDateTime).toLocaleString()}
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
               style={[
-                styles.tagBadge,
-                { backgroundColor: statusColors[item.status] },
+                styles.actionBtn,
+                { backgroundColor: theme.colors.colorPrimary600 },
               ]}
+              onPress={() =>
+                router.push({
+                  pathname: "/CaseDetailScreen",
+                  params: { item : JSON.stringify(item) },
+                })
+              }
             >
-              <Text style={styles.tagText}>{item.tag}</Text>
-            </View>
+              <Text style={styles.actionBtnText}>{t("cases.viewCase")}</Text>
+            </TouchableOpacity>
           </View>
+        );
+      })}
 
-          <Text style={styles.cardText}>
-            {t("cases.age")}: {item.age}
-          </Text>
-          <Text style={styles.cardText}>
-            {t("cases.category")}: {item.category}
-          </Text>
-          <Text style={styles.cardText}>
-            {t("cases.ticket")}: {item.ticket}
-          </Text>
-
-          <View style={styles.metaRow}>
-            <View style={styles.metaItem}>
-              <RemixIcon
-                name="map-pin-line"
-                size={16}
-                color={theme.colors.colorTextSecondary}
-              />
-              <Text style={styles.metaText}>{item.distance}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <RemixIcon
-                name="time-line"
-                size={16}
-                color={theme.colors.colorTextSecondary}
-              />
-              <Text style={styles.metaText}>{item.time}</Text>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.actionBtn,
-              { backgroundColor: theme.colors.colorPrimary600 },
-            ]}
-            onPress={() => router.push("/CaseDetailScreen")}
-          >
-            <Text style={styles.actionBtnText}>{t("cases.viewCase")}</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-
-      {/* ---------------- NEW CASE POPUP ---------------- */}
+      {/* ---------------- MODALS (UNCHANGED) ---------------- */}
       <NewCasePopupModal
         visible={showPopUp}
-        name="Satpal Gulati"
+        name="New Case Assigned"
         age={72}
         timerSeconds={30}
         details={[
-          { label: "Complaint Category:", value: "Health Assistance" },
-          { label: "Ticket Number:", value: "TKT-14567-001" },
-          { label: "Distance:", value: "2.3 km Away" },
+          { label: "Ticket Number:", value: "Auto Assigned" },
         ]}
         onAccept={() => {
           setShowPopUp(false);
@@ -242,7 +265,6 @@ export default function CasesScreen() {
         }}
       />
 
-      {/* ---------------- REMARK MODAL ---------------- */}
       <RemarkActionModal
         visible={showRemarkModal}
         title="Why You Declined"
@@ -257,7 +279,6 @@ export default function CasesScreen() {
         }}
       />
 
-      {/* ---------------- STATUS MODAL ---------------- */}
       <StatusModal
         visible={showStatusModal}
         title="Case Accepted"
@@ -267,12 +288,13 @@ export default function CasesScreen() {
         autoCloseAfter={2000}
         onClose={() => setShowStatusModal(false)}
       />
+
       <StatusModal
         visible={showDeclinedStatusModal}
         title="Case Declined"
         iconName="check-line"
         iconColor={theme.colors.validationErrorText}
-        iconBgColor={theme.colors.validationErrorText +22}
+        iconBgColor={theme.colors.validationErrorText + "22"}
         autoCloseAfter={2000}
         onClose={() => setShowDeclinedStatusModal(false)}
         titleColor={theme.colors.colorAccent500}
@@ -282,6 +304,7 @@ export default function CasesScreen() {
 }
 
 /* ---------------- STYLES ---------------- */
+
 const styles = StyleSheet.create({
   tabContainer: {
     paddingHorizontal: 10,

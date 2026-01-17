@@ -1,10 +1,14 @@
 import BodyLayout from "@/components/layout/BodyLayout";
+import Card from "@/components/reusables/Card";
 import PunchInCard from "@/components/reusables/PunchInCard";
+import ReusableButton from "@/components/reusables/ReusableButton";
 import ReusableCard from "@/components/reusables/ReusableCard";
+import { getInteractionsListByAssignToId } from "@/features/fro/interactionApi";
+import { useFROLocationUpdater } from "@/hooks/useFROLocationUpdater";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
 
@@ -12,15 +16,76 @@ export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const screenWidth = Dimensions.get("window").width;
+
   const authState = useAppSelector((state) => state.auth);
 
-console.log(authState.userId);
-console.log(authState.antiforgeryToken);
+  // 🔴 Update FRO live location
+  useFROLocationUpdater(authState?.userId);
 
+  /* ================= STATE ================= */
+
+  const [interactions, setInteractions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  /* ================= FETCH DATA ================= */
+
+  useEffect(() => {
+    fetchInteractions();
+  }, []);
+
+  const fetchInteractions = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getInteractionsListByAssignToId({
+        assignToId: String(authState.userId),
+        pageNumber: 1,
+        pageSize: 100,
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
+
+      setInteractions(res?.data?.interactions || []);
+    } catch (error) {
+      console.error("❌ Failed to fetch interactions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ================= CASE COUNTS ================= */
+
+  const caseCounts = useMemo(() => {
+    return {
+      new: interactions.filter((i) => i.caseStatusName === "Open").length,
+
+      approved: interactions.filter((i) => i.caseStatusName === "Approved")
+        .length,
+
+      onTheWay: interactions.filter((i) => i.caseStatusName === "On The Way")
+        .length,
+
+      working: interactions.filter((i) => i.caseStatusName === "In Progress")
+        .length,
+
+      followup: interactions.filter((i) => i.caseStatusName === "Follow Up")
+        .length,
+
+      closed: interactions.filter((i) => i.caseStatusName === "Closed").length,
+    };
+  }, [interactions]);
+
+  const highPriorityCount = useMemo(() => {
+    return interactions.filter((i) => i.priority === "Highkjklj").length;
+  }, [interactions]);
+
+  const totalCaseCount = interactions.length
+
+  /* ================= UI ================= */
 
   return (
-    <BodyLayout type="dashboard">
-      {/* Heading */}
+    <BodyLayout type="dashboard" TotalCases={String(totalCaseCount)}>
+      {/* Attendance */}
       <Text
         style={[
           theme.typography.fontH2,
@@ -32,6 +97,7 @@ console.log(authState.antiforgeryToken);
 
       <PunchInCard />
 
+      {/* Case Overview */}
       <Text
         style={[
           theme.typography.fontH2,
@@ -41,13 +107,11 @@ console.log(authState.antiforgeryToken);
         {t("home.casesOverview")}
       </Text>
 
-
-
       {/* ROW 1 */}
       <View style={styles.row}>
         <ReusableCard
           icon="file-list-3-line"
-          count={12}
+          count={caseCounts.new}
           title={t("home.newCases")}
           bg={theme.colors.colorBgPage}
           iconBg={theme.colors.validationInfoText}
@@ -64,7 +128,7 @@ console.log(authState.antiforgeryToken);
 
         <ReusableCard
           icon="folder-check-line"
-          count={12}
+          count={caseCounts.approved}
           title={t("home.approvedCases")}
           bg={theme.colors.colorBgPage}
           iconBg="#00C950"
@@ -84,9 +148,9 @@ console.log(authState.antiforgeryToken);
       <View style={styles.row}>
         <ReusableCard
           icon="arrow-right-box-line"
-          count={12}
+          count={caseCounts.onTheWay}
           title={t("home.onTheWay")}
-          bg={theme.colors.colorHeadingH1 + 22}
+          bg={theme.colors.colorHeadingH1 + "22"}
           iconBg={theme.colors.colorHeadingH1}
           countColor={theme.colors.colorHeadingH1}
           titleColor={theme.colors.colorTextSecondary}
@@ -101,7 +165,7 @@ console.log(authState.antiforgeryToken);
 
         <ReusableCard
           icon="time-line"
-          count={12}
+          count={caseCounts.working}
           title={t("home.working")}
           bg={theme.colors.colorBgPage}
           iconBg={theme.colors.validationWarningText}
@@ -121,7 +185,7 @@ console.log(authState.antiforgeryToken);
       <View style={styles.row}>
         <ReusableCard
           icon="group-line"
-          count={12}
+          count={caseCounts.followup}
           title={t("home.followup")}
           bg={theme.colors.colorBgPage}
           iconBg={theme.colors.colorWarning400}
@@ -138,7 +202,7 @@ console.log(authState.antiforgeryToken);
 
         <ReusableCard
           icon="close-circle-line"
-          count={12}
+          count={caseCounts.closed}
           title={t("home.closedCases")}
           bg={theme.colors.colorBgPage}
           cardBg={theme.colors.navDivider}
@@ -154,6 +218,7 @@ console.log(authState.antiforgeryToken);
         />
       </View>
 
+      {/* Bottom Summary */}
       <View
         style={[
           styles.bottomSection,
@@ -196,13 +261,13 @@ console.log(authState.antiforgeryToken);
               { color: theme.colors.inputErrorBorder },
             ]}
           >
-            04
+            {highPriorityCount}
           </Text>
         </View>
       </View>
 
-      {/* QUICK ACTION CARD */}
-      {/* <Card
+      {/* Quick Actions */}
+      <Card
         title={t("home.quickActions")}
         cardStyle={{
           height: 140,
@@ -223,7 +288,7 @@ console.log(authState.antiforgeryToken);
               textStyle: {
                 color: theme.colors.colorPrimary600,
               },
-              onPress: () => console.log("new case"),
+              onPress: () => console.log("Add new case"),
             },
             {
               title: t("home.viewMap"),
@@ -238,10 +303,12 @@ console.log(authState.antiforgeryToken);
             },
           ]}
         />
-      </Card> */}
+      </Card>
     </BodyLayout>
   );
 }
+
+/* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
   row: {

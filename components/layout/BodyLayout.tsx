@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -25,6 +26,7 @@ interface BodyLayoutProps {
   children: React.ReactNode;
   scrollViewStyle?: StyleProp<ViewStyle>;
   scrollContentStyle?: StyleProp<ViewStyle>;
+  TotalCases?:string
 }
 
 export default function BodyLayout({
@@ -33,10 +35,13 @@ export default function BodyLayout({
   children,
   scrollViewStyle,
   scrollContentStyle,
+  TotalCases
 }: BodyLayoutProps) {
   const { theme } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+    const authState = useAppSelector((state) => state.auth);
+  
 
   // ✅ CENTRALIZED ICON NAVIGATION (NORMAL vs FRL)
   const handleIconPress = (
@@ -81,7 +86,7 @@ export default function BodyLayout({
                   { color: theme.colors.colorBgPage },
                 ]}
               >
-                Hello , Rejesh
+                Hello , {authState.role  ||"User"} 
               </Text>
 
               <Text
@@ -94,7 +99,7 @@ export default function BodyLayout({
                   },
                 ]}
               >
-                FRO-14567-001
+               {/* {authState.userId  ||"Id not found"} */}
               </Text>
             </View>
 
@@ -190,7 +195,7 @@ export default function BodyLayout({
                     { color: theme.colors.colorPrimary600 },
                   ]}
                 >
-                  04
+                  {TotalCases || 0}
                 </Text>
               </View>
             </View>

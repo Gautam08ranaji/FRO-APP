@@ -1,7 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import RemarkActionModal from "@/components/reusables/RemarkActionModal";
 import { useTheme } from "@/theme/ThemeContext";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -15,11 +15,34 @@ import {
 import RemixIcon from "react-native-remix-icon";
 
 export default function CaseDetailScreen() {
+  const params = useLocalSearchParams();
+  const item = params.item ? JSON.parse(params.item as string) : null;
+
+  console.log("fet item", item);
+
   const { theme } = useTheme();
   const { t } = useTranslation();
   const [showModal, setShowModal] = useState(false);
 
-  const ticketNo = "TKT-14567-001";
+  const ticketNo = item?.transactionNumber || "TKT-00000-001";
+  const elderName = item?.name || item?.contactName || "रामलाल शर्मा";
+  const age = item?.ageofTheElder || "72";
+  const gender = item?.gender === "Male" ? t("caseDetail.genderMale") : item?.gender === "Female" ? t("caseDetail.genderFemale") : t("caseDetail.genderMale");
+  const phone = item?.mobileNo || "+91-9876543210";
+  const emergencyPhone = item?.contactPolice || item?.contactAmbulance || "+91-9876543 / 211";
+  const category = item?.categoryName || "स्वास्थ्य सहायता";
+  const subCategory = item?.subCategoryName || "";
+  const subSubCategory = item?.subSubCategoryName || "";
+  const details = item?.caseDescription || item?.problemReported || item?.reasonForCalling || "बुजुर्ग को चलने में कठिनाई हो रही है...";
+  const address = item?.completeAddress || item?.location || "123, गांधी नगर, मुंबई - 400001";
+  const state = item?.stateName || "";
+  const district = item?.districtName || "";
+  const agentRemarks = item?.agentRemarks || "";
+  const comment = item?.comment || "";
+  const priority = item?.priority || "Medium";
+  const callType = item?.callTypeName || "Actionable";
+  const caseStatus = item?.caseStatusName || "Open";
+  const subStatus = item?.subStatusName || "Open";
 
   const steps = [
     { title: t("caseDetail.steps.registered"), time: "10:30 AM" },
@@ -88,7 +111,7 @@ export default function CaseDetailScreen() {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                रामलाल शर्मा
+                {elderName}
               </Text>
             </View>
 
@@ -107,7 +130,7 @@ export default function CaseDetailScreen() {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                72 {t("caseDetail.years")}
+                {age} {t("caseDetail.years")}
               </Text>
             </View>
 
@@ -126,7 +149,7 @@ export default function CaseDetailScreen() {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {t("caseDetail.genderMale")}
+                {gender}
               </Text>
             </View>
           </View>
@@ -148,7 +171,7 @@ export default function CaseDetailScreen() {
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              +91-9876543210
+              {phone}
             </Text>
           </View>
 
@@ -167,7 +190,7 @@ export default function CaseDetailScreen() {
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              +91-9876543 / 211
+              {emergencyPhone}
             </Text>
           </View>
         </View>
@@ -183,36 +206,118 @@ export default function CaseDetailScreen() {
           {t("caseDetail.complaintInfo")}
         </Text>
 
-        <Text
-          style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
-        >
-          {t("caseDetail.category")}:
-        </Text>
-        <Text
-          style={[
-            styles.labelValue,
-            { color: theme.colors.colorTextSecondary },
-          ]}
-        >
-          स्वास्थ्य सहायता
-        </Text>
+        <View style={styles.keyValueRow}>
+          <Text
+            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+          >
+            {t("caseDetail.category")}:
+          </Text>
+          <Text
+            style={[
+              styles.labelValue,
+              { color: theme.colors.colorTextSecondary },
+            ]}
+          >
+            {category}
+          </Text>
+        </View>
 
-        <Text
-          style={[
-            styles.labelKey,
-            { marginTop: 12, color: theme.colors.colorTextSecondary },
-          ]}
-        >
-          {t("caseDetail.details")}:
-        </Text>
-        <Text
-          style={[
-            styles.labelValue,
-            { color: theme.colors.colorTextSecondary },
-          ]}
-        >
-          बुजुर्ग को चलने में कठिनाई हो रही है...
-        </Text>
+        {subCategory && (
+          <View style={styles.keyValueRow}>
+            <Text
+              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            >
+              {t("caseDetail.subCategory")}:
+            </Text>
+            <Text
+              style={[
+                styles.labelValue,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {subCategory}
+            </Text>
+          </View>
+        )}
+
+        {subSubCategory && (
+          <View style={styles.keyValueRow}>
+            <Text
+              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            >
+              {t("caseDetail.subSubCategory")}:
+            </Text>
+            <Text
+              style={[
+                styles.labelValue,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {subSubCategory}
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.keyValueRow}>
+          <Text
+            style={[
+              styles.labelKey,
+              { marginTop: 12, color: theme.colors.colorTextSecondary },
+            ]}
+          >
+            {t("caseDetail.details")}:
+          </Text>
+          <Text
+            style={[
+              styles.labelValue,
+              { color: theme.colors.colorTextSecondary },
+            ]}
+          >
+            {details}
+          </Text>
+        </View>
+
+        {agentRemarks && (
+          <View style={styles.keyValueRow}>
+            <Text
+              style={[
+                styles.labelKey,
+                { marginTop: 12, color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {t("caseDetail.agentRemarks")}:
+            </Text>
+            <Text
+              style={[
+                styles.labelValue,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {agentRemarks}
+            </Text>
+          </View>
+        )}
+
+        {comment && (
+          <View style={styles.keyValueRow}>
+            <Text
+              style={[
+                styles.labelKey,
+                { marginTop: 12, color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {t("caseDetail.comments")}:
+            </Text>
+            <Text
+              style={[
+                styles.labelValue,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {comment}
+            </Text>
+          </View>
+        )}
 
         <Text
           style={[
@@ -257,9 +362,30 @@ export default function CaseDetailScreen() {
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            123, गांधी नगर, मुंबई - 400001
+            {address}
           </Text>
         </View>
+
+        {(state || district) && (
+          <View style={styles.keyValueRow}>
+            <Text
+              style={[
+                styles.labelKey,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {t("caseDetail.location")}:
+            </Text>
+            <Text
+              style={[
+                styles.labelValue,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {district && state ? `${district}, ${state}` : state || district}
+            </Text>
+          </View>
+        )}
 
         <View
           style={[
@@ -373,6 +499,139 @@ export default function CaseDetailScreen() {
         </View>
       </View>
 
+      {/* CASE METADATA */}
+      <View
+        style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
+      >
+        <Text
+          style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
+        >
+          {t("caseDetail.caseMetadata")}
+        </Text>
+
+        <View style={styles.keyValueRow}>
+          <Text
+            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+          >
+            {t("caseDetail.priority")}:
+          </Text>
+          <Text
+            style={[
+              styles.labelValue,
+              { 
+                color: priority === "High" ? theme.colors.validationErrorText : 
+                       priority === "Medium" ? theme.colors.colorAccent500 : 
+                       theme.colors.colorSuccess600
+              },
+            ]}
+          >
+            {priority}
+          </Text>
+        </View>
+
+        <View style={styles.keyValueRow}>
+          <Text
+            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+          >
+            {t("caseDetail.callType")}:
+          </Text>
+          <Text
+            style={[
+              styles.labelValue,
+              { color: theme.colors.colorTextSecondary },
+            ]}
+          >
+            {callType}
+          </Text>
+        </View>
+
+        <View style={styles.keyValueRow}>
+          <Text
+            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+          >
+            {t("caseDetail.status")}:
+          </Text>
+          <Text
+            style={[
+              styles.labelValue,
+              { color: theme.colors.colorTextSecondary },
+            ]}
+          >
+            {caseStatus}
+          </Text>
+        </View>
+
+        <View style={styles.keyValueRow}>
+          <Text
+            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+          >
+            {t("caseDetail.subStatus")}:
+          </Text>
+          <Text
+            style={[
+              styles.labelValue,
+              { color: theme.colors.colorTextSecondary },
+            ]}
+          >
+            {subStatus}
+          </Text>
+        </View>
+
+        {item?.teamName && (
+          <View style={styles.keyValueRow}>
+            <Text
+              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            >
+              {t("caseDetail.team")}:
+            </Text>
+            <Text
+              style={[
+                styles.labelValue,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {item.teamName}
+            </Text>
+          </View>
+        )}
+
+        {item?.assignToName && (
+          <View style={styles.keyValueRow}>
+            <Text
+              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            >
+              {t("caseDetail.assignedTo")}:
+            </Text>
+            <Text
+              style={[
+                styles.labelValue,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {item.assignToName}
+            </Text>
+          </View>
+        )}
+
+        {item?.callBack === "Yes" && item?.callBackDateTime && (
+          <View style={styles.keyValueRow}>
+            <Text
+              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            >
+              {t("caseDetail.callback")}:
+            </Text>
+            <Text
+              style={[
+                styles.labelValue,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {new Date(item.callBackDateTime).toLocaleString()}
+            </Text>
+          </View>
+        )}
+      </View>
+
       {/* ACTIONS */}
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
@@ -468,20 +727,18 @@ export default function CaseDetailScreen() {
       </View>
 
       <RemarkActionModal
-      title="Reason for Marking as Incorrect"
-      subtitle="Provide details to help us understand what is wrong."
+        title="Reason for Marking as Incorrect"
+        subtitle="Provide details to help us understand what is wrong."
         visible={showModal}
         onClose={() => setShowModal(false)}
         onSubmit={() => {
-            setShowModal(false)
+          setShowModal(false)
         }}
         stylesOverride={{
           // button: { backgroundColor: "#1565C0" },
           // title: { color: "#0D47A1" },
         }}
       />
-
-      
     </BodyLayout>
   );
 }
