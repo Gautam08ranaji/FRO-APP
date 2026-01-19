@@ -73,6 +73,8 @@ export default function SubmittedCentreTab() {
           userId: authState.userId as string,
         });
 
+        console.log("faqRes", faqRes?.data);
+
         const ngoRes = await getListStatic({
           endpoint: "GetNgoMasterList",
           auth: apiAuth,
@@ -123,7 +125,7 @@ export default function SubmittedCentreTab() {
             id: String(hospital.id),
             title: hospital.name,
             description: hospital.discriptions,
-            subtitle: `${hospital.distrinct || hospital.city || ''}`,
+            subtitle: `${hospital.distrinct || hospital.city || ""}`,
             address: hospital.address,
             contactPhone: hospital.contactPhone,
             contactEmail: hospital.contactEmail,
@@ -135,7 +137,7 @@ export default function SubmittedCentreTab() {
             id: String(palliative.id),
             title: palliative.name,
             description: palliative.description,
-            subtitle: `${palliative.district || ''}, ${palliative.state || ''}`,
+            subtitle: `${palliative.district || ""}, ${palliative.state || ""}`,
             address: palliative.address,
             contactPhone: palliative.contactPhone,
             contactEmail: palliative.contactEmail,
@@ -145,7 +147,12 @@ export default function SubmittedCentreTab() {
             type: "PALLIATIVE",
           })) ?? [];
 
-        setAllItems([...faqItems, ...ngoItems, ...hospitalItems, ...palliativeItems]);
+        setAllItems([
+          ...faqItems,
+          ...ngoItems,
+          ...hospitalItems,
+          ...palliativeItems,
+        ]);
       } catch (error) {
         console.error("❌ API error", error);
       } finally {
@@ -169,22 +176,22 @@ export default function SubmittedCentreTab() {
 
   const faqItems = useMemo(
     () => allItems.filter((i) => i.type === "FAQ"),
-    [allItems]
+    [allItems],
   );
 
   const ngoItems = useMemo(
     () => allItems.filter((i) => i.type === "NGO"),
-    [allItems]
+    [allItems],
   );
 
   const hospitalItems = useMemo(
     () => allItems.filter((i) => i.type === "HOSPITAL"),
-    [allItems]
+    [allItems],
   );
 
   const palliativeItems = useMemo(
     () => allItems.filter((i) => i.type === "PALLIATIVE"),
-    [allItems]
+    [allItems],
   );
 
   /* ================= UI CONFIG ================= */
@@ -228,7 +235,7 @@ export default function SubmittedCentreTab() {
     type: ListItemType;
   }) => {
     const ui = uiConfig[type];
-    
+
     return (
       <View style={[styles.sectionCard, { backgroundColor: ui.bg }]}>
         {/* Section Header with Icon */}
@@ -244,7 +251,7 @@ export default function SubmittedCentreTab() {
             {title}
           </Text>
         </View>
-        
+
         {/* Section Content */}
         {children}
       </View>
@@ -253,10 +260,15 @@ export default function SubmittedCentreTab() {
 
   const ItemCard = ({ item }: { item: ListItem }) => {
     const ui = uiConfig[item.type];
-    
+
     return (
       <TouchableOpacity activeOpacity={0.8}>
-        <View style={[styles.card, { backgroundColor: theme.colors.colorBgSurface }]}>
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: theme.colors.colorBgSurface },
+          ]}
+        >
           {/* Left Icon */}
           <View style={[styles.iconBox, { backgroundColor: ui.iconBg }]}>
             <RemixIcon
@@ -268,69 +280,94 @@ export default function SubmittedCentreTab() {
 
           {/* Text Content */}
           <View style={styles.textContainer}>
-            <Text style={[styles.title, { color: theme.colors.colorTextSecondary }]}>
+            <Text
+              style={[styles.title, { color: theme.colors.colorTextSecondary }]}
+            >
               {item.title}
             </Text>
-            
+
             {item.subtitle && (
-              <Text style={[styles.subtitle, { color: theme.colors.colorTextTertiary }]}>
+              <Text
+                style={[
+                  styles.subtitle,
+                  { color: theme.colors.colorTextTertiary },
+                ]}
+              >
                 {item.subtitle}
               </Text>
             )}
-            
-            <Text 
-              style={[styles.description, { color: theme.colors.colorTextSecondary }]}
+
+            <Text
+              style={[
+                styles.description,
+                { color: theme.colors.colorTextSecondary },
+              ]}
               numberOfLines={2}
             >
               {item.description}
             </Text>
 
             {/* Additional contact info for HOSPITAL and PALLIATIVE */}
-            {(item.type === "HOSPITAL" || item.type === "PALLIATIVE") && 
-             (item.contactPhone || item.address) && (
-              <View style={styles.contactInfo}>
-                {item.contactPhone && (
-                  <View style={styles.infoRow}>
-                    <RemixIcon name="phone-line" size={12} color={theme.colors.colorTextTertiary} />
-                    <Text style={[styles.infoText, { color: theme.colors.colorTextTertiary }]}>
-                      {item.contactPhone}
-                    </Text>
-                  </View>
-                )}
-                {item.address && (
-                  <View style={styles.infoRow}>
-                    <RemixIcon name="map-pin-line" size={12} color={theme.colors.colorTextTertiary} />
-                    <Text style={[styles.infoText, { color: theme.colors.colorTextTertiary }]} numberOfLines={1}>
-                      {item.address}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            )}
+            {(item.type === "HOSPITAL" || item.type === "PALLIATIVE") &&
+              (item.contactPhone || item.address) && (
+                <View style={styles.contactInfo}>
+                  {item.contactPhone && (
+                    <View style={styles.infoRow}>
+                      <RemixIcon
+                        name="phone-line"
+                        size={12}
+                        color={theme.colors.colorTextTertiary}
+                      />
+                      <Text
+                        style={[
+                          styles.infoText,
+                          { color: theme.colors.colorTextTertiary },
+                        ]}
+                      >
+                        {item.contactPhone}
+                      </Text>
+                    </View>
+                  )}
+                  {item.address && (
+                    <View style={styles.infoRow}>
+                      <RemixIcon
+                        name="map-pin-line"
+                        size={12}
+                        color={theme.colors.colorTextTertiary}
+                      />
+                      <Text
+                        style={[
+                          styles.infoText,
+                          { color: theme.colors.colorTextTertiary },
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {item.address}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
           </View>
 
           {/* Right Arrow */}
-          <RemixIcon
-            name="arrow-right-up-line"
-            size={18}
-            color={ui.iconBg}
-          />
+          <RemixIcon name="arrow-right-up-line" size={18} color={ui.iconBg} />
         </View>
       </TouchableOpacity>
     );
   };
 
-  const FilterButton = ({ 
-    filterType, 
-    label, 
-    icon 
-  }: { 
-    filterType: FilterType; 
-    label: string; 
-    icon: string; 
+  const FilterButton = ({
+    filterType,
+    label,
+    icon,
+  }: {
+    filterType: FilterType;
+    label: string;
+    icon: string;
   }) => {
     const isActive = filter === filterType;
-    
+
     // Get UI configuration for the filter button
     const getFilterUI = () => {
       if (filterType === "ALL") {
@@ -348,17 +385,19 @@ export default function SubmittedCentreTab() {
         };
       }
     };
-    
+
     const ui = getFilterUI();
-    
+
     return (
       <TouchableOpacity
         style={[
           styles.filterButton,
-          { 
-            backgroundColor: isActive ? ui.iconColor : theme.colors.colorBgSurface,
+          {
+            backgroundColor: isActive
+              ? ui.iconColor
+              : theme.colors.colorBgSurface,
             borderColor: isActive ? ui.iconColor : theme.colors.colorBorder,
-          }
+          },
         ]}
         onPress={() => setFilter(filterType)}
       >
@@ -373,9 +412,9 @@ export default function SubmittedCentreTab() {
         <Text
           style={[
             styles.filterText,
-            { 
-              color: isActive ? theme.colors.colorBgSurface : ui.textColor 
-            }
+            {
+              color: isActive ? theme.colors.colorBgSurface : ui.textColor,
+            },
           ]}
         >
           {label}
@@ -398,30 +437,18 @@ export default function SubmittedCentreTab() {
     <View style={styles.container}>
       {/* Filters */}
       <View style={styles.filterRow}>
-        <FilterButton 
-          filterType="ALL" 
-          label="All Items" 
-          icon="apps-line" 
+        <FilterButton filterType="ALL" label="All Items" icon="apps-line" />
+        <FilterButton filterType="FAQ" label="FAQs" icon="question-line" />
+        <FilterButton filterType="NGO" label="NGOs" icon="community-line" />
+        <FilterButton
+          filterType="HOSPITAL"
+          label="Hospitals"
+          icon="hospital-line"
         />
-        <FilterButton 
-          filterType="FAQ" 
-          label="FAQs" 
-          icon="question-line" 
-        />
-        <FilterButton 
-          filterType="NGO" 
-          label="NGOs" 
-          icon="community-line" 
-        />
-        <FilterButton 
-          filterType="HOSPITAL" 
-          label="Hospitals" 
-          icon="hospital-line" 
-        />
-        <FilterButton 
-          filterType="PALLIATIVE" 
-          label="Palliative" 
-          icon="heart-pulse-line" 
+        <FilterButton
+          filterType="PALLIATIVE"
+          label="Palliative"
+          icon="heart-pulse-line"
         />
       </View>
 
@@ -481,11 +508,20 @@ export default function SubmittedCentreTab() {
                 size={48}
                 color={theme.colors.colorBorder}
               />
-              <Text style={[styles.emptyText, { color: theme.colors.colorTextTertiary }]}>
-                {filter === "FAQ" ? "FAQs" : 
-                 filter === "NGO" ? "NGOs" : 
-                 filter === "HOSPITAL" ? "Hospitals" : 
-                 "Palliative Care Centers"} not found
+              <Text
+                style={[
+                  styles.emptyText,
+                  { color: theme.colors.colorTextTertiary },
+                ]}
+              >
+                {filter === "FAQ"
+                  ? "FAQs"
+                  : filter === "NGO"
+                    ? "NGOs"
+                    : filter === "HOSPITAL"
+                      ? "Hospitals"
+                      : "Palliative Care Centers"}{" "}
+                not found
               </Text>
             </View>
           }
@@ -505,8 +541,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#F7F9FC",
   },
   centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   /* Filters */
@@ -573,7 +609,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    marginTop: 10
+    marginTop: 10,
   },
   iconBox: {
     width: 36,
@@ -600,7 +636,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     marginBottom: 4,
   },
-  
+
   /* Contact Info */
   contactInfo: {
     marginTop: 4,

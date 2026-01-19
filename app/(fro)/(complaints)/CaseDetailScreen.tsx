@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import RemixIcon from "react-native-remix-icon";
 
 export default function CaseDetailScreen() {
@@ -27,14 +28,25 @@ export default function CaseDetailScreen() {
   const ticketNo = item?.transactionNumber || "TKT-00000-001";
   const elderName = item?.name || item?.contactName || "रामलाल शर्मा";
   const age = item?.ageofTheElder || "72";
-  const gender = item?.gender === "Male" ? t("caseDetail.genderMale") : item?.gender === "Female" ? t("caseDetail.genderFemale") : t("caseDetail.genderMale");
+  const gender =
+    item?.gender === "Male"
+      ? t("caseDetail.genderMale")
+      : item?.gender === "Female"
+        ? t("caseDetail.genderFemale")
+        : t("caseDetail.genderMale");
   const phone = item?.mobileNo || "+91-9876543210";
-  const emergencyPhone = item?.contactPolice || item?.contactAmbulance || "+91-9876543 / 211";
+  const emergencyPhone =
+    item?.contactPolice || item?.contactAmbulance || "+91-9876543 / 211";
   const category = item?.categoryName || "स्वास्थ्य सहायता";
   const subCategory = item?.subCategoryName || "";
   const subSubCategory = item?.subSubCategoryName || "";
-  const details = item?.caseDescription || item?.problemReported || item?.reasonForCalling || "बुजुर्ग को चलने में कठिनाई हो रही है...";
-  const address = item?.completeAddress || item?.location || "123, गांधी नगर, मुंबई - 400001";
+  const details =
+    item?.caseDescription ||
+    item?.problemReported ||
+    item?.reasonForCalling ||
+    "बुजुर्ग को चलने में कठिनाई हो रही है...";
+  const address =
+    item?.completeAddress || item?.location || "123, गांधी नगर, मुंबई - 400001";
   const state = item?.stateName || "";
   const district = item?.districtName || "";
   const agentRemarks = item?.agentRemarks || "";
@@ -43,6 +55,19 @@ export default function CaseDetailScreen() {
   const callType = item?.callTypeName || "Actionable";
   const caseStatus = item?.caseStatusName || "Open";
   const subStatus = item?.subStatusName || "Open";
+
+  // Extract coordinates with fallback
+  const lat = item?.latitude || item?.lat || 19.076; // Default to Mumbai
+  const lng = item?.longitude || item?.lng || 72.8777;
+  const latitude = typeof lat === "string" ? parseFloat(lat) : lat;
+  const longitude = typeof lng === "string" ? parseFloat(lng) : lng;
+
+  const initialRegion = {
+    latitude,
+    longitude,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  };
 
   const steps = [
     { title: t("caseDetail.steps.registered"), time: "10:30 AM" },
@@ -73,7 +98,7 @@ export default function CaseDetailScreen() {
       screenName={t("caseDetail.screenTitle", { ticket: ticketNo })}
     >
       <View
-        style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
+        style={[styles.card, { backgroundColor: theme.colors.colorPrimary50 }]}
       >
         <Text
           style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
@@ -85,7 +110,10 @@ export default function CaseDetailScreen() {
           <View
             style={[
               styles.avatarBox,
-              { backgroundColor: theme.colors.colorPrimary50 },
+              {
+                backgroundColor: theme.colors.colorPrimary50,
+                borderColor: theme.colors.colorPrimary600,
+              },
             ]}
           >
             <RemixIcon
@@ -208,7 +236,10 @@ export default function CaseDetailScreen() {
 
         <View style={styles.keyValueRow}>
           <Text
-            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            style={[
+              styles.labelKey,
+              { color: theme.colors.colorTextSecondary },
+            ]}
           >
             {t("caseDetail.category")}:
           </Text>
@@ -225,7 +256,10 @@ export default function CaseDetailScreen() {
         {subCategory && (
           <View style={styles.keyValueRow}>
             <Text
-              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+              style={[
+                styles.labelKey,
+                { color: theme.colors.colorTextSecondary },
+              ]}
             >
               {t("caseDetail.subCategory")}:
             </Text>
@@ -243,7 +277,10 @@ export default function CaseDetailScreen() {
         {subSubCategory && (
           <View style={styles.keyValueRow}>
             <Text
-              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+              style={[
+                styles.labelKey,
+                { color: theme.colors.colorTextSecondary },
+              ]}
             >
               {t("caseDetail.subSubCategory")}:
             </Text>
@@ -387,19 +424,69 @@ export default function CaseDetailScreen() {
           </View>
         )}
 
-        <View
-          style={[
-            styles.mapBox,
-            { backgroundColor: theme.colors.colorBgSurface },
-          ]}
-        >
-          <RemixIcon name="map-pin-line" size={36} color="#999" />
+        <View style={styles.mapContainer}>
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            style={styles.map}
+            initialRegion={initialRegion}
+            scrollEnabled={true}
+            zoomEnabled={true}
+            rotateEnabled={false}
+            pitchEnabled={false}
+            loadingEnabled={true}
+            loadingIndicatorColor={theme.colors.colorPrimary600}
+          >
+            <Marker
+              coordinate={{ latitude, longitude }}
+              title={elderName}
+              description={address}
+            >
+              <View style={styles.markerContainer}>
+                <View
+                  style={[
+                    styles.markerPin,
+                    { backgroundColor: theme.colors.validationErrorText },
+                  ]}
+                >
+                  <RemixIcon name="map-pin-fill" size={20} color="#FFF" />
+                </View>
+                <View
+                  style={[
+                    styles.markerTail,
+                    { borderTopColor: theme.colors.validationErrorText },
+                  ]}
+                />
+              </View>
+            </Marker>
+          </MapView>
+
+          <TouchableOpacity
+            style={styles.mapOverlayButton}
+            onPress={() => {
+              router.push({
+                pathname: "/FullMapScreen",
+                params: {
+                  latitude: latitude.toString(),
+                  longitude: longitude.toString(),
+                  title: elderName,
+                  description: address,
+                },
+              });
+            }}
+          >
+            <Text style={styles.mapOverlayText}>View Full Map</Text>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity
           activeOpacity={0.8}
           style={styles.navBtn}
-          onPress={() => router.push("/StartNavigationScreen")}
+          onPress={() =>
+            router.push({
+              pathname: "/(fro)/(complaints)/StartNavigationScreen",
+              params: { item: JSON.stringify(item) },
+            })
+          }
         >
           <Text style={styles.navBtnText}>
             {t("caseDetail.startNavigation")}
@@ -511,17 +598,23 @@ export default function CaseDetailScreen() {
 
         <View style={styles.keyValueRow}>
           <Text
-            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            style={[
+              styles.labelKey,
+              { color: theme.colors.colorTextSecondary },
+            ]}
           >
             {t("caseDetail.priority")}:
           </Text>
           <Text
             style={[
               styles.labelValue,
-              { 
-                color: priority === "High" ? theme.colors.validationErrorText : 
-                       priority === "Medium" ? theme.colors.colorAccent500 : 
-                       theme.colors.colorSuccess600
+              {
+                color:
+                  priority === "High"
+                    ? theme.colors.validationErrorText
+                    : priority === "Medium"
+                      ? theme.colors.colorAccent500
+                      : theme.colors.colorSuccess600,
               },
             ]}
           >
@@ -531,7 +624,10 @@ export default function CaseDetailScreen() {
 
         <View style={styles.keyValueRow}>
           <Text
-            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            style={[
+              styles.labelKey,
+              { color: theme.colors.colorTextSecondary },
+            ]}
           >
             {t("caseDetail.callType")}:
           </Text>
@@ -547,7 +643,10 @@ export default function CaseDetailScreen() {
 
         <View style={styles.keyValueRow}>
           <Text
-            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            style={[
+              styles.labelKey,
+              { color: theme.colors.colorTextSecondary },
+            ]}
           >
             {t("caseDetail.status")}:
           </Text>
@@ -563,7 +662,10 @@ export default function CaseDetailScreen() {
 
         <View style={styles.keyValueRow}>
           <Text
-            style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+            style={[
+              styles.labelKey,
+              { color: theme.colors.colorTextSecondary },
+            ]}
           >
             {t("caseDetail.subStatus")}:
           </Text>
@@ -580,7 +682,10 @@ export default function CaseDetailScreen() {
         {item?.teamName && (
           <View style={styles.keyValueRow}>
             <Text
-              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+              style={[
+                styles.labelKey,
+                { color: theme.colors.colorTextSecondary },
+              ]}
             >
               {t("caseDetail.team")}:
             </Text>
@@ -598,7 +703,10 @@ export default function CaseDetailScreen() {
         {item?.assignToName && (
           <View style={styles.keyValueRow}>
             <Text
-              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+              style={[
+                styles.labelKey,
+                { color: theme.colors.colorTextSecondary },
+              ]}
             >
               {t("caseDetail.assignedTo")}:
             </Text>
@@ -616,7 +724,10 @@ export default function CaseDetailScreen() {
         {item?.callBack === "Yes" && item?.callBackDateTime && (
           <View style={styles.keyValueRow}>
             <Text
-              style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+              style={[
+                styles.labelKey,
+                { color: theme.colors.colorTextSecondary },
+              ]}
             >
               {t("caseDetail.callback")}:
             </Text>
@@ -680,10 +791,7 @@ export default function CaseDetailScreen() {
               borderColor: theme.colors.validationErrorText,
             },
           ]}
-
-          onPress={()=>{
-            setShowModal(true)
-          }}
+          onPress={() => setShowModal(true)}
         >
           <RemixIcon
             name="close-circle-line"
@@ -732,18 +840,20 @@ export default function CaseDetailScreen() {
         visible={showModal}
         onClose={() => setShowModal(false)}
         onSubmit={() => {
-          setShowModal(false)
+          setShowModal(false);
         }}
-        stylesOverride={{
-          // button: { backgroundColor: "#1565C0" },
-          // title: { color: "#0D47A1" },
-        }}
+        stylesOverride={
+          {
+            // button: { backgroundColor: "#1565C0" },
+            // title: { color: "#0D47A1" },
+          }
+        }
       />
     </BodyLayout>
   );
 }
 
-/* STYLES (NO CHANGE) */
+/* STYLES */
 const styles = StyleSheet.create({
   card: {
     marginTop: 14,
@@ -773,6 +883,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
   },
 
   attachmentBox: {
@@ -783,12 +894,68 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  mapBox: {
+  mapContainer: {
     height: 120,
     borderRadius: 10,
     marginTop: 10,
-    justifyContent: "center",
+    overflow: "hidden",
+    position: "relative",
+  },
+
+  map: {
+    width: "100%",
+    height: "100%",
+  },
+
+  markerContainer: {
     alignItems: "center",
+    justifyContent: "center",
+  },
+
+  markerPin: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#FFF",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+
+  markerTail: {
+    width: 0,
+    height: 0,
+    backgroundColor: "transparent",
+    borderStyle: "solid",
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 12,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    marginTop: -4,
+  },
+
+  mapOverlayButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#027A61",
+  },
+
+  mapOverlayText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#027A61",
   },
 
   navBtn: {

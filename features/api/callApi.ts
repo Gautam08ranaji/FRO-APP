@@ -25,19 +25,19 @@ apiClient.interceptors.request.use(
   (error) => {
     console.error("🚀 [API REQUEST ERROR]", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor
 apiClient.interceptors.response.use(
   (response) => {
-    console.log("✅ [API RESPONSE SUCCESS]", {
-      url: response.config.url,
-      status: response.status,
-      statusText: response.statusText,
-      data: response.data,
-      headers: response.headers,
-    });
+    // console.log("✅ [API RESPONSE SUCCESS]", {
+    //   url: response.config.url,
+    //   status: response.status,
+    //   statusText: response.statusText,
+    //   data: response.data,
+    //   headers: response.headers,
+    // });
     return response;
   },
   (error) => {
@@ -51,13 +51,13 @@ apiClient.interceptors.response.use(
       message: error.message,
     });
     return Promise.reject(error);
-  }
+  },
 );
 
 /* ================= GENERIC REQUEST ================= */
 
 export const apiRequest = async <R = any>(
-  config: AxiosRequestConfig
+  config: AxiosRequestConfig,
 ): Promise<R> => {
   try {
     const response = await apiClient.request<R>(config);
