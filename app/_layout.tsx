@@ -7,13 +7,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Platform, StatusBar as RNStatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { Provider } from "react-redux";
 
-import { persistor, store } from "@/store";
-
+import { useThemedToastConfig } from "@/components/reusables/ThemedToast";
 import { AudioRecorderProvider } from "@/hooks/AudioRecorderProvider";
 import { CameraPermissionProvider } from "@/hooks/CameraPermissionProvider";
 import { LocationProvider } from "@/hooks/LocationContext";
+import { persistor, store } from "@/store";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 import { PersistGate } from "redux-persist/integration/react";
 
@@ -21,10 +22,11 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
+  const toastConfig = useThemedToastConfig();
 
   useEffect(() => {
     async function prepare() {
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
       setAppIsReady(true);
     }
     prepare();
@@ -39,22 +41,30 @@ export default function RootLayout() {
   if (!appIsReady) return null;
 
   return (
-    // ✅ REDUX PROVIDER (TOP LEVEL)
     <Provider store={store}>
-       <PersistGate loading={null} persistor={persistor}>
-      <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <SafeAreaProvider>
-          <LocationProvider>
-            <CameraPermissionProvider>
-              <ThemeProvider>
-                <AudioRecorderProvider>
-                  <ThemedStack />
-                </AudioRecorderProvider>
-              </ThemeProvider>
-            </CameraPermissionProvider>
-          </LocationProvider>
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
+      <PersistGate loading={null} persistor={persistor}>
+        <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
+          <SafeAreaProvider>
+            <LocationProvider>
+              <CameraPermissionProvider>
+                <ThemeProvider>
+                  <AudioRecorderProvider>
+                    <>
+                      <ThemedStack />
+
+                      {/* ✅ THEMED BOTTOM TOAST */}
+                      <Toast
+                        config={toastConfig}
+                        position="bottom"
+                        bottomOffset={70}
+                      />
+                    </>
+                  </AudioRecorderProvider>
+                </ThemeProvider>
+              </CameraPermissionProvider>
+            </LocationProvider>
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
       </PersistGate>
     </Provider>
   );
@@ -73,18 +83,10 @@ function ThemedStack() {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        {/* ✅ ONBOARDING FLOW */}
         <Stack.Screen name="(onboarding)" />
-
-        {/* ✅ ROLE-BASED TAB LAYOUTS */}
         <Stack.Screen name="(fro)" />
         <Stack.Screen name="(frl)" />
-
-        {/* ✅ MODAL */}
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal" }}
-        />
+        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
       </Stack>
 
       <StatusBar

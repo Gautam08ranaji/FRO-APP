@@ -3,7 +3,6 @@ import RemarkActionModal from "@/components/reusables/RemarkActionModal";
 import { useTheme } from "@/theme/ThemeContext";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
   Animated,
   Easing,
@@ -22,7 +21,6 @@ export default function CaseDetailScreen() {
   console.log("fet item", item);
 
   const { theme } = useTheme();
-  const { t } = useTranslation();
   const [showModal, setShowModal] = useState(false);
 
   const ticketNo = item?.transactionNumber || "TKT-00000-001";
@@ -30,10 +28,10 @@ export default function CaseDetailScreen() {
   const age = item?.ageofTheElder || "72";
   const gender =
     item?.gender === "Male"
-      ? t("caseDetail.genderMale")
+      ? "पुरुष"
       : item?.gender === "Female"
-        ? t("caseDetail.genderFemale")
-        : t("caseDetail.genderMale");
+        ? "महिला"
+        : "पुरुष";
   const phone = item?.mobileNo || "+91-9876543210";
   const emergencyPhone =
     item?.contactPolice || item?.contactAmbulance || "+91-9876543 / 211";
@@ -70,12 +68,12 @@ export default function CaseDetailScreen() {
   };
 
   const steps = [
-    { title: t("caseDetail.steps.registered"), time: "10:30 AM" },
-    { title: t("caseDetail.steps.assigned"), time: "10:45 AM" },
-    { title: t("caseDetail.steps.approved") },
-    { title: t("caseDetail.steps.onway") },
-    { title: t("caseDetail.steps.arrived") },
-    { title: t("caseDetail.steps.working") },
+    { title: "Registered", time: "10:30 AM" },
+    { title: "Assigned", time: "10:45 AM" },
+    { title: "Approved" },
+    { title: "On the way" },
+    { title: "Arrived" },
+    { title: "Working" },
   ];
 
   const completedSteps = 3;
@@ -93,17 +91,15 @@ export default function CaseDetailScreen() {
   }, [animatedProgress]);
 
   return (
-    <BodyLayout
-      type="screen"
-      screenName={t("caseDetail.screenTitle", { ticket: ticketNo })}
-    >
+    <BodyLayout type="screen" screenName={`Case Details - ${ticketNo}`}>
+      {/* ELDER DETAILS */}
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorPrimary50 }]}
       >
         <Text
           style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
         >
-          {t("caseDetail.elderDetails")}
+          Elder Details
         </Text>
 
         <View style={styles.row}>
@@ -131,7 +127,7 @@ export default function CaseDetailScreen() {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {t("caseDetail.name")}:
+                Name:
               </Text>
               <Text
                 style={[
@@ -150,7 +146,7 @@ export default function CaseDetailScreen() {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {t("caseDetail.age")}:
+                Age:
               </Text>
               <Text
                 style={[
@@ -158,7 +154,7 @@ export default function CaseDetailScreen() {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {age} {t("caseDetail.years")}
+                {age} years
               </Text>
             </View>
 
@@ -169,7 +165,7 @@ export default function CaseDetailScreen() {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {t("caseDetail.gender")}:
+                Gender:
               </Text>
               <Text
                 style={[
@@ -191,7 +187,7 @@ export default function CaseDetailScreen() {
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.phone")}:
+              Phone:
             </Text>
             <Text
               style={[
@@ -210,7 +206,7 @@ export default function CaseDetailScreen() {
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.emergency")}:
+              Emergency Contact:
             </Text>
             <Text
               style={[
@@ -231,7 +227,7 @@ export default function CaseDetailScreen() {
         <Text
           style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
         >
-          {t("caseDetail.complaintInfo")}
+          Complaint Information
         </Text>
 
         <View style={styles.keyValueRow}>
@@ -241,7 +237,7 @@ export default function CaseDetailScreen() {
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            {t("caseDetail.category")}:
+            Category:
           </Text>
           <Text
             style={[
@@ -261,7 +257,7 @@ export default function CaseDetailScreen() {
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.subCategory")}:
+              Sub Category:
             </Text>
             <Text
               style={[
@@ -282,7 +278,7 @@ export default function CaseDetailScreen() {
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.subSubCategory")}:
+              Sub Sub Category:
             </Text>
             <Text
               style={[
@@ -302,7 +298,7 @@ export default function CaseDetailScreen() {
               { marginTop: 12, color: theme.colors.colorTextSecondary },
             ]}
           >
-            {t("caseDetail.details")}:
+            Details:
           </Text>
           <Text
             style={[
@@ -322,7 +318,7 @@ export default function CaseDetailScreen() {
                 { marginTop: 12, color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.agentRemarks")}:
+              Agent Remarks:
             </Text>
             <Text
               style={[
@@ -343,7 +339,7 @@ export default function CaseDetailScreen() {
                 { marginTop: 12, color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.comments")}:
+              Comments:
             </Text>
             <Text
               style={[
@@ -362,7 +358,7 @@ export default function CaseDetailScreen() {
             { marginTop: 12, color: theme.colors.colorTextSecondary },
           ]}
         >
-          {t("caseDetail.attachments")}:
+          Attachments:
         </Text>
         <View
           style={[
@@ -381,7 +377,7 @@ export default function CaseDetailScreen() {
         <Text
           style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
         >
-          {t("caseDetail.location")}
+          Location
         </Text>
 
         <View style={styles.keyValueRow}>
@@ -391,7 +387,7 @@ export default function CaseDetailScreen() {
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            {t("caseDetail.address")}:
+            Address:
           </Text>
           <Text
             style={[
@@ -411,7 +407,7 @@ export default function CaseDetailScreen() {
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.location")}:
+              Location:
             </Text>
             <Text
               style={[
@@ -488,19 +484,18 @@ export default function CaseDetailScreen() {
             })
           }
         >
-          <Text style={styles.navBtnText}>
-            {t("caseDetail.startNavigation")}
-          </Text>
+          <Text style={styles.navBtnText}>Start Navigation</Text>
         </TouchableOpacity>
       </View>
 
+      {/* TIMELINE */}
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
       >
         <Text
           style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
         >
-          {t("caseDetail.timeline")}
+          Timeline
         </Text>
 
         <View style={styles.timelineContainer}>
@@ -586,28 +581,28 @@ export default function CaseDetailScreen() {
         </View>
       </View>
 
-      {/* CASE METADATA */}
+      {/* CASE METADATA - UPDATED WITH FIXED SPACING */}
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
       >
         <Text
           style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
         >
-          {t("caseDetail.caseMetadata")}
+          Case Metadata
         </Text>
 
-        <View style={styles.keyValueRow}>
+        <View style={styles.metadataRow}>
           <Text
             style={[
-              styles.labelKey,
+              styles.metadataKey,
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            {t("caseDetail.priority")}:
+            Priority:
           </Text>
           <Text
             style={[
-              styles.labelValue,
+              styles.metadataValue,
               {
                 color:
                   priority === "High"
@@ -622,18 +617,18 @@ export default function CaseDetailScreen() {
           </Text>
         </View>
 
-        <View style={styles.keyValueRow}>
+        <View style={styles.metadataRow}>
           <Text
             style={[
-              styles.labelKey,
+              styles.metadataKey,
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            {t("caseDetail.callType")}:
+            Call Type:
           </Text>
           <Text
             style={[
-              styles.labelValue,
+              styles.metadataValue,
               { color: theme.colors.colorTextSecondary },
             ]}
           >
@@ -641,18 +636,18 @@ export default function CaseDetailScreen() {
           </Text>
         </View>
 
-        <View style={styles.keyValueRow}>
+        <View style={styles.metadataRow}>
           <Text
             style={[
-              styles.labelKey,
+              styles.metadataKey,
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            {t("caseDetail.status")}:
+            Status:
           </Text>
           <Text
             style={[
-              styles.labelValue,
+              styles.metadataValue,
               { color: theme.colors.colorTextSecondary },
             ]}
           >
@@ -660,18 +655,18 @@ export default function CaseDetailScreen() {
           </Text>
         </View>
 
-        <View style={styles.keyValueRow}>
+        <View style={styles.metadataRow}>
           <Text
             style={[
-              styles.labelKey,
+              styles.metadataKey,
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            {t("caseDetail.subStatus")}:
+            Sub Status:
           </Text>
           <Text
             style={[
-              styles.labelValue,
+              styles.metadataValue,
               { color: theme.colors.colorTextSecondary },
             ]}
           >
@@ -680,18 +675,18 @@ export default function CaseDetailScreen() {
         </View>
 
         {item?.teamName && (
-          <View style={styles.keyValueRow}>
+          <View style={styles.metadataRow}>
             <Text
               style={[
-                styles.labelKey,
+                styles.metadataKey,
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.team")}:
+              Team:
             </Text>
             <Text
               style={[
-                styles.labelValue,
+                styles.metadataValue,
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
@@ -701,18 +696,18 @@ export default function CaseDetailScreen() {
         )}
 
         {item?.assignToName && (
-          <View style={styles.keyValueRow}>
+          <View style={styles.metadataRow}>
             <Text
               style={[
-                styles.labelKey,
+                styles.metadataKey,
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.assignedTo")}:
+              Assigned To:
             </Text>
             <Text
               style={[
-                styles.labelValue,
+                styles.metadataValue,
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
@@ -722,18 +717,18 @@ export default function CaseDetailScreen() {
         )}
 
         {item?.callBack === "Yes" && item?.callBackDateTime && (
-          <View style={styles.keyValueRow}>
+          <View style={styles.metadataRow}>
             <Text
               style={[
-                styles.labelKey,
+                styles.metadataKey,
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
-              {t("caseDetail.callback")}:
+              Callback:
             </Text>
             <Text
               style={[
-                styles.labelValue,
+                styles.metadataValue,
                 { color: theme.colors.colorTextSecondary },
               ]}
             >
@@ -750,22 +745,45 @@ export default function CaseDetailScreen() {
         <Text
           style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
         >
-          {t("caseDetail.actions")}
+          Actions
         </Text>
 
         {[
-          t("caseDetail.updateStatus"),
-          t("caseDetail.addPhoto"),
-          t("caseDetail.addNote"),
-          t("caseDetail.addVoice"),
-          t("caseDetail.scheduleFollowup"),
-        ].map((label, index) => (
+          {
+            label: "Update Status",
+            onPress: () =>
+              router.push({
+                pathname: "/(fro)/(complaints)/updateCase",
+                params: {
+                  item: JSON.stringify(item),
+                  caseId: item?.id,
+                },
+              }),
+          },
+          {
+            label: "Add Photo",
+            onPress: () => console.log("Add photo pressed"),
+          },
+          {
+            label: "Add Note",
+            onPress: () => console.log("Add note pressed"),
+          },
+          {
+            label: "Add Voice",
+            onPress: () => console.log("Add voice pressed"),
+          },
+          {
+            label: "Schedule Followup",
+            onPress: () => console.log("Schedule followup pressed"),
+          },
+        ].map((action, index) => (
           <TouchableOpacity
             key={index}
             style={[
               styles.actionBtn,
               { borderColor: theme.colors.colorPrimary600 },
             ]}
+            onPress={action.onPress}
           >
             <Text
               style={[
@@ -773,7 +791,7 @@ export default function CaseDetailScreen() {
                 { color: theme.colors.colorPrimary600 },
               ]}
             >
-              {label}
+              {action.label}
             </Text>
           </TouchableOpacity>
         ))}
@@ -829,7 +847,7 @@ export default function CaseDetailScreen() {
           <Text
             style={[styles.closeBtnText, { color: theme.colors.colorBgPage }]}
           >
-            {t("caseDetail.closeCase")}
+            Close Case
           </Text>
         </TouchableOpacity>
       </View>
@@ -842,12 +860,6 @@ export default function CaseDetailScreen() {
         onSubmit={() => {
           setShowModal(false);
         }}
-        stylesOverride={
-          {
-            // button: { backgroundColor: "#1565C0" },
-            // title: { color: "#0D47A1" },
-          }
-        }
       />
     </BodyLayout>
   );
@@ -874,6 +886,26 @@ const styles = StyleSheet.create({
   },
   labelKey: { width: 130, fontSize: 14, fontWeight: "500" },
   labelValue: { fontSize: 14, fontWeight: "600", flexShrink: 1 },
+
+  // Updated metadata styles with fixed spacing
+  metadataRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+    paddingVertical: 4,
+  },
+  metadataKey: {
+    fontSize: 14,
+    fontWeight: "500",
+    flex: 1,
+  },
+  metadataValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    flex: 1,
+    textAlign: "right",
+  },
 
   row: { flexDirection: "row", alignItems: "center" },
 

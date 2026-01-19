@@ -1,10 +1,11 @@
+import { updateAttendancePunch } from "@/features/fro/attendanceApi";
+import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
-import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import Toast from "react-native-toast-message";
 
 const TARGET_MINUTES = 8 * 60;
-
 function formatMinutesToTime(minutes: number) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -20,39 +21,80 @@ function formatTimeAMPM(date: Date) {
 
 export default function PunchInCard() {
   const { theme } = useTheme();
+  const authState = useAppSelector((state) => state.auth);
 
   const [punchInTime, setPunchInTime] = useState<Date | null>(null);
   const [workedMinutes, setWorkedMinutes] = useState(0);
   const [isPunchedIn, setIsPunchedIn] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  /* ================= TIMER ================= */
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
 
     if (isPunchedIn && punchInTime) {
       interval = setInterval(() => {
-        const now = new Date();
-        const diffMs = now.getTime() - punchInTime.getTime();
-        const totalMinutes = Math.floor(diffMs / 60000);
-        setWorkedMinutes(totalMinutes);
+        const diffMs = Date.now() - punchInTime.getTime();
+        setWorkedMinutes(Math.floor(diffMs / 60000));
       }, 60000);
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval !== undefined) {
+        clearInterval(interval);
+      }
     };
   }, [isPunchedIn, punchInTime]);
 
-  const handlePunchIn = () => {
-    setPunchInTime(new Date());
-    setWorkedMinutes(0);
-    setIsPunchedIn(true);
+  /* ================= API HANDLER ================= */
+  const punchAttendance = async (punchIn: boolean) => {
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      const res = await updateAttendancePunch({
+        userId: String(authState.userId),
+        punchIn,
+        token: String(authState.token),
+      });
+
+      console.log("attendance update", res);
+
+      if (punchIn) {
+        const now = new Date();
+        setPunchInTime(now);
+        setWorkedMinutes(0);
+        setIsPunchedIn(true);
+
+        Toast.show({
+          type: "success",
+          text1: "Punch In Successful",
+          text2: `Started at ${formatTimeAMPM(now)}`,
+        });
+      } else {
+        setIsPunchedIn(false);
+
+        Toast.show({
+          type: "success",
+          text1: "Punch Out Successful",
+          text2: `Worked ${formatMinutesToTime(workedMinutes)}`,
+        });
+      }
+    } catch (error) {
+      console.error("Attendance punch failed", error);
+
+      Toast.show({
+        type: "error",
+        text1: "Attendance Failed",
+        text2: "Please try again",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePunchOut = () => {
-    // setIsPunchedIn(false);
-    router.push('/(fro)/(complaints)/StartNavigationScreen')
-  };
-
+  /* ================= UI ================= */
   return (
     <View
       style={{
@@ -80,24 +122,34 @@ export default function PunchInCard() {
           <Text
             style={[
               theme.typography.fontH4,
-              { color: theme.colors.validationWarningText, marginTop: 5 },
+              {
+                color: theme.colors.validationWarningText,
+                marginTop: 5,
+              },
             ]}
           >
-            {punchInTime ? formatTimeAMPM(punchInTime) : "00:00"}
+            {punchInTime ? formatTimeAMPM(punchInTime) : "--:--"}
           </Text>
         </View>
 
         <TouchableOpacity
-          onPress={isPunchedIn ? handlePunchOut : handlePunchIn}
+          disabled={loading}
+          onPress={() => punchAttendance(!isPunchedIn)}
           style={{
             paddingVertical: 12,
             paddingHorizontal: 22,
             borderRadius: 10,
-            backgroundColor: theme.colors.validationWarningText,
+            backgroundColor: loading
+              ? "#999"
+              : theme.colors.validationWarningText,
           }}
         >
           <Text style={{ color: "#fff", fontWeight: "700" }}>
-            {isPunchedIn ? "Punch Out" : "Punch In"}
+            {loading
+              ? "Please wait..."
+              : isPunchedIn
+                ? "Punch Out"
+                : "Punch In"}
           </Text>
         </TouchableOpacity>
       </View>

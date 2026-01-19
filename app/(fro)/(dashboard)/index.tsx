@@ -79,7 +79,7 @@ export default function HomeScreen() {
     return interactions.filter((i) => i.priority === "Highkjklj").length;
   }, [interactions]);
 
-  const totalCaseCount = interactions.length
+  const totalCaseCount = interactions.length;
 
   /* ================= UI ================= */
 
