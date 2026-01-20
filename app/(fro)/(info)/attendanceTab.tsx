@@ -45,18 +45,25 @@ const formatDate = (dateStr: string) => {
       });
 };
 
-/* ================= STATUS NORMALIZER (ADDED) ================= */
+const formatLocalTime = (date: Date | null) =>
+  date
+    ? date.toLocaleTimeString(i18n.language, {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "--:--";
+
+/* ================= STATUS NORMALIZER ================= */
 
 const normalizeStatus = (status?: string): AttendanceStatus => {
   switch (status?.trim().toLowerCase()) {
     case "present":
       return "Present";
-    case "absent":
-      return "Absent";
     case "leave":
       return "Leave";
+    case "absent":
     default:
-      return "Absent"; // ✅ safe fallback
+      return "Absent";
   }
 };
 
@@ -92,7 +99,7 @@ const mapAttendanceFromApi = (item: any): AttendanceItem => {
     checkIn,
     checkOut,
     totalMinutes,
-    status: normalizeStatus(item.status), // ✅ FIXED
+    status: normalizeStatus(item.status),
   };
 };
 
@@ -115,7 +122,7 @@ export default function AttendanceTab() {
 
   const [activeTab, setActiveTab] = useState<"all" | AttendanceStatus>("all");
 
-  /* ================= FETCH ================= */
+  /* ================= FETCH HISTORY ================= */
 
   useEffect(() => {
     loadAttendance();
@@ -138,11 +145,55 @@ export default function AttendanceTab() {
         : [];
 
       setAttendanceHistory(list.map(mapAttendanceFromApi));
-    } catch (error) {
-      console.error("Attendance API error:", error);
+    } catch (err) {
+      console.error("Attendance API error:", err);
     } finally {
       setLoading(false);
     }
+  };
+
+  /* ================= LIVE DUTY TIMER ================= */
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    if (isDutyStarted && startTime) {
+      timer = setInterval(() => {
+        const diff = Date.now() - startTime.getTime();
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+
+        setTotalTime(
+          `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+            2,
+            "0",
+          )}`,
+        );
+      }, 1000);
+    }
+
+    return () => {
+      if (timer !== null) {
+        clearInterval(timer);
+      }
+    };
+  }, [isDutyStarted, startTime]);
+
+  /* ================= DUTY HANDLERS ================= */
+
+  const handleStartDuty = () => {
+    const now = new Date();
+    setStartTime(now);
+    setEndTime(null);
+    setTotalTime("00:00");
+    setIsDutyStarted(true);
+  };
+
+  const handleEndDuty = () => {
+    const now = new Date();
+    setEndTime(now);
+    setIsDutyStarted(false);
   };
 
   /* ================= FILTER ================= */
@@ -156,7 +207,7 @@ export default function AttendanceTab() {
 
   return (
     <ScrollView style={{ padding: 16 }}>
-      {/* ================= TODAY CARD (UNCHANGED) ================= */}
+      {/* ================= TODAY CARD ================= */}
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
       >
@@ -174,25 +225,13 @@ export default function AttendanceTab() {
         >
           <Text style={styles.label}>{t("attendance.startTimeLabel")}</Text>
           <Text style={[styles.value, { color: theme.colors.colorSuccess600 }]}>
-            {startTime
-              ? startTime.toLocaleTimeString(i18n.language, {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "--:--"}
+            {formatLocalTime(startTime)}
           </Text>
         </View>
 
         <View style={[styles.row, { backgroundColor: theme.colors.inputBg }]}>
           <Text style={styles.label}>{t("attendance.endTimeLabel")}</Text>
-          <Text style={styles.value}>
-            {endTime
-              ? endTime.toLocaleTimeString(i18n.language, {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "--:--"}
-          </Text>
+          <Text style={styles.value}>{formatLocalTime(endTime)}</Text>
         </View>
 
         <View style={[styles.row, { backgroundColor: theme.colors.inputBg }]}>
@@ -213,7 +252,7 @@ export default function AttendanceTab() {
                 : theme.colors.colorPrimary500,
             }}
             textStyle={{ color: theme.colors.colorBgPage }}
-            onPress={() => {}}
+            onPress={isDutyStarted ? handleEndDuty : handleStartDuty}
           />
         </View>
       </View>
@@ -240,8 +279,7 @@ export default function AttendanceTab() {
 
       {/* ================= HISTORY ================= */}
       {filteredData.map((item) => {
-        const themeColor = statusTheme[item.status] ?? statusTheme.Absent; // ✅ NO CRASH
-
+        const themeColor = statusTheme[item.status];
         const hours = Math.floor(item.totalMinutes / 60);
         const minutes = item.totalMinutes % 60;
 
@@ -256,7 +294,7 @@ export default function AttendanceTab() {
               },
             ]}
           >
-            <Text style={{ color: themeColor.text }}>
+            <Text style={{ color: themeColor.text, fontWeight: "700" }}>
               {formatDate(item.date)} — {item.status}
             </Text>
 
