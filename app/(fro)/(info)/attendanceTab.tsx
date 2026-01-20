@@ -8,6 +8,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { getAttendanceHistory } from "@/features/fro/addAttendance";
 import { updateAttendancePunch } from "@/features/fro/attendanceApi";
 
+import { addAttendance } from "@/features/fro/addAttendanceStatus";
 import { useAppSelector } from "@/store/hooks";
 import Toast from "react-native-toast-message";
 
@@ -211,6 +212,7 @@ export default function AttendanceTab() {
 
       if (res?.success) {
         console.log("updateAttendancePunch", res.success);
+        submitAttendanceStatus();
       }
 
       if (punchIn) {
@@ -238,6 +240,46 @@ export default function AttendanceTab() {
     activeTab === "all"
       ? attendanceHistory
       : attendanceHistory.filter((item) => item.status === activeTab);
+
+  const submitAttendanceStatus = async () => {
+    try {
+      const now = new Date();
+      const currentDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
+      const currentDateTime = now.toISOString(); // ISO string for current time
+
+      // Determine which time to set based on punch status
+      const checkintime = isPunchedIn ? "" : currentDateTime; // Empty on start, set on end
+      const checkouttime = isPunchedIn ? currentDateTime : ""; // Set on start, empty on end
+
+      const res = await addAttendance({
+        data: {
+          attendancedate: currentDate,
+          checkintime: checkintime,
+          checkouttime: checkouttime,
+          status: "Present",
+          totalworkinghours: formatMinutesToTime(workedMinutes),
+          userId: String(authState.userId),
+        },
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
+
+      console.log("Attendance added:", res);
+
+      Toast.show({
+        type: "success",
+        text1: "Attendance Saved",
+      });
+
+      loadAttendance(); // refresh list
+    } catch (error) {
+      console.error("Add attendance failed", error);
+      Toast.show({
+        type: "error",
+        text1: "Failed to add attendance",
+      });
+    }
+  };
 
   /* ================= UI ================= */
 
