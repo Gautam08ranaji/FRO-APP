@@ -2,13 +2,6 @@ import { apiRequest } from "@/features/api/callApi";
 
 /* ================= TYPES ================= */
 
-export type GetDropdownParams = {
-  endpoint: string; // "/Dropdown/GetStatusMasterDropdown"
-  token: string; // Bearer token
-  csrfToken?: string; // Optional CSRF token
-  params?: Record<string, any>; // Optional query params
-};
-
 export type DropdownItem = {
   id: string | number;
   name: string;
@@ -19,18 +12,33 @@ export type DropdownResponse<T = DropdownItem> = {
   data: T[];
 };
 
-/* ================= COMMON DROPDOWN CALL ================= */
+/* ================= COMMON DROPDOWN ================= */
 
-export const getDropdown = async <T = DropdownItem>({
-  endpoint,
-  token,
-  csrfToken,
-  params,
-}: GetDropdownParams): Promise<DropdownResponse<T>> => {
+export const getDropdownByEndpoint = <T = DropdownItem>(
+  endpoint: string,
+  token: string,
+  csrfToken?: string,
+): Promise<DropdownResponse<T>> => {
   return apiRequest<DropdownResponse<T>>({
     method: "GET",
-    url: endpoint,
-    params,
+    url: `/Dropdown/${endpoint}`, // 👈 normalize here
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(csrfToken && { "X-CSRF-TOKEN": csrfToken }),
+      accept: "application/json",
+    },
+  });
+};
+
+export const getDropdownByEndpointAndId = <T = DropdownItem>(
+  endpoint: string, // e.g. "GetSubStatusMasterById"
+  id: string | number, // e.g. 2
+  token: string,
+  csrfToken?: string,
+): Promise<DropdownResponse<T>> => {
+  return apiRequest<DropdownResponse<T>>({
+    method: "GET",
+    url: `/Dropdown/${endpoint}/${id}`,
     headers: {
       Authorization: `Bearer ${token}`,
       ...(csrfToken && { "X-CSRF-TOKEN": csrfToken }),

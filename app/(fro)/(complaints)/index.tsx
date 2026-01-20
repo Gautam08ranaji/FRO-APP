@@ -6,7 +6,13 @@ import { getInteractionsListByAssignToId } from "@/features/fro/interactionApi";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
@@ -60,7 +66,7 @@ export default function CasesScreen() {
 
   const initialTabIndex = tabs.findIndex((t) => t.key === params.filter);
   const [activeTab, setActiveTab] = useState(
-    initialTabIndex !== -1 ? initialTabIndex : 0
+    initialTabIndex !== -1 ? initialTabIndex : 0,
   );
 
   const scrollRef = useRef<ScrollView>(null);
@@ -72,7 +78,7 @@ export default function CasesScreen() {
     useCallback(() => {
       fetchInteractions();
       setShowPopUp(true);
-    }, [])
+    }, []),
   );
 
   const fetchInteractions = async () => {
@@ -114,7 +120,7 @@ export default function CasesScreen() {
         (x: number) => {
           scrollEl.scrollTo({ x: x - width / 3, animated: true });
         },
-        () => {}
+        () => {},
       );
     }
   }, [activeTab]);
@@ -127,7 +133,7 @@ export default function CasesScreen() {
     if (selectedFilterKey === "all") return interactions;
 
     return interactions.filter(
-      (item) => STATUS_MAP[item.caseStatusName] === selectedFilterKey
+      (item) => STATUS_MAP[item.caseStatusName] === selectedFilterKey,
     );
   }, [interactions, selectedFilterKey]);
 
@@ -156,7 +162,7 @@ export default function CasesScreen() {
         {tabs.map((tab, index) => (
           <TouchableOpacity
             key={tab.key}
-            ref={(el:any) => (tabRefs.current[index] = el)}
+            ref={(el: any) => (tabRefs.current[index] = el)}
             onPress={() => setActiveTab(index)}
             style={[
               styles.tab,
@@ -191,7 +197,12 @@ export default function CasesScreen() {
             style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
           >
             <View style={styles.rowBetween}>
-              <Text style={[styles.cardTitle, { color: theme.colors.colorTextSecondary }]}>
+              <Text
+                style={[
+                  styles.cardTitle,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
                 {item.name}
               </Text>
 
@@ -236,7 +247,7 @@ export default function CasesScreen() {
               onPress={() =>
                 router.push({
                   pathname: "/CaseDetailScreen",
-                  params: { item : JSON.stringify(item) },
+                  params: { item: JSON.stringify(item) },
                 })
               }
             >
@@ -252,9 +263,7 @@ export default function CasesScreen() {
         name="New Case Assigned"
         age={72}
         timerSeconds={30}
-        details={[
-          { label: "Ticket Number:", value: "Auto Assigned" },
-        ]}
+        details={[{ label: "Ticket Number:", value: "Auto Assigned" }]}
         onAccept={() => {
           setShowPopUp(false);
           setShowStatusModal(true);

@@ -5,24 +5,28 @@ import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Image,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 
 // Import the API function from your existing file
+import {
+  getDropdownByEndpoint,
+  getDropdownByEndpointAndId,
+} from "@/features/fro/dropdownApi";
 import { updateInteraction } from "@/features/fro/interactionApi";
 
 /* ================= STATIC DATA ================= */
@@ -255,8 +259,7 @@ const UpdateStatusScreen = () => {
 
     try {
       // Use current user ID from Redux (the logged-in user)
-      const updatingUserId =
-        currentUserId || "00000000-0000-0000-0000-000000000000";
+      const updatingUserId = currentUserId;
 
       // Prepare data for API
       const updateData = {
@@ -385,8 +388,31 @@ const UpdateStatusScreen = () => {
     }, 100);
   }, []);
 
+  const fetchStatusDropdown = async () => {
+    const res = await getDropdownByEndpoint(
+      "GetStatusMasterDropdown",
+      String(authState.token),
+      String(authState.antiforgeryToken),
+    );
+
+    console.log("dropdownData", res.data);
+  };
+
+  const fetchSubStatusDropdown = async () => {
+    const res = await getDropdownByEndpointAndId(
+      "GetSubStatusMasterById",
+      2,
+      String(authState.token),
+      String(authState.antiforgeryToken),
+    );
+
+    console.log("fetchSubStatus", res.data);
+  };
+
   /* ================= SHOW AUTH INFO (for debugging) ================= */
   useEffect(() => {
+    fetchStatusDropdown();
+    fetchSubStatusDropdown();
     console.log(
       "Auth state updated - Token:",
       !!token,

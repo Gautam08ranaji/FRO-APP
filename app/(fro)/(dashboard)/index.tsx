@@ -3,19 +3,24 @@ import Card from "@/components/reusables/Card";
 import PunchInCard from "@/components/reusables/PunchInCard";
 import ReusableButton from "@/components/reusables/ReusableButton";
 import ReusableCard from "@/components/reusables/ReusableCard";
+
+
 import { getInteractionsListByAssignToId } from "@/features/fro/interactionApi";
 import { useFROLocationUpdater } from "@/hooks/useFROLocationUpdater";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+
+/* ================= LOCAL DROPDOWN WRAPPER ================= */
+
+/* ================= SCREEN ================= */
 
 export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const screenWidth = Dimensions.get("window").width;
 
   const authState = useAppSelector((state) => state.auth);
 
@@ -27,13 +32,11 @@ export default function HomeScreen() {
   const [interactions, setInteractions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* ================= FETCH DATA ================= */
+  /* ================= API CALLS ================= */
 
-  useEffect(() => {
-    fetchInteractions();
-  }, []);
+  const fetchInteractions = useCallback(async () => {
+    if (!authState?.token || !authState?.userId) return;
 
-  const fetchInteractions = async () => {
     try {
       setLoading(true);
 
@@ -51,26 +54,27 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authState]);
+
+  /* ================= FETCH ON LOAD ================= */
+
+  useEffect(() => {
+    fetchInteractions();
+  }, [fetchInteractions]);
 
   /* ================= CASE COUNTS ================= */
 
   const caseCounts = useMemo(() => {
     return {
       new: interactions.filter((i) => i.caseStatusName === "Open").length,
-
       approved: interactions.filter((i) => i.caseStatusName === "Approved")
         .length,
-
       onTheWay: interactions.filter((i) => i.caseStatusName === "On The Way")
         .length,
-
       working: interactions.filter((i) => i.caseStatusName === "In Progress")
         .length,
-
       followup: interactions.filter((i) => i.caseStatusName === "Follow Up")
         .length,
-
       closed: interactions.filter((i) => i.caseStatusName === "Closed").length,
     };
   }, [interactions]);

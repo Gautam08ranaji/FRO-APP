@@ -35,17 +35,15 @@ export default function ProfileScreen() {
   // console.log(authState);
 
   const antiforgeryToken = useAppSelector(
-    (state) => state.auth.antiforgeryToken
+    (state) => state.auth.antiforgeryToken,
   );
-
-
 
   const logOutApi = async () => {
     try {
       const response = await logoutUser(
         String(authState.userId),
         String(authState.token),
-        String(antiforgeryToken)
+        String(antiforgeryToken),
       );
 
       console.log("Logout API response:", response);
@@ -110,14 +108,14 @@ export default function ProfileScreen() {
   ];
 
   const selectedAvailability = availabilityOptions.find(
-    (a) => a.key === availability
+    (a) => a.key === availability,
   );
 
   const renderItem = (
     label: string,
     icon: string,
     onPress: () => void,
-    iconColor?: string
+    iconColor?: string,
   ) => (
     <TouchableOpacity
       onPress={onPress}
@@ -296,48 +294,48 @@ export default function ProfileScreen() {
           t("profile.menuOfficerDetails"),
           "user-settings-line",
           () => router.push("/profileDetails"),
-          theme.colors.validationInfoText
+          theme.colors.validationInfoText,
         )}
         {renderItem(
           "Knowledge Management",
           "building-line",
           () => router.push("/knowledgeManagement"),
-          theme.colors.colorAccent500
+          theme.colors.colorAccent500,
         )}
 
         {renderItem(
           "Your Performance",
           "bar-chart-line",
           () => router.push("/(fro)/(profile)/teamOverView"),
-          theme.colors.colorWarning400
+          theme.colors.colorWarning400,
         )}
 
         {renderItem(
           t("profile.menuWorkArea"),
           "map-pin-line",
           () => router.push("/location"),
-          theme.colors.colorPrimary600
+          theme.colors.colorPrimary600,
         )}
 
         {renderItem(
           t("profile.menuLanguage"),
           "translate-2",
           () => router.push("/languageSelect"),
-          theme.colors.validationInfoText
+          theme.colors.validationInfoText,
         )}
 
         {renderItem(
           t("profile.menuSettings"),
           "settings-3-line",
           () => router.push("/setting"),
-          theme.colors.colorError400
+          theme.colors.colorError400,
         )}
 
         {renderItem(
           t("profile.menuChangePassword"),
           "lock-password-line",
           () => router.push("/changePassword"),
-          theme.colors.colorError600
+          theme.colors.colorError600,
         )}
 
         {/* ===== Logout ===== */}
@@ -372,7 +370,7 @@ export default function ProfileScreen() {
           onConfirm={() => {
             setShowAlert(false);
             // logOutApi();
-            router.push('/(onboarding)/login')
+            router.push("/(onboarding)/login");
           }}
           onCancel={() => setShowAlert(false)}
           confirmColor={theme.colors.colorPrimary600}
