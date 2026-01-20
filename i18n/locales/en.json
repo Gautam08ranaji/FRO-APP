@@ -10,7 +10,7 @@
     "title2": "Support Center",
     "chooseLanguage": "Choose Language"
   },
- "login": {
+  "login": {
     "title": "Welcome Back",
     "subtitle": "Login to continue to your account",
 
@@ -32,20 +32,19 @@
     }
   },
   "onboarding": {
-  "step1Title": "Receive new cases instantly",
-  "step1Subtitle": "View all newly assigned cases here.",
+    "step1Title": "Receive new cases instantly",
+    "step1Subtitle": "View all newly assigned cases here.",
 
-  "step2Title": "Navigate to location easily",
-  "step2Subtitle": "Use GPS to navigate directly to the citizen's location.",
+    "step2Title": "Navigate to location easily",
+    "step2Subtitle": "Use GPS to navigate directly to the citizen's location.",
 
-  "step3Title": "Update case status",
-  "step3Subtitle": "Complete the case by adding photos, notes and evidence.",
+    "step3Title": "Update case status",
+    "step3Subtitle": "Complete the case by adding photos, notes and evidence.",
 
-  "prev": "Previous",
-  "next": "Next",
-  "gotoDashboard": "Go to Dashboard"
-}
-,
+    "prev": "Previous",
+    "next": "Next",
+    "gotoDashboard": "Go to Dashboard"
+  },
   "otp": {
     "enterOtp": "Enter OTP",
     "sentTo": "We have sent a 6-digit OTP to",
@@ -53,37 +52,36 @@
     "resendAfter": "seconds left",
     "resendOtp": "Resend OTP"
   },
- "profileSteps": {
-  "step1Title": "Officer Details",
-  "fullName": "Full Name",
-  "enterFullName": "Enter your full name",
-  "position": "Position",
-  "empCode": "Employee Code",
+  "profileSteps": {
+    "step1Title": "Officer Details",
+    "fullName": "Full Name",
+    "enterFullName": "Enter your full name",
+    "position": "Position",
+    "empCode": "Employee Code",
 
-  "step2Title": "Your Work Area",
-  "step2Description": "Choose your work area so appropriate cases can be assigned.",
-  "state": "State",
-  "enterState": "Enter state",
-  "district": "District",
-  "enterDistrict": "Enter district",
-  "block": "Block / Police Station",
-  "enterBlock": "Enter block / police station",
-  "teamLead": "Team Leader Name",
+    "step2Title": "Your Work Area",
+    "step2Description": "Choose your work area so appropriate cases can be assigned.",
+    "state": "State",
+    "enterState": "Enter state",
+    "district": "District",
+    "enterDistrict": "Enter district",
+    "block": "Block / Police Station",
+    "enterBlock": "Enter block / police station",
+    "teamLead": "Team Leader Name",
 
-  "step3Title": "Contact Details",
-  "mobile": "Mobile Number",
-  "enterMobile": "Enter mobile number",
-  "email": "Email (optional)",
-  "enterEmail": "Enter email",
+    "step3Title": "Contact Details",
+    "mobile": "Mobile Number",
+    "enterMobile": "Enter mobile number",
+    "email": "Email (optional)",
+    "enterEmail": "Enter email",
 
-  "mobileRequired": "Please enter mobile number",
-  "mobileInvalid": "Enter a valid 10-digit mobile number",
-  "emailInvalid": "Enter valid email",
+    "mobileRequired": "Please enter mobile number",
+    "mobileInvalid": "Enter a valid 10-digit mobile number",
+    "emailInvalid": "Enter valid email",
 
-  "next": "Next",
-  "submit": "Submit"
-}
-,
+    "next": "Next",
+    "submit": "Submit"
+  },
   "button": {
     "back": "Back",
     "continue": "Continue"
@@ -99,186 +97,186 @@
     "aboutApp": "Learn about the app"
   },
   "home": {
-  "casesOverview": "Case Overview",
+    "casesOverview": "Case Overview",
 
-  "newCases": "New Cases",
-  "approvedCases": "Approved Cases",
-  "onTheWay": "On The Way",
-  "working": "In Progress",
-  "followup": "Follow-Up",
-  "closedCases": "Closed Cases",
+    "newCases": "New Cases",
+    "approvedCases": "Approved Cases",
+    "onTheWay": "On The Way",
+    "working": "In Progress",
+    "followup": "Follow-Up",
+    "closedCases": "Closed Cases",
 
-  "todayDuty": "Today's Duty",
-  "totalCases": "Total Cases",
-  "highPriority": "High Priority Cases:",
-  "quickActions": "Quick Actions",
-  "addNewCase": "Add New Case",
-  "viewMap": "View Map"
-},
-"escalation": {
-  "screenTitle": "Send Escalation",
+    "todayDuty": "Today's Duty",
+    "totalCases": "Total Cases",
+    "highPriority": "High Priority Cases:",
+    "quickActions": "Quick Actions",
+    "addNewCase": "Add New Case",
+    "viewMap": "View Map"
+  },
+  "escalation": {
+    "screenTitle": "Send Escalation",
 
-  "warningText": "⚠️ Use escalation only for serious cases. Your supervisor will be notified immediately.",
+    "warningText": "⚠️ Use escalation only for serious cases. Your supervisor will be notified immediately.",
 
-  "chooseReason": "Select Reason",
-  "reasonPlaceholder": "Select reason",
-  "notesLabel": "Add Notes",
-  "notesPlaceholder": "Write here...",
-  "uploadLabel": "Add Photo / Document",
-  "uploadText": "Upload File",
-  "fileSelected": "File Selected ✓",
+    "chooseReason": "Select Reason",
+    "reasonPlaceholder": "Select reason",
+    "notesLabel": "Add Notes",
+    "notesPlaceholder": "Write here...",
+    "uploadLabel": "Add Photo / Document",
+    "uploadText": "Upload File",
+    "fileSelected": "File Selected ✓",
 
-  "camera": "📷 Camera",
-  "gallery": "🖼️ Gallery",
-  "cancel": "Cancel",
+    "camera": "📷 Camera",
+    "gallery": "🖼️ Gallery",
+    "cancel": "Cancel",
 
-  "submitEscalation": "Submit Escalation",
+    "submitEscalation": "Submit Escalation",
 
-  "reason1": "Emergency situation",
-  "reason2": "Reason unclear",
-  "reason3": "No cooperation",
-  "reason4": "Delay in treatment"
-},
-"notifications": {
-  "screenTitle": "Notifications",
+    "reason1": "Emergency situation",
+    "reason2": "Reason unclear",
+    "reason3": "No cooperation",
+    "reason4": "Delay in treatment"
+  },
+  "notifications": {
+    "screenTitle": "Notifications",
 
-  "newCaseAssigned": "A new case has been assigned to you",
-  "ticketUpdated": "Ticket has been updated",
-  "supervisorComment": "Supervisor added a comment",
+    "newCaseAssigned": "A new case has been assigned to you",
+    "ticketUpdated": "Ticket has been updated",
+    "supervisorComment": "Supervisor added a comment",
 
-  "ticketNumber": "Ticket Number:",
-  "newMessage": "Senior citizen sent a new message",
-  "newComment": "New comment",
+    "ticketNumber": "Ticket Number:",
+    "newMessage": "Senior citizen sent a new message",
+    "newComment": "New comment",
 
-  "minAgo": "minutes ago",
-  "hourAgo": "hours ago"
-},
-"cases": {
-  "screenTitle": "Cases",
+    "minAgo": "minutes ago",
+    "hourAgo": "hours ago"
+  },
+  "cases": {
+    "screenTitle": "Cases",
 
-  "tabNew": "New",
-  "tabApproved": "Approved",
-  "tabOnWay": "On The Way",
-  "tabWorking": "In Progress",
-  "tabFollowup": "Follow-Up",
-  "tabClosed": "Closed",
+    "tabNew": "New",
+    "tabApproved": "Approved",
+    "tabOnWay": "On The Way",
+    "tabWorking": "In Progress",
+    "tabFollowup": "Follow-Up",
+    "tabClosed": "Closed",
 
-  "noCases": "No cases available",
+    "noCases": "No cases available",
 
-  "age": "Age",
-  "category": "Category",
-  "ticket": "Ticket No.",
-  "away": "away",
-  "viewCase": "View Case",
+    "age": "Age",
+    "category": "Category",
+    "ticket": "Ticket No.",
+    "away": "away",
+    "viewCase": "View Case",
 
-  "timeMinutesAgo": "minutes ago",
-  "timeHoursAgo": "hours ago"
-},
-"caseDetail": {
-  "screenTitle": "Ticket No: {{ticket}}",
+    "timeMinutesAgo": "minutes ago",
+    "timeHoursAgo": "hours ago"
+  },
+  "caseDetail": {
+    "screenTitle": "Ticket No: {{ticket}}",
 
-  "elderDetails": "Elder Details",
-  "name": "Name",
-  "age": "Age",
-  "gender": "Gender",
-  "phone": "Phone Number",
-  "emergency": "Emergency Contact",
+    "elderDetails": "Elder Details",
+    "name": "Name",
+    "age": "Age",
+    "gender": "Gender",
+    "phone": "Phone Number",
+    "emergency": "Emergency Contact",
 
-  "complaintInfo": "Complaint Info",
-  "category": "Category",
-  "details": "Details",
-  "attachments": "Attachments",
+    "complaintInfo": "Complaint Info",
+    "category": "Category",
+    "details": "Details",
+    "attachments": "Attachments",
 
-  "location": "Location",
-  "address": "Address",
-  "startNavigation": "Start Navigation",
+    "location": "Location",
+    "address": "Address",
+    "startNavigation": "Start Navigation",
 
-  "timeline": "Timeline",
+    "timeline": "Timeline",
 
-  "actions": "Actions",
-  "updateStatus": "Update Status",
-  "addPhoto": "Add Photo/Video",
-  "addNote": "Add Note",
-  "addVoice": "Add Voice Note",
-  "scheduleFollowup": "Schedule Follow-Up",
-  "closeCase": "Close Case",
+    "actions": "Actions",
+    "updateStatus": "Update Status",
+    "addPhoto": "Add Photo/Video",
+    "addNote": "Add Note",
+    "addVoice": "Add Voice Note",
+    "scheduleFollowup": "Schedule Follow-Up",
+    "closeCase": "Close Case",
 
-  "genderMale": "Male",
-  "years": "years",
+    "genderMale": "Male",
+    "years": "years",
 
-  "steps": {
-    "registered": "Complaint Registered",
-    "assigned": "Assigned to FRO",
-    "approved": "Approved",
-    "onway": "On The Way",
-    "arrived": "Arrived on Location",
-    "working": "Work in Progress"
-  }
-},
-"navigation": {
-  "screenTitle": "Go to Location",
-  "distance": "Distance",
-  "eta": "Estimated Time",
-  "address": "Address",
-  "openMaps": "Open in Google Maps",
-  "onTheWay": "I am on the way",
+    "steps": {
+      "registered": "Complaint Registered",
+      "assigned": "Assigned to FRO",
+      "approved": "Approved",
+      "onway": "On The Way",
+      "arrived": "Arrived on Location",
+      "working": "Work in Progress"
+    }
+  },
+  "navigation": {
+    "screenTitle": "Go to Location",
+    "distance": "Distance",
+    "eta": "Estimated Time",
+    "address": "Address",
+    "openMaps": "Open in Google Maps",
+    "onTheWay": "I am on the way",
 
-  "name": "Ramlal Sharma",
-  "distanceValue": "2.3 km",
-  "etaValue": "8 minutes",
-  "fullAddress": "123, Gandhi Nagar, Sector 5, Mumbai, Maharashtra - 400001"
-},
-"statusUpdate": {
-  "screenTitle": "Update Status",
+    "name": "Ramlal Sharma",
+    "distanceValue": "2.3 km",
+    "etaValue": "8 minutes",
+    "fullAddress": "123, Gandhi Nagar, Sector 5, Mumbai, Maharashtra - 400001"
+  },
+  "statusUpdate": {
+    "screenTitle": "Update Status",
 
-  "step1Title": "Case Approved",
-  "step1Subtitle": "Accept the case and continue",
-  "acceptCase": "Accept Case",
+    "step1Title": "Case Approved",
+    "step1Subtitle": "Accept the case and continue",
+    "acceptCase": "Accept Case",
 
-  "step2Title": "I'm on the way",
-  "step2Subtitle": "Your location is being shared.",
-  "locationTracking": "📍 Your live location is being tracked",
-  "updateStatus": "Update Status",
+    "step2Title": "I'm on the way",
+    "step2Subtitle": "Your location is being shared.",
+    "locationTracking": "📍 Your live location is being tracked",
+    "updateStatus": "Update Status",
 
-  "step3Title": "Have you reached the location?",
-  "step3Subtitle": "Please confirm and start work.",
-  "step3Yes": "Yes, reached",
-  "step3No": "No, could not find address",
+    "step3Title": "Have you reached the location?",
+    "step3Subtitle": "Please confirm and start work.",
+    "step3Yes": "Yes, reached",
+    "step3No": "No, could not find address",
 
-  "step4Title": "Did you contact the senior citizen?",
-  "step4Yes": "Yes",
-  "step4No": "No",
+    "step4Title": "Did you contact the senior citizen?",
+    "step4Yes": "Yes",
+    "step4No": "No",
 
-  "step5Title": "Details of work done",
-  "notesPlaceholder": "Write here...",
-  "uploadPhoto": "Photo",
-  "uploadVoice": "Voice Note",
-  "saveAndUpdate": "Save & Update"
-},
-"addPhoto": {
-  "screenTitle": "Add Photo",
-  "openCamera": "Open Camera",
-  "chooseGallery": "Choose from Gallery",
-  "selectedPhoto": "Selected Photo",
-  "savePhoto": "Save Photo"
-},
-"voiceNote": {
-  "screenTitle": "Record Voice Note",
-  "recording": "Recording...",
-  "ready": "Ready to record",
-  "start": "Start Recording",
-  "stop": "Stop Recording",
-  "savedNote": "Recorded Voice Note",
-  "play": "Play",
-  "pause": "Pause"
-},
-"availability": {
-  "screenTitle": "Reporting",
-  "tabAttendance": "Attendance",
-  "tabDaily": "Daily",
-  "tabWeekly": "Weekly",
-  "tabMonthly": "Monthly"
-},
+    "step5Title": "Details of work done",
+    "notesPlaceholder": "Write here...",
+    "uploadPhoto": "Photo",
+    "uploadVoice": "Voice Note",
+    "saveAndUpdate": "Save & Update"
+  },
+  "addPhoto": {
+    "screenTitle": "Add Photo",
+    "openCamera": "Open Camera",
+    "chooseGallery": "Choose from Gallery",
+    "selectedPhoto": "Selected Photo",
+    "savePhoto": "Save Photo"
+  },
+  "voiceNote": {
+    "screenTitle": "Record Voice Note",
+    "recording": "Recording...",
+    "ready": "Ready to record",
+    "start": "Start Recording",
+    "stop": "Stop Recording",
+    "savedNote": "Recorded Voice Note",
+    "play": "Play",
+    "pause": "Pause"
+  },
+  "availability": {
+    "screenTitle": "Reporting",
+    "tabAttendance": "Attendance",
+    "tabDaily": "Daily",
+    "tabWeekly": "Weekly",
+    "tabMonthly": "Monthly"
+  },
   "attendance": {
     "todayAttendanceTitle": "Today's Attendance",
     "startTimeLabel": "Start Time",
@@ -290,9 +288,9 @@
 
     "tabs": {
       "all": "All",
-      "present": "Present",
-      "absent": "Absent",
-      "leave": "Leave"
+      "Present": "Present",
+      "Absent": "Absent",
+      "Leave": "Leave"
     },
 
     "history": {
@@ -303,133 +301,121 @@
       "totalWorkingHoursLabel": "Total Working Hours",
       "toLabel": "To"
     }
-  }
-
-,
-"dailyReport": {
-  "title": "Daily Report",
-  "totalCases": "Total Cases",
-  "solvedCases": "Solved Cases",
-  "followUp": "Follow Up",
-  "placeVisited": "Places Visited"
-},
-"weeklyReport": {
-  "title": "Weekly Report",
-  "totalCases": "Total Cases",
-  "solvedCases": "Solved Cases",
-  "days": {
-    "mon": "Mon",
-    "tue": "Tue",
-    "wed": "Wed",
-    "thu": "Thu",
-    "fri": "Fri",
-    "sat": "Sat",
-    "sun": "Sun"
-  }
-},
-"monthlyReport": {
-  "title": "Monthly Report",
-  "totalCases": "Total Cases",
-  "solvedCases": "Solved Cases",
-  "followUp": "Follow Up",
-  "placeVisited": "Places Visited"
-},
-"profile": {
-  "name": "Rajesh Kumar",
-  "code": "FRO-14567-001",
-  "role": "FRO - Field Response Officer",
-
-  "menuOfficerDetails": "Officer Details",
-  "menuWorkArea": "Work Area",
-  "menuLanguage": "Language",
-  "menuSettings": "Settings",
-  "menuChangePassword": "Change Password",
-
-  "logout": "Logout",
-  "logoutTitle": "Do you want to logout?",
-  "logoutDescription": "You will be logged out from your account.",
-  "logoutConfirm": "Yes, logout",
-  "logoutCancel": "Cancel"
-},
-"officerDetails": {
-  "screenTitle": "Officer Details",
-  "name": "Name",
-  "nameValue": "Rajesh Kumar",
-  "employeeCode": "Employee Code",
-  "employeeCodeValue": "FRO-14567-001",
-  "mobile": "Mobile Number",
-  "mobileValue": "+91-9876543210",
-  "email": "Email",
-  "emailValue": "rajesh.kumar@example.com",
-  "save": "Save"
-},
-"locationDetails": {
-  "screenTitle": "Work Area",
-  "state": "State",
-  "district": "District",
-  "block": "Block / Police Station",
-  "blockPlaceholder": "Enter Block / Police Station",
-  "teamLeadName": "Team Leader Name",
-  "teamLeadPlaceholder": "Enter Team Leader Name",
-  "save": "Save",
-  "defaultName": "Rajesh Kumar",
-
-  "states": {
-    "up": "Uttar Pradesh",
-    "br": "Bihar",
-    "rj": "Rajasthan"
   },
 
-  "districts": {
-    "lucknow": "Lucknow",
-    "kanpur": "Kanpur",
-    "varanasi": "Varanasi"
-  }
-},
-"settings": {
-  "screenTitle": "Settings",
+  "dailyReport": {
+    "title": "Daily Report",
+    "totalCases": "Total Cases",
+    "solvedCases": "Solved Cases",
+    "followUp": "Follow Up",
+    "placeVisited": "Places Visited"
+  },
+  "weeklyReport": {
+    "title": "Weekly Report",
+    "totalCases": "Total Cases",
+    "solvedCases": "Solved Cases",
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
+  "monthlyReport": {
+    "title": "Monthly Report",
+    "totalCases": "Total Cases",
+    "solvedCases": "Solved Cases",
+    "followUp": "Follow Up",
+    "placeVisited": "Places Visited"
+  },
+  "profile": {
+    "name": "Rajesh Kumar",
+    "code": "FRO-14567-001",
+    "role": "FRO - Field Response Officer",
 
-  "notification": "Notifications",
-  "locationPermission": "Location Permission",
-  "changeTheme": "Change Theme",
-  "textSize": "Text Size",
-  "textSizeSmall": "Small",
-  "textSizeMedium": "Medium",
-  "textSizeLarge": "Large",
-  "helpSupport": "Help & Support",
+    "menuOfficerDetails": "Officer Details",
+    "menuWorkArea": "Work Area",
+    "menuLanguage": "Language",
+    "menuSettings": "Settings",
+    "menuChangePassword": "Change Password",
 
-  "locationAlertTitle": "Turn off location",
-  "locationAlertMessage": "Open app settings to turn off location permission.",
-  "locationAlertCancel": "Cancel",
-  "locationAlertOpenSettings": "Open Settings"
-},
-"changePassword": {
-  "screenTitle": "Change Password",
+    "logout": "Logout",
+    "logoutTitle": "Do you want to logout?",
+    "logoutDescription": "You will be logged out from your account.",
+    "logoutConfirm": "Yes, logout",
+    "logoutCancel": "Cancel"
+  },
+  "officerDetails": {
+    "screenTitle": "Officer Details",
+    "name": "Name",
+    "nameValue": "Rajesh Kumar",
+    "employeeCode": "Employee Code",
+    "employeeCodeValue": "FRO-14567-001",
+    "mobile": "Mobile Number",
+    "mobileValue": "+91-9876543210",
+    "email": "Email",
+    "emailValue": "rajesh.kumar@example.com",
+    "save": "Save"
+  },
+  "locationDetails": {
+    "screenTitle": "Work Area",
+    "state": "State",
+    "district": "District",
+    "block": "Block / Police Station",
+    "blockPlaceholder": "Enter Block / Police Station",
+    "teamLeadName": "Team Leader Name",
+    "teamLeadPlaceholder": "Enter Team Leader Name",
+    "save": "Save",
+    "defaultName": "Rajesh Kumar",
 
-  "oldPassword": "Old Password",
-  "oldPasswordPlaceholder": "Enter old password",
+    "states": {
+      "up": "Uttar Pradesh",
+      "br": "Bihar",
+      "rj": "Rajasthan"
+    },
 
-  "newPassword": "New Password",
-  "newPasswordPlaceholder": "Enter new password",
+    "districts": {
+      "lucknow": "Lucknow",
+      "kanpur": "Kanpur",
+      "varanasi": "Varanasi"
+    }
+  },
+  "settings": {
+    "screenTitle": "Settings",
 
-  "confirmPassword": "Confirm Password",
-  "confirmPasswordPlaceholder": "Re-enter new password",
+    "notification": "Notifications",
+    "locationPermission": "Location Permission",
+    "changeTheme": "Change Theme",
+    "textSize": "Text Size",
+    "textSizeSmall": "Small",
+    "textSizeMedium": "Medium",
+    "textSizeLarge": "Large",
+    "helpSupport": "Help & Support",
 
-  "save": "Save"
-}
+    "locationAlertTitle": "Turn off location",
+    "locationAlertMessage": "Open app settings to turn off location permission.",
+    "locationAlertCancel": "Cancel",
+    "locationAlertOpenSettings": "Open Settings"
+  },
+  "changePassword": {
+    "screenTitle": "Change Password",
 
+    "oldPassword": "Old Password",
+    "oldPasswordPlaceholder": "Enter old password",
 
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
 
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter new password",
 
+    "save": "Save"
+  },
 
-
-
-
-
-
-
-,
- "frl": {
+  "frl": {
     "home": {
       "casesOverview": "FROs & Cases",
       "newCases": "Active FROs",

@@ -5,166 +5,194 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-/* ------------------ ✅ TYPES ------------------ */
+import { getAttendanceHistory } from "@/features/fro/addAttendance";
+import { useAppSelector } from "@/store/hooks";
 
-type AttendanceStatus = "present" | "absent" | "leave";
+/* ================= TYPES ================= */
+
+type AttendanceStatus = "Present" | "Absent" | "Leave";
 
 type AttendanceItem = {
   id: number;
-  date: string; // ISO recommended from API
-  checkIn: string; // "09:00"
-  checkOut: string; // "19:00"
+  date: string;
+  checkIn: string;
+  checkOut: string;
   totalMinutes: number;
   status: AttendanceStatus;
 };
 
-
-const attendanceHistory: AttendanceItem[] = [
-  {
-    id: 1,
-    date: "2025-12-03T09:00:00Z",
-    checkIn: "09:00",
-    checkOut: "19:00",
-    totalMinutes: 600,
-    status: "present",
-  },
-  {
-    id: 2,
-    date: "2025-12-02T09:00:00Z",
-    checkIn: "--",
-    checkOut: "--",
-    totalMinutes: 0,
-    status: "absent",
-  },
-  {
-    id: 3,
-    date: "2025-12-01T10:00:00Z",
-    checkIn: "10:00",
-    checkOut: "17:00",
-    totalMinutes: 420,
-    status: "leave",
-  },
-];
-
-/* ------------------ ✅ STATUS COLOR MAP ------------------ */
+/* ================= STATUS COLORS ================= */
 
 const statusTheme: Record<
   AttendanceStatus,
   { bg: string; text: string; border: string }
 > = {
-  present: { bg: "#E9F9EF", text: "#1E7F43", border: "#1E7F43" },
-  absent: { bg: "#FDECEC", text: "#C62828", border: "#C62828" },
-  leave: { bg: "#EAF2FF", text: "#1565C0", border: "#1565C0" },
+  Present: { bg: "#E9F9EF", text: "#1E7F43", border: "#1E7F43" },
+  Absent: { bg: "#FDECEC", text: "#C62828", border: "#C62828" },
+  Leave: { bg: "#EAF2FF", text: "#1565C0", border: "#1565C0" },
 };
 
-/* ------------------ ✅ LOCALE FORMAT HELPERS ------------------ */
+/* ================= HELPERS ================= */
 
-// ✅ Date formatter
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString(i18n.language, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return isNaN(date.getTime())
+    ? "--"
+    : date.toLocaleDateString(i18n.language, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
 };
 
-// ✅ Time formatter
-const formatApiTime = (time: string) => {
-  if (time === "--") return "--";
-  const date = new Date(`1970-01-01T${time}:00`);
-  return date.toLocaleTimeString(i18n.language, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+/* ================= STATUS NORMALIZER (ADDED) ================= */
+
+const normalizeStatus = (status?: string): AttendanceStatus => {
+  switch (status?.trim().toLowerCase()) {
+    case "present":
+      return "Present";
+    case "absent":
+      return "Absent";
+    case "leave":
+      return "Leave";
+    default:
+      return "Absent"; // ✅ safe fallback
+  }
 };
+
+/* ================= API MAPPER ================= */
+
+const mapAttendanceFromApi = (item: any): AttendanceItem => {
+  const checkIn = item.checkintime
+    ? new Date(item.checkintime).toLocaleTimeString(i18n.language, {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "--";
+
+  const checkOut = item.checkouttime
+    ? new Date(item.checkouttime).toLocaleTimeString(i18n.language, {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "--";
+
+  const totalMinutes =
+    item.checkintime && item.checkouttime
+      ? Math.floor(
+          (new Date(item.checkouttime).getTime() -
+            new Date(item.checkintime).getTime()) /
+            60000,
+        )
+      : 0;
+
+  return {
+    id: item.id,
+    date: item.attendancedate ?? item.createddate,
+    checkIn,
+    checkOut,
+    totalMinutes,
+    status: normalizeStatus(item.status), // ✅ FIXED
+  };
+};
+
+/* ================= COMPONENT ================= */
 
 export default function AttendanceTab() {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const authState = useAppSelector((state) => state.auth);
+
+  const [attendanceHistory, setAttendanceHistory] = useState<AttendanceItem[]>(
+    [],
+  );
+  const [loading, setLoading] = useState(false);
 
   const [isDutyStarted, setIsDutyStarted] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [totalTime, setTotalTime] = useState("00:00");
-  const [activeTab, setActiveTab] = useState<
-    "all" | AttendanceStatus
-  >("all");
 
-  /* ------------------ ✅ LIVE DUTY TIMER ------------------ */
+  const [activeTab, setActiveTab] = useState<"all" | AttendanceStatus>("all");
+
+  /* ================= FETCH ================= */
 
   useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
+    loadAttendance();
+  }, []);
 
-    if (isDutyStarted && startTime) {
-      timer = setInterval(() => {
-        const now = new Date().getTime();
-        const diff = now - startTime.getTime();
+  const loadAttendance = async () => {
+    try {
+      setLoading(true);
 
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const res = await getAttendanceHistory({
+        userId: String(authState.userId),
+        pageNumber: 1,
+        pageSize: 30,
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
 
-        setTotalTime(
-          `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
-        );
-      }, 1000);
+      const list = Array.isArray(res?.data?.attendanceList)
+        ? res.data.attendanceList
+        : [];
+
+      setAttendanceHistory(list.map(mapAttendanceFromApi));
+    } catch (error) {
+      console.error("Attendance API error:", error);
+    } finally {
+      setLoading(false);
     }
-
-    return () => clearInterval(timer);
-  }, [isDutyStarted, startTime]);
-
-  /* ------------------ ✅ FORMAT LOCAL TIME ------------------ */
-
-  const formatLocalTime = (date: Date | null) => {
-    if (!date) return "--:--";
-    return date.toLocaleTimeString(i18n.language, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   };
 
-  /* ------------------ ✅ DUTY HANDLERS ------------------ */
-
-  const handleStart = () => {
-    const now = new Date();
-    setStartTime(now);
-    setIsDutyStarted(true);
-    setEndTime(null);
-    setTotalTime("00:00");
-  };
-
-  const handleEnd = () => {
-    const now = new Date();
-    setEndTime(now);
-    setIsDutyStarted(false);
-  };
-
-  /* ------------------ ✅ FILTER ------------------ */
+  /* ================= FILTER ================= */
 
   const filteredData =
     activeTab === "all"
       ? attendanceHistory
-      : attendanceHistory.filter(item => item.status === activeTab);
+      : attendanceHistory.filter((item) => item.status === activeTab);
+
+  /* ================= UI ================= */
 
   return (
     <ScrollView style={{ padding: 16 }}>
-
-      {/* ✅ TODAY ATTENDANCE */}
-      <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}>
+      {/* ================= TODAY CARD (UNCHANGED) ================= */}
+      <View
+        style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
+      >
+        <Text
+          style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
+        >
           {t("attendance.todayAttendanceTitle")}
         </Text>
 
-        <View style={[styles.row, { backgroundColor: theme.colors.colorSuccess100 }]}>
+        <View
+          style={[
+            styles.row,
+            { backgroundColor: theme.colors.colorSuccess100 },
+          ]}
+        >
           <Text style={styles.label}>{t("attendance.startTimeLabel")}</Text>
           <Text style={[styles.value, { color: theme.colors.colorSuccess600 }]}>
-            {formatLocalTime(startTime)}
+            {startTime
+              ? startTime.toLocaleTimeString(i18n.language, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "--:--"}
           </Text>
         </View>
 
         <View style={[styles.row, { backgroundColor: theme.colors.inputBg }]}>
           <Text style={styles.label}>{t("attendance.endTimeLabel")}</Text>
-          <Text style={styles.value}>{formatLocalTime(endTime)}</Text>
+          <Text style={styles.value}>
+            {endTime
+              ? endTime.toLocaleTimeString(i18n.language, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "--:--"}
+          </Text>
         </View>
 
         <View style={[styles.row, { backgroundColor: theme.colors.inputBg }]}>
@@ -185,14 +213,14 @@ export default function AttendanceTab() {
                 : theme.colors.colorPrimary500,
             }}
             textStyle={{ color: theme.colors.colorBgPage }}
-            onPress={isDutyStarted ? handleEnd : handleStart}
+            onPress={() => {}}
           />
         </View>
       </View>
 
-      {/* ✅ TAB FILTER */}
+      {/* ================= TABS ================= */}
       <View style={styles.tabRow}>
-        {(["all", "present", "absent", "leave"] as const).map(tab => (
+        {(["all", "Present", "Absent", "Leave"] as const).map((tab) => (
           <Text
             key={tab}
             onPress={() => setActiveTab(tab)}
@@ -210,9 +238,10 @@ export default function AttendanceTab() {
         ))}
       </View>
 
-      {/* ✅ ATTENDANCE CARDS */}
-      {filteredData.map(item => {
-        const themeColor = statusTheme[item.status];
+      {/* ================= HISTORY ================= */}
+      {filteredData.map((item) => {
+        const themeColor = statusTheme[item.status] ?? statusTheme.Absent; // ✅ NO CRASH
+
         const hours = Math.floor(item.totalMinutes / 60);
         const minutes = item.totalMinutes % 60;
 
@@ -221,42 +250,23 @@ export default function AttendanceTab() {
             key={item.id}
             style={[
               styles.historyCard,
-              { backgroundColor: themeColor.bg, borderColor: themeColor.border },
+              {
+                backgroundColor: themeColor.bg,
+                borderColor: themeColor.border,
+              },
             ]}
           >
-            <View style={styles.historyTopRow}>
-              <Text style={[styles.historyDate, { color: themeColor.text }]}>
-                {formatDate(item.date)}
-              </Text>
+            <Text style={{ color: themeColor.text }}>
+              {formatDate(item.date)} — {item.status}
+            </Text>
 
-              <View style={[styles.statusBadge, { borderColor: themeColor.border }]}>
-                <Text style={{ color: themeColor.text }}>
-                  {t(`attendance.history.${item.status}Status`)}
-                </Text>
-              </View>
-            </View>
+            <Text style={{ color: themeColor.text }}>
+              {item.checkIn} → {item.checkOut}
+            </Text>
 
-            <View style={styles.historyBottomRow}>
-              <View>
-                <Text style={styles.historyLabel}>
-                  {t("attendance.history.checkInOutLabel")}
-                </Text>
-                <Text style={[styles.historyValue, { color: themeColor.text }]}>
-                  {formatApiTime(item.checkIn)} {t("attendance.history.toLabel")}{" "}
-                  {formatApiTime(item.checkOut)}
-                </Text>
-              </View>
-
-              <View>
-                <Text style={styles.historyLabel}>
-                  {t("attendance.history.totalWorkingHoursLabel")}
-                </Text>
-                <Text style={[styles.historyValue, { color: themeColor.text }]}>
-                  {hours}:{String(minutes).padStart(2, "0")}{" "}
-                  {t("attendance.hoursSuffix")}
-                </Text>
-              </View>
-            </View>
+            <Text style={{ color: themeColor.text }}>
+              {hours}:{String(minutes).padStart(2, "0")} hrs
+            </Text>
           </View>
         );
       })}
@@ -264,11 +274,20 @@ export default function AttendanceTab() {
   );
 }
 
-/* ------------------ ✅ STYLES ------------------ */
+/* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 16, padding: 16, elevation: 3, marginBottom: 20 },
-  cardTitle: { fontSize: 16, fontWeight: "700", marginBottom: 6 },
+  card: {
+    borderRadius: 16,
+    padding: 16,
+    elevation: 3,
+    marginBottom: 20,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
   row: {
     marginTop: 14,
     padding: 14,
@@ -279,16 +298,23 @@ const styles = StyleSheet.create({
   label: { fontSize: 14, color: "#555" },
   value: { fontSize: 15, fontWeight: "600" },
 
-  tabRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
-  tabText: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, fontWeight: "600", borderWidth: 1 },
+  tabRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  tabText: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    fontWeight: "600",
+    borderWidth: 1,
+  },
 
-  historyCard: { borderRadius: 14, padding: 14, borderWidth: 1, marginBottom: 12 },
-  historyTopRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
-  historyDate: { fontSize: 15, fontWeight: "700" },
-
-  statusBadge: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 },
-
-  historyBottomRow: { flexDirection: "row", justifyContent: "space-between" },
-  historyLabel: { fontSize: 12, color: "#666" },
-  historyValue: { fontSize: 14, fontWeight: "600", marginTop: 4 },
+  historyCard: {
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
 });
