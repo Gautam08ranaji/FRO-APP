@@ -23,3 +23,14 @@ export interface AttendanceListResponse {
     totalCount: number;
   };
 }
+
+// src/features/fro/types/addAttendance.ts
+
+export interface AddAttendanceRequest {
+  attendancedate: string; // YYYY-MM-DD
+  checkintime: string; // ISO string
+  checkouttime: string; // ISO string
+  status: "Present" | "Absent" | "Leave";
+  totalworkinghours: string; // e.g. "5:00"
+  userId: string;
+}

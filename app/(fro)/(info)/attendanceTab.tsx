@@ -6,7 +6,10 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getAttendanceHistory } from "@/features/fro/addAttendance";
+import { updateAttendancePunch } from "@/features/fro/attendanceApi";
+
 import { useAppSelector } from "@/store/hooks";
+import Toast from "react-native-toast-message";
 
 /* ================= TYPES ================= */
 
@@ -34,6 +37,8 @@ const statusTheme: Record<
 
 /* ================= HELPERS ================= */
 
+const getTodayKey = () => new Date().toDateString();
+
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
   return isNaN(date.getTime())
@@ -45,13 +50,19 @@ const formatDate = (dateStr: string) => {
       });
 };
 
-const formatLocalTime = (date: Date | null) =>
+const formatTimeAMPM = (date: Date | null) =>
   date
     ? date.toLocaleTimeString(i18n.language, {
         hour: "2-digit",
         minute: "2-digit",
       })
     : "--:--";
+
+const formatMinutesToTime = (minutes: number) => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
 
 /* ================= STATUS NORMALIZER ================= */
 
@@ -61,7 +72,6 @@ const normalizeStatus = (status?: string): AttendanceStatus => {
       return "Present";
     case "leave":
       return "Leave";
-    case "absent":
     default:
       return "Absent";
   }
@@ -70,34 +80,19 @@ const normalizeStatus = (status?: string): AttendanceStatus => {
 /* ================= API MAPPER ================= */
 
 const mapAttendanceFromApi = (item: any): AttendanceItem => {
-  const checkIn = item.checkintime
-    ? new Date(item.checkintime).toLocaleTimeString(i18n.language, {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "--";
-
-  const checkOut = item.checkouttime
-    ? new Date(item.checkouttime).toLocaleTimeString(i18n.language, {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "--";
+  const checkInDate = item.checkintime ? new Date(item.checkintime) : null;
+  const checkOutDate = item.checkouttime ? new Date(item.checkouttime) : null;
 
   const totalMinutes =
-    item.checkintime && item.checkouttime
-      ? Math.floor(
-          (new Date(item.checkouttime).getTime() -
-            new Date(item.checkintime).getTime()) /
-            60000,
-        )
+    checkInDate && checkOutDate
+      ? Math.floor((checkOutDate.getTime() - checkInDate.getTime()) / 60000)
       : 0;
 
   return {
     id: item.id,
     date: item.attendancedate ?? item.createddate,
-    checkIn,
-    checkOut,
+    checkIn: formatTimeAMPM(checkInDate),
+    checkOut: formatTimeAMPM(checkOutDate),
     totalMinutes,
     status: normalizeStatus(item.status),
   };
@@ -115,18 +110,16 @@ export default function AttendanceTab() {
   );
   const [loading, setLoading] = useState(false);
 
-  const [isDutyStarted, setIsDutyStarted] = useState(false);
-  const [startTime, setStartTime] = useState<Date | null>(null);
-  const [endTime, setEndTime] = useState<Date | null>(null);
-  const [totalTime, setTotalTime] = useState("00:00");
+  /* ===== Punch States ===== */
+  const [isPunchedIn, setIsPunchedIn] = useState(false);
+  const [punchInTime, setPunchInTime] = useState<Date | null>(null);
+  const [workedMinutes, setWorkedMinutes] = useState(0);
+  const [dutyEnded, setDutyEnded] = useState(false);
 
+  const [todayKey, setTodayKey] = useState(getTodayKey());
   const [activeTab, setActiveTab] = useState<"all" | AttendanceStatus>("all");
 
   /* ================= FETCH HISTORY ================= */
-
-  useEffect(() => {
-    loadAttendance();
-  }, []);
 
   const loadAttendance = async () => {
     try {
@@ -152,48 +145,91 @@ export default function AttendanceTab() {
     }
   };
 
-  /* ================= LIVE DUTY TIMER ================= */
+  useEffect(() => {
+    loadAttendance();
+  }, []);
+
+  /* ================= LIVE TIMER ================= */
 
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
 
-    if (isDutyStarted && startTime) {
+    if (isPunchedIn && punchInTime) {
       timer = setInterval(() => {
-        const diff = Date.now() - startTime.getTime();
-
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-
-        setTotalTime(
-          `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-            2,
-            "0",
-          )}`,
-        );
+        const diff = Date.now() - punchInTime.getTime();
+        setWorkedMinutes(Math.floor(diff / 60000));
       }, 1000);
     }
 
     return () => {
-      if (timer !== null) {
-        clearInterval(timer);
-      }
+      if (timer) clearInterval(timer);
     };
-  }, [isDutyStarted, startTime]);
+  }, [isPunchedIn, punchInTime]);
 
-  /* ================= DUTY HANDLERS ================= */
+  /* ================= DATE CHANGE AUTO RESET ================= */
 
-  const handleStartDuty = () => {
-    const now = new Date();
-    setStartTime(now);
-    setEndTime(null);
-    setTotalTime("00:00");
-    setIsDutyStarted(true);
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentKey = getTodayKey();
 
-  const handleEndDuty = () => {
-    const now = new Date();
-    setEndTime(now);
-    setIsDutyStarted(false);
+      if (currentKey !== todayKey) {
+        setTodayKey(currentKey);
+
+        setDutyEnded(false);
+        setIsPunchedIn(false);
+        setPunchInTime(null);
+        setWorkedMinutes(0);
+
+        loadAttendance();
+      }
+    }, 60 * 1000); // check every minute
+
+    return () => clearInterval(interval);
+  }, [todayKey]);
+
+  /* ================= PUNCH API ================= */
+
+  const punchAttendance = async (punchIn: boolean) => {
+    if (dutyEnded && !punchIn) {
+      Toast.show({
+        type: "info",
+        text1: "Duty Ended",
+        text2: "You already ended duty",
+      });
+      return;
+    }
+
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const res = await updateAttendancePunch({
+        userId: String(authState.userId),
+        punchIn,
+        token: String(authState.token),
+      });
+
+      if (res?.success) {
+        console.log("updateAttendancePunch", res.success);
+      }
+
+      if (punchIn) {
+        const now = new Date();
+        setPunchInTime(now);
+        setWorkedMinutes(0);
+        setIsPunchedIn(true);
+        setDutyEnded(false);
+      } else {
+        setIsPunchedIn(false);
+        setPunchInTime(null);
+        setDutyEnded(true);
+        loadAttendance();
+      }
+    } catch (error) {
+      console.error("Attendance punch failed", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   /* ================= FILTER ================= */
@@ -207,7 +243,6 @@ export default function AttendanceTab() {
 
   return (
     <ScrollView style={{ padding: 16 }}>
-      {/* ================= TODAY CARD ================= */}
       <View
         style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
       >
@@ -225,39 +260,51 @@ export default function AttendanceTab() {
         >
           <Text style={styles.label}>{t("attendance.startTimeLabel")}</Text>
           <Text style={[styles.value, { color: theme.colors.colorSuccess600 }]}>
-            {formatLocalTime(startTime)}
+            {formatTimeAMPM(punchInTime)}
           </Text>
         </View>
 
         <View style={[styles.row, { backgroundColor: theme.colors.inputBg }]}>
           <Text style={styles.label}>{t("attendance.endTimeLabel")}</Text>
-          <Text style={styles.value}>{formatLocalTime(endTime)}</Text>
+          <Text style={styles.value}>
+            {dutyEnded
+              ? "Duty Ended"
+              : !isPunchedIn && punchInTime
+                ? formatTimeAMPM(new Date())
+                : "--:--"}
+          </Text>
         </View>
 
         <View style={[styles.row, { backgroundColor: theme.colors.inputBg }]}>
           <Text style={styles.label}>{t("attendance.totalTimeLabel")}</Text>
-          <Text style={[styles.value, { color: "#1565C0" }]}>{totalTime}</Text>
+          <Text style={[styles.value, { color: "#1565C0" }]}>
+            {formatMinutesToTime(workedMinutes)}
+          </Text>
         </View>
 
         <View style={{ marginTop: 20 }}>
           <ReusableButton
             title={
-              isDutyStarted
-                ? t("attendance.endDutyButton")
-                : t("attendance.startDutyButton")
+              dutyEnded
+                ? "Duty Ended"
+                : isPunchedIn
+                  ? t("attendance.endDutyButton")
+                  : t("attendance.startDutyButton")
             }
+            disabled={dutyEnded}
             containerStyle={{
-              backgroundColor: isDutyStarted
-                ? theme.colors.colorAccent500
-                : theme.colors.colorPrimary500,
+              backgroundColor: dutyEnded
+                ? "#BDBDBD"
+                : isPunchedIn
+                  ? theme.colors.colorAccent500
+                  : theme.colors.colorPrimary500,
             }}
             textStyle={{ color: theme.colors.colorBgPage }}
-            onPress={isDutyStarted ? handleEndDuty : handleStartDuty}
+            onPress={() => punchAttendance(!isPunchedIn)}
           />
         </View>
       </View>
 
-      {/* ================= TABS ================= */}
       <View style={styles.tabRow}>
         {(["all", "Present", "Absent", "Leave"] as const).map((tab) => (
           <Text
@@ -277,7 +324,6 @@ export default function AttendanceTab() {
         ))}
       </View>
 
-      {/* ================= HISTORY ================= */}
       {filteredData.map((item) => {
         const themeColor = statusTheme[item.status];
         const hours = Math.floor(item.totalMinutes / 60);
