@@ -55,6 +55,8 @@ export default function HomeScreen() {
     }
   };
 
+  console.log("antifog", authState?.antiforgeryToken);
+
   /* ================= API CALLS ================= */
 
   const fetchInteractions = useCallback(async () => {

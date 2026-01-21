@@ -21,6 +21,10 @@ import { useTheme } from "@/theme/ThemeContext";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import {
+  getDropdownByEndpoint,
+  getDropdownByEndpointAndId,
+} from "@/features/fro/dropdownApi";
 import { launchImageLibrary } from "react-native-image-picker";
 import RemixIcon from "react-native-remix-icon";
 
@@ -203,8 +207,42 @@ export default function OfficerDetailsScreen() {
   useEffect(() => {
     if (authState?.userId && authState?.token) {
       fetchUserData();
+      fetchStateDropdown();
+      fetchDistrictDropdown();
+      fetchGenderDropdown();
     }
   }, [authState]);
+
+  const fetchGenderDropdown = async () => {
+    const res = await getDropdownByEndpoint(
+      "GetGenderDropdown",
+      String(authState.token),
+      String(authState.antiforgeryToken),
+    );
+
+    console.log("GetGenderDropdown", res.data);
+  };
+
+  const fetchStateDropdown = async () => {
+    const res = await getDropdownByEndpoint(
+      "GetStateDropdown",
+      String(authState.token),
+      String(authState.antiforgeryToken),
+    );
+
+    console.log("GetStateDropdown", res.data);
+  };
+
+  const fetchDistrictDropdown = async () => {
+    const res = await getDropdownByEndpointAndId(
+      "GetDistrictDropdownByStateId",
+      2,
+      String(authState.token),
+      String(authState.antiforgeryToken),
+    );
+
+    console.log("GetDistrictDropdownByStateId", res.data);
+  };
 
   /* ================= IMAGE PICKER ================= */
 
