@@ -1,11 +1,9 @@
 import BodyLayout from "@/components/layout/BodyLayout";
+import { baseUrlApi } from "@/features/api/baseUrl.ts";
 import { getUserDataById } from "@/features/fro/profile/getProfile";
 import { updateUser } from "@/features/fro/profile/updateUser";
-import { useAppSelector } from "@/store/hooks";
-import { useTheme } from "@/theme/ThemeContext";
-import React, { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Modal,
@@ -17,6 +15,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+import { useAppSelector } from "@/store/hooks";
+import { useTheme } from "@/theme/ThemeContext";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+
 import { launchImageLibrary } from "react-native-image-picker";
 import RemixIcon from "react-native-remix-icon";
 
@@ -33,6 +37,7 @@ type OfficerForm = {
   pincode: string;
   address: string; // ✅ ADD
   photo: string | null;
+  photoBase64: string | null;
 };
 
 export type UpdateUserPayload = {
@@ -61,7 +66,16 @@ export type UpdateUserPayload = {
   userRoles: any[];
 };
 
-type TextInputKey = Exclude<keyof OfficerForm, "photo">;
+type TextInputKey =
+  | "firstName"
+  | "lastName"
+  | "phone"
+  | "email"
+  | "gender"
+  | "state"
+  | "city"
+  | "pincode"
+  | "address";
 
 type DropdownKey = "gender" | "state" | "city";
 
@@ -129,31 +143,43 @@ export default function OfficerDetailsScreen() {
     state: "",
     city: "",
     pincode: "",
-    photo: null,
     address: "",
+    photo: null,
+    photoBase64: null, // ✅ ADD
   });
 
   const [errors, setErrors] = useState<Partial<Record<TextInputKey, string>>>(
     {},
   );
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [dropdownKey, setDropdownKey] = useState<DropdownKey | null>(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   /* ================= FETCH USER ================= */
+  const getProfileImageUrl = (photoPath: string | null) => {
+    if (!photoPath) return null;
+
+    // Replace backslashes with forward slashes
+    const normalizedPath = photoPath.replace(/\\/g, "/");
+
+    return `${baseUrlApi}/${normalizedPath}`;
+  };
 
   const fetchUserData = async () => {
     try {
+      setLoading(true);
+
       const response = await getUserDataById({
         userId: String(authState.userId),
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      console.log("fetch profile", response);
-
       const data: UserApiResponse = response?.data;
       setUserProfile(data);
+
       setForm({
         firstName: data?.firstName ?? "",
         lastName: data?.lastName ?? "",
@@ -163,11 +189,14 @@ export default function OfficerDetailsScreen() {
         state: data?.stateName ?? "",
         city: data?.cityName ?? "",
         pincode: data?.pinCode ?? "",
-        photo: data?.profilePhoto ?? null,
         address: data?.address ?? "",
+        photo: getProfileImageUrl(data?.profilePhoto),
+        photoBase64: null,
       });
     } catch (error) {
       console.error("Failed to fetch user data", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -180,14 +209,26 @@ export default function OfficerDetailsScreen() {
   /* ================= IMAGE PICKER ================= */
 
   const openImagePicker = () => {
-    launchImageLibrary({ mediaType: "photo" }, (res) => {
-      if (res.assets?.length) {
-        setForm((prev) => ({
-          ...prev,
-          photo: res.assets![0].uri ?? null,
-        }));
-      }
-    });
+    launchImageLibrary(
+      {
+        mediaType: "photo",
+        includeBase64: true, // ✅ REQUIRED
+        quality: 0.7,
+      },
+      (res) => {
+        if (res.assets?.length) {
+          const asset = res.assets[0];
+
+          setForm((prev) => ({
+            ...prev,
+            photo: asset.uri ?? null,
+            photoBase64: asset.base64
+              ? `data:${asset.type};base64,${asset.base64}`
+              : null,
+          }));
+        }
+      },
+    );
   };
 
   /* ================= KEYBOARD AUTO SCROLL ================= */
@@ -242,7 +283,7 @@ export default function OfficerDetailsScreen() {
   const onSave = () => {
     if (!validate()) return;
     handleUpdateUser();
-    console.log("UPDATE PAYLOAD:", form);
+    // console.log("UPDATE PAYLOAD:", form);
   };
 
   /* ================= DROPDOWN ================= */
@@ -270,6 +311,8 @@ export default function OfficerDetailsScreen() {
       throw new Error("User profile not loaded");
     }
 
+    const isImageUpdated = Boolean(form.photoBase64);
+
     return {
       id: String(authState.userId),
 
@@ -282,10 +325,14 @@ export default function OfficerDetailsScreen() {
       cityName: form.city,
       pinCode: form.pincode,
 
-      isImageUpdate: Boolean(form.photo),
-      imgSrc: form.photo ?? "",
+      // ✅ IMAGE LOGIC (IMPORTANT)
+      isImageUpdate: isImageUpdated,
+      imgSrc: isImageUpdated
+        ? form.photoBase64! // 🔥 NEW IMAGE (base64)
+        : (userProfile.profilePhoto ?? ""), // 🔥 EXISTING IMAGE
 
-      address: form.address ?? "",
+      address: form.address,
+
       isActive: userProfile.isActive ?? true,
       userLevel: userProfile.userLevel ?? 0,
       userLevelName: userProfile.userLevelName ?? "",
@@ -300,13 +347,15 @@ export default function OfficerDetailsScreen() {
 
   const handleUpdateUser = async () => {
     if (!validate()) return;
-    if (!userProfile) return; // ✅ guard here
+    if (!userProfile) return;
 
     try {
+      setSaving(true);
+
       const response = await updateUser({
         token: authState.token!,
         csrfToken: String(authState.antiforgeryToken),
-        data: buildUpdatePayload(), // ✅ always valid
+        data: buildUpdatePayload(),
       });
 
       if (response?.success) {
@@ -314,6 +363,8 @@ export default function OfficerDetailsScreen() {
       }
     } catch (error: any) {
       console.error("Update failed:", error?.response?.data ?? error.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -325,6 +376,15 @@ export default function OfficerDetailsScreen() {
       screenName={t("officerDetails.screenTitle")}
       enableScroll={false}
     >
+      {(loading || saving) && (
+        <View style={styles.overlay}>
+          <ActivityIndicator
+            size="large"
+            color={theme.colors.colorPrimary600}
+          />
+        </View>
+      )}
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 210}
@@ -386,11 +446,17 @@ export default function OfficerDetailsScreen() {
             <TouchableOpacity
               style={[
                 styles.saveBtn,
-                { backgroundColor: theme.colors.colorPrimary600 },
+                {
+                  backgroundColor: theme.colors.colorPrimary600,
+                  opacity: saving ? 0.6 : 1,
+                },
               ]}
               onPress={onSave}
+              disabled={saving}
             >
-              <Text style={styles.saveText}>{t("officerDetails.save")}</Text>
+              <Text style={styles.saveText}>
+                {saving ? "Saving..." : t("officerDetails.save")}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -555,5 +621,21 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 16,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.25)", // ✅ transparent dark overlay
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
   },
 });
