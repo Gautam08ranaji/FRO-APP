@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getAttendanceHistory } from "@/features/fro/addAttendance";
-import { updateAttendancePunch } from "@/features/fro/attendanceApi";
 
 import { addAttendance } from "@/features/fro/addAttendanceStatus";
 import { useAppSelector } from "@/store/hooks";
@@ -188,96 +187,67 @@ export default function AttendanceTab() {
     return () => clearInterval(interval);
   }, [todayKey]);
 
-  /* ================= PUNCH API ================= */
-
-  const punchAttendance = async (punchIn: boolean) => {
-    if (dutyEnded && !punchIn) {
-      Toast.show({
-        type: "info",
-        text1: "Duty Ended",
-        text2: "You already ended duty",
-      });
-      return;
-    }
-
-    if (loading) return;
-    setLoading(true);
-
-    try {
-      const res = await updateAttendancePunch({
-        userId: String(authState.userId),
-        punchIn,
-        token: String(authState.token),
-      });
-
-      if (res?.success) {
-        console.log("updateAttendancePunch", res.success);
-        submitAttendanceStatus();
-      }
-
-      if (punchIn) {
-        const now = new Date();
-        setPunchInTime(now);
-        setWorkedMinutes(0);
-        setIsPunchedIn(true);
-        setDutyEnded(false);
-      } else {
-        setIsPunchedIn(false);
-        setPunchInTime(null);
-        setDutyEnded(true);
-        loadAttendance();
-      }
-    } catch (error) {
-      console.error("Attendance punch failed", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ================= FILTER ================= */
-
   const filteredData =
     activeTab === "all"
       ? attendanceHistory
       : attendanceHistory.filter((item) => item.status === activeTab);
 
-  const submitAttendanceStatus = async () => {
+  const submitAttendanceStatus = async (action: "start" | "end") => {
     try {
       const now = new Date();
-      const currentDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
-      const currentDateTime = now.toISOString(); // ISO string for current time
-
-      // Determine which time to set based on punch status
-      const checkintime = isPunchedIn ? "" : currentDateTime; // Empty on start, set on end
-      const checkouttime = isPunchedIn ? currentDateTime : ""; // Set on start, empty on end
+      const currentDate = now.toISOString().split("T")[0];
+      const currentDateTime = now.toISOString();
 
       const res = await addAttendance({
         data: {
           attendancedate: currentDate,
-          checkintime: checkintime,
-          checkouttime: checkouttime,
+          checkintime: action === "start" ? currentDateTime : "",
+          checkouttime: action === "end" ? currentDateTime : "",
           status: "Present",
-          totalworkinghours: formatMinutesToTime(workedMinutes),
+          totalworkinghours:
+            action === "end" ? formatMinutesToTime(workedMinutes) : "00:00",
           userId: String(authState.userId),
         },
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      console.log("Attendance added:", res);
+      console.log("punch in punch out ", res);
 
       Toast.show({
         type: "success",
-        text1: "Attendance Saved",
+        text1: action === "start" ? "Duty Started" : "Duty Ended Successfully",
       });
 
-      loadAttendance(); // refresh list
+      loadAttendance();
     } catch (error) {
-      console.error("Add attendance failed", error);
+      console.error("Attendance submit failed", error);
       Toast.show({
         type: "error",
-        text1: "Failed to add attendance",
+        text1: "Attendance failed",
       });
+    }
+  };
+
+  const handleDutyAction = async () => {
+    if (loading) return;
+
+    if (!isPunchedIn) {
+      // ▶ START DUTY
+      const now = new Date();
+      setPunchInTime(now);
+      setWorkedMinutes(0);
+      setIsPunchedIn(true);
+      setDutyEnded(false);
+
+      await submitAttendanceStatus("start");
+    } else {
+      // ⏹ END DUTY
+      setIsPunchedIn(false);
+      setPunchInTime(null);
+      setDutyEnded(true);
+
+      await submitAttendanceStatus("end");
     }
   };
 
@@ -342,7 +312,7 @@ export default function AttendanceTab() {
                   : theme.colors.colorPrimary500,
             }}
             textStyle={{ color: theme.colors.colorBgPage }}
-            onPress={() => punchAttendance(!isPunchedIn)}
+            onPress={handleDutyAction}
           />
         </View>
       </View>

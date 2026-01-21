@@ -14,7 +14,7 @@ export const useFROLocationUpdater = (userId?: string | null) => {
         const location = await fetchLocation();
         if (!location) return;
 
-        const { latitude, longitude } = location.coords;        
+        const { latitude, longitude } = location.coords;
         const payload = {
           name: address ?? "Unknown location", // ✅ READABLE ADDRESS
           latitute: latitude.toString(), // ✅ real latitude
