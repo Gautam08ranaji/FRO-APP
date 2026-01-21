@@ -20,13 +20,23 @@ import {
 
 const { width } = Dimensions.get("window");
 
+/* ================= PROPS ================= */
+
 interface BodyLayoutProps {
   type: "dashboard" | "screen" | "frl";
   screenName?: string;
   children: React.ReactNode;
+
   scrollViewStyle?: StyleProp<ViewStyle>;
   scrollContentStyle?: StyleProp<ViewStyle>;
-  TotalCases?:string
+
+  enableScroll?: boolean; // ✅ NEW
+
+  userName?: string;
+  userId?: string;
+  todaysDutyCount?: number | string;
+  totalCases?: number | string;
+  notificationCount?: number;
 }
 
 export default function BodyLayout({
@@ -35,17 +45,24 @@ export default function BodyLayout({
   children,
   scrollViewStyle,
   scrollContentStyle,
-  TotalCases
+
+  enableScroll = true, // ✅ DEFAULT TRUE
+
+  userName,
+  userId,
+  todaysDutyCount,
+  totalCases,
+  notificationCount = 0,
 }: BodyLayoutProps) {
   const { theme } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-    const authState = useAppSelector((state) => state.auth);
-  
+  const authState = useAppSelector((state) => state.auth);
 
-  // ✅ CENTRALIZED ICON NAVIGATION (NORMAL vs FRL)
+  /* ================= ICON NAVIGATION ================= */
+
   const handleIconPress = (
-    iconType: "notification" | "escalation" | "call"
+    iconType: "notification" | "escalation" | "call",
   ) => {
     if (type === "frl") {
       if (iconType === "notification") {
@@ -63,10 +80,14 @@ export default function BodyLayout({
   };
 
   return (
- <SafeAreaView
-  edges={["top"]}
-  style={[styles.safeArea, { backgroundColor: theme.colors.colorBgSurface }]}
->
+    <SafeAreaView
+      edges={["top"]}
+      style={[
+        styles.safeArea,
+        { backgroundColor: theme.colors.colorBgSurface },
+      ]}
+    >
+      {/* ================= HEADER ================= */}
 
       {type === "dashboard" || type === "frl" ? (
         <View
@@ -78,6 +99,8 @@ export default function BodyLayout({
             },
           ]}
         >
+          {/* ================= TOP ROW ================= */}
+
           <View style={styles.topRow}>
             <View>
               <Text
@@ -86,7 +109,7 @@ export default function BodyLayout({
                   { color: theme.colors.colorBgPage },
                 ]}
               >
-                Hello , {authState.role  ||"User"} 
+                Hello, {userName || "User"}
               </Text>
 
               <Text
@@ -99,9 +122,11 @@ export default function BodyLayout({
                   },
                 ]}
               >
-               {/* {authState.userId  ||"Id not found"} */}
+                {userId || ""}
               </Text>
             </View>
+
+            {/* ================= ICONS ================= */}
 
             <View style={styles.iconRow}>
               <TouchableOpacity
@@ -116,9 +141,12 @@ export default function BodyLayout({
                   size={22}
                   color={theme.colors.colorPrimary600}
                 />
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>3</Text>
-                </View>
+
+                {notificationCount > 0 && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{notificationCount}</Text>
+                  </View>
+                )}
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -152,6 +180,8 @@ export default function BodyLayout({
             </View>
           </View>
 
+          {/* ================= DASHBOARD STATS ================= */}
+
           {type !== "frl" && (
             <View
               style={[
@@ -166,7 +196,7 @@ export default function BodyLayout({
                     { color: theme.colors.colorPrimary600 },
                   ]}
                 >
-                 {" Today's Duty"}
+                  {"Today's Duty"}
                 </Text>
 
                 <Text
@@ -186,7 +216,7 @@ export default function BodyLayout({
                     { color: theme.colors.colorPrimary600 },
                   ]}
                 >
-                  12
+                  {todaysDutyCount ?? 0}
                 </Text>
 
                 <Text
@@ -195,13 +225,15 @@ export default function BodyLayout({
                     { color: theme.colors.colorPrimary600 },
                   ]}
                 >
-                  {TotalCases || 0}
+                  {totalCases ?? 0}
                 </Text>
               </View>
             </View>
           )}
         </View>
       ) : (
+        /* ================= NORMAL SCREEN HEADER ================= */
+
         <View
           style={[
             styles.dashboardHeader,
@@ -235,26 +267,44 @@ export default function BodyLayout({
         </View>
       )}
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={[
-          styles.bodyContainer,
-          { backgroundColor: theme.colors.colorBgSurface },
-          scrollViewStyle,
-        ]}
-        contentContainerStyle={[
-          {
-            flexGrow: 1,
-            paddingBottom: insets.bottom + 16,
-          },
-          scrollContentStyle,
-        ]}
-      >
-        {children}
-      </ScrollView>
+      {/* ================= BODY ================= */}
+
+      {enableScroll ? (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={[
+            styles.bodyContainer,
+            { backgroundColor: theme.colors.colorBgSurface },
+            scrollViewStyle,
+          ]}
+          contentContainerStyle={[
+            {
+              flexGrow: 1,
+              paddingBottom: insets.bottom + 16,
+            },
+            scrollContentStyle,
+          ]}
+        >
+          {children}
+        </ScrollView>
+      ) : (
+        <View
+          style={[
+            styles.bodyContainer,
+            {
+              backgroundColor: theme.colors.colorBgSurface,
+              paddingBottom: insets.bottom + 16,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      )}
     </SafeAreaView>
   );
 }
+
+/* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
   safeArea: {

@@ -96,52 +96,41 @@ export default function LoginScreen() {
       if (!res.success || !res.data) {
         Alert.alert(
           t("login.errorTitle"),
-          res.errors?.[0] ?? t("login.errors.loginFailed")
+          res.errors?.[0] ?? t("login.errors.loginFailed"),
         );
         return;
       }
       const user = res.data;
-      console.log("login res",res);
-      
+      console.log("login res", res);
+
       console.log("login res", res?.data?.userRoles[0]);
 
       const role = user.userType == "FRO" ? "FRO" : "FRL";
 
       console.log("role", role);
 
-      // const role = user.userRoles.some(
-      //   (r) => r.roleName.toUpperCase() === "FRO"
-      // )
-      //   ? "FRO"
-      //   : "FRL";
-
-      // 2️⃣ FETCH ANTIFORGERY TOKEN USING BEARER TOKEN
       const antiRes = await loadAntiForgeryToken(user.bearerToken);
-      // antiRes => { token: string }
 
       // 3️⃣ STORE AUTH + ANTIFORGERY TOGETHER ✅
       dispatch(
         setAuth({
           id: user.id,
-          userName: user.userName,
           bearerToken: user.bearerToken,
-          firstName: user.firstName ?? null,
-          lastName: user.lastName ?? null,
           role,
-          antiforgeryToken: antiRes.token, // ✅ NOW VALID
-        })
+          antiforgeryToken: antiRes.token,
+        }),
       );
 
-      console.log("role", role);
+      console.log("role", res);
 
       // 4️⃣ NAVIGATE
       router.replace(
-        role === "FRO" ? "/(fro)/(dashboard)" : "/(frl)/(dashboard)"
+        role === "FRO" ? "/(fro)/(dashboard)" : "/(frl)/(dashboard)",
       );
     } catch (err: any) {
       Alert.alert(
         t("login.errorTitle"),
-        err?.data?.errors?.[0] ?? t("login.errors.generic")
+        err?.data?.errors?.[0] ?? t("login.errors.generic"),
       );
     }
   };

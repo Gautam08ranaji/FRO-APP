@@ -5,6 +5,7 @@ import ReusableButton from "@/components/reusables/ReusableButton";
 import ReusableCard from "@/components/reusables/ReusableCard";
 
 import { getInteractionsListByAssignToId } from "@/features/fro/interactionApi";
+import { getUserDataById } from "@/features/fro/profile/getProfile";
 import { useFROLocationUpdater } from "@/hooks/useFROLocationUpdater";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
@@ -20,6 +21,8 @@ import { StyleSheet, Text, View } from "react-native";
 export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const [firstName, setfirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
   const authState = useAppSelector((state) => state.auth);
 
@@ -30,6 +33,27 @@ export default function HomeScreen() {
 
   const [interactions, setInteractions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await getUserDataById({
+        userId: String(authState.userId),
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
+      setfirstName(response?.data?.firstName || "User");
+      setLastName(response?.data?.lastName || "User");
+      console.log("User data:", response?.data);
+      return response;
+    } catch (error) {
+      console.error("Failed to fetch user data", error);
+      throw error;
+    }
+  };
 
   /* ================= API CALLS ================= */
 
@@ -87,7 +111,14 @@ export default function HomeScreen() {
   /* ================= UI ================= */
 
   return (
-    <BodyLayout type="dashboard" TotalCases={String(totalCaseCount)}>
+    <BodyLayout
+      type="dashboard"
+      userName={`${firstName} ${lastName}`}
+      userId={""}
+      todaysDutyCount={12}
+      totalCases={48}
+      notificationCount={3}
+    >
       {/* Attendance */}
       <Text
         style={[
