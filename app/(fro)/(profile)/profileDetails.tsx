@@ -30,16 +30,24 @@ import RemixIcon from "react-native-remix-icon";
 
 /* ================= TYPES ================= */
 
+type ApiDropdownItem = {
+  id: string | number;
+  name: string;
+};
+
 type OfficerForm = {
   firstName: string;
   lastName: string;
   phone: string;
   email: string;
   gender: string;
+  genderValue: number;
   state: string;
+  stateValue: number;
   city: string;
+  cityValue: number;
   pincode: string;
-  address: string; // ✅ ADD
+  address: string;
   photo: string | null;
   photoBase64: string | null;
 };
@@ -98,7 +106,6 @@ type UserApiResponse = {
 
   profilePhoto: string | null;
 
-  // ✅ missing fields
   address: string | null;
   isActive: boolean | null;
   userLevel: number | null;
@@ -109,6 +116,11 @@ type UserApiResponse = {
   cityId: number | null;
   userType: string | null;
   userRoles: any[];
+};
+
+type DropdownItem = {
+  label: string;
+  value: number;
 };
 
 /* ================= COMPONENT ================= */
@@ -122,7 +134,6 @@ export default function OfficerDetailsScreen() {
 
   const scrollRef = useRef<ScrollView>(null);
 
-  // Initialize with all required keys
   const inputRefs = useRef<Record<TextInputKey, View | null>>({
     firstName: null,
     lastName: null,
@@ -144,12 +155,15 @@ export default function OfficerDetailsScreen() {
     phone: "",
     email: "",
     gender: "",
+    genderValue: 0,
     state: "",
+    stateValue: 0,
     city: "",
+    cityValue: 0,
     pincode: "",
     address: "",
     photo: null,
-    photoBase64: null, // ✅ ADD
+    photoBase64: null,
   });
 
   const [errors, setErrors] = useState<Partial<Record<TextInputKey, string>>>(
@@ -161,13 +175,15 @@ export default function OfficerDetailsScreen() {
   const [dropdownKey, setDropdownKey] = useState<DropdownKey | null>(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
+  const [genderDropdown, setGenderDropdown] = useState<any[]>([]);
+  const [stateDropdown, setStateDropdown] = useState<any[]>([]);
+  const [cityDropdown, setCityDropdown] = useState<any[]>([]);
+
   /* ================= FETCH USER ================= */
   const getProfileImageUrl = (photoPath: string | null) => {
     if (!photoPath) return null;
 
-    // Replace backslashes with forward slashes
     const normalizedPath = photoPath.replace(/\\/g, "/");
-
     return `${baseUrlApi}/${normalizedPath}`;
   };
 
@@ -190,13 +206,20 @@ export default function OfficerDetailsScreen() {
         phone: data?.phoneNumber ?? "",
         email: data?.email ?? "",
         gender: data?.gender ?? "",
+        genderValue: 0,
         state: data?.stateName ?? "",
+        stateValue: data?.stateId ?? 0,
         city: data?.cityName ?? "",
+        cityValue: data?.cityId ?? 0,
         pincode: data?.pinCode ?? "",
         address: data?.address ?? "",
         photo: getProfileImageUrl(data?.profilePhoto),
         photoBase64: null,
       });
+
+      if (data?.stateId) {
+        fetchDistrictDropdown(data.stateId);
+      }
     } catch (error) {
       console.error("Failed to fetch user data", error);
     } finally {
@@ -204,14 +227,7 @@ export default function OfficerDetailsScreen() {
     }
   };
 
-  useEffect(() => {
-    if (authState?.userId && authState?.token) {
-      fetchUserData();
-      fetchStateDropdown();
-      fetchDistrictDropdown();
-      fetchGenderDropdown();
-    }
-  }, [authState]);
+  /* ================= DROPDOWN API FUNCTIONS ================= */
 
   const fetchGenderDropdown = async () => {
     const res = await getDropdownByEndpoint(
@@ -220,7 +236,7 @@ export default function OfficerDetailsScreen() {
       String(authState.antiforgeryToken),
     );
 
-    console.log("GetGenderDropdown", res.data);
+    setGenderDropdown(res.data ?? []);
   };
 
   const fetchStateDropdown = async () => {
@@ -230,19 +246,27 @@ export default function OfficerDetailsScreen() {
       String(authState.antiforgeryToken),
     );
 
-    console.log("GetStateDropdown", res.data);
+    setStateDropdown(res.data ?? []);
   };
 
-  const fetchDistrictDropdown = async () => {
+  const fetchDistrictDropdown = async (stateId: number) => {
     const res = await getDropdownByEndpointAndId(
       "GetDistrictDropdownByStateId",
-      2,
+      stateId,
       String(authState.token),
       String(authState.antiforgeryToken),
     );
 
-    console.log("GetDistrictDropdownByStateId", res.data);
+    setCityDropdown(res.data ?? []);
   };
+
+  useEffect(() => {
+    if (authState?.userId && authState?.token) {
+      fetchUserData();
+      fetchGenderDropdown();
+      fetchStateDropdown();
+    }
+  }, [authState]);
 
   /* ================= IMAGE PICKER ================= */
 
@@ -250,7 +274,7 @@ export default function OfficerDetailsScreen() {
     launchImageLibrary(
       {
         mediaType: "photo",
-        includeBase64: true, // ✅ REQUIRED
+        includeBase64: true,
         quality: 0.7,
       },
       (res) => {
@@ -289,18 +313,13 @@ export default function OfficerDetailsScreen() {
     const newErrors: Partial<Record<TextInputKey, string>> = {};
 
     if (!form.firstName.trim()) newErrors.firstName = "First name is required";
-
     if (!form.lastName.trim()) newErrors.lastName = "Last name is required";
-
     if (!/^\d{10}$/.test(form.phone))
       newErrors.phone = "Phone must be 10 digits";
-
     if (!/^\d{6}$/.test(form.pincode))
       newErrors.pincode = "Pincode must be 6 digits";
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       newErrors.email = "Invalid email";
-
     if (!form.state) newErrors.state = "State required";
     if (!form.city) newErrors.city = "City required";
 
@@ -321,7 +340,6 @@ export default function OfficerDetailsScreen() {
   const onSave = () => {
     if (!validate()) return;
     handleUpdateUser();
-    // console.log("UPDATE PAYLOAD:", form);
   };
 
   /* ================= DROPDOWN ================= */
@@ -334,14 +352,49 @@ export default function OfficerDetailsScreen() {
   const getDropdownData = () => {
     switch (dropdownKey) {
       case "gender":
-        return ["Male", "Female", "Other"];
+        return genderDropdown;
       case "state":
-        return ["Delhi", "Maharashtra", "Karnataka"];
+        return stateDropdown;
       case "city":
-        return ["Mumbai", "Delhi", "Bengaluru"];
+        return cityDropdown;
       default:
         return [];
     }
+  };
+
+  const handleDropdownSelect = (item: { label: string; value: number }) => {
+    if (!dropdownKey) return;
+
+    switch (dropdownKey) {
+      case "gender":
+        setForm((prev) => ({
+          ...prev,
+          gender: item.label,
+          genderValue: item.value,
+        }));
+        break;
+
+      case "state":
+        setForm((prev) => ({
+          ...prev,
+          state: item.label,
+          stateValue: item.value,
+          city: "",
+          cityValue: 0,
+        }));
+        fetchDistrictDropdown(item.value);
+        break;
+
+      case "city":
+        setForm((prev) => ({
+          ...prev,
+          city: item.label,
+          cityValue: item.value,
+        }));
+        break;
+    }
+
+    setDropdownVisible(false);
   };
 
   const buildUpdatePayload = (): UpdateUserPayload => {
@@ -363,21 +416,19 @@ export default function OfficerDetailsScreen() {
       cityName: form.city,
       pinCode: form.pincode,
 
-      // ✅ IMAGE LOGIC (IMPORTANT)
       isImageUpdate: isImageUpdated,
       imgSrc: isImageUpdated
-        ? form.photoBase64! // 🔥 NEW IMAGE (base64)
-        : (userProfile.profilePhoto ?? ""), // 🔥 EXISTING IMAGE
+        ? form.photoBase64!
+        : (userProfile.profilePhoto ?? ""),
 
       address: form.address,
-
       isActive: userProfile.isActive ?? true,
       userLevel: userProfile.userLevel ?? 0,
       userLevelName: userProfile.userLevelName ?? "",
       department: userProfile.department ?? "",
       maxAssignInteraction: userProfile.maxAssignInteraction ?? 0,
-      stateId: userProfile.stateId ?? 0,
-      cityId: userProfile.cityId ?? 0,
+      stateId: form.stateValue,
+      cityId: form.cityValue,
       userType: userProfile.userType ?? "",
       userRoles: userProfile.userRoles ?? [],
     };
@@ -479,7 +530,7 @@ export default function OfficerDetailsScreen() {
             {renderDropdown("State", "state", "Select state")}
             {renderDropdown("City", "city", "Select city")}
             {renderInput("Pincode", "pincode", "Enter pincode", true)}
-            {renderInput("Address", "address", "Enter ")}
+            {renderInput("Address", "address", "Enter address")}
 
             <TouchableOpacity
               style={[
@@ -508,20 +559,13 @@ export default function OfficerDetailsScreen() {
           onPress={() => setDropdownVisible(false)}
         >
           <View style={styles.modalContent}>
-            {getDropdownData().map((item) => (
+            {getDropdownData().map((item: { label: string; value: number }) => (
               <TouchableOpacity
-                key={item}
+                key={item.value}
                 style={styles.modalItem}
-                onPress={() => {
-                  if (!dropdownKey) return;
-                  setForm((prev) => ({
-                    ...prev,
-                    [dropdownKey]: item,
-                  }));
-                  setDropdownVisible(false);
-                }}
+                onPress={() => handleDropdownSelect(item)}
               >
-                <Text style={styles.modalText}>{item}</Text>
+                <Text style={styles.modalText}>{item.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -572,7 +616,7 @@ export default function OfficerDetailsScreen() {
           onPress={() => openDropdown(key)}
         >
           <Text style={{ color: form[key] ? "#000" : "#999" }}>
-            {form[key] || placeholder}
+            {typeof form[key] === "string" ? form[key] : placeholder}
           </Text>
         </TouchableOpacity>
         {errors[key] && <Text style={styles.error}>{errors[key]}</Text>}
@@ -586,8 +630,6 @@ export default function OfficerDetailsScreen() {
 const styles = StyleSheet.create({
   card: {
     marginTop: 0,
-    // padding: 20,
-    // borderRadius: 12,
   },
   profileWrapper: {
     alignSelf: "center",
@@ -623,6 +665,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 12,
     backgroundColor: "#f5f5f5",
@@ -653,17 +696,15 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
+    maxHeight: "50%",
   },
   modalItem: {
     paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
   },
   modalText: {
     fontSize: 16,
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   overlay: {
     position: "absolute",
@@ -671,7 +712,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.25)", // ✅ transparent dark overlay
+    backgroundColor: "rgba(0,0,0,0.25)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 999,
