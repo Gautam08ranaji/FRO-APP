@@ -1,5 +1,6 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { getUserDataById } from "@/features/fro/profile/getProfile";
+import { updateUser } from "@/features/fro/profile/updateUser";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useEffect, useRef, useState } from "react";
@@ -30,22 +31,66 @@ type OfficerForm = {
   state: string;
   city: string;
   pincode: string;
+  address: string; // ✅ ADD
   photo: string | null;
 };
 
+export type UpdateUserPayload = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  gender: string;
+  stateName: string;
+  cityName: string;
+  pinCode: string;
+
+  isImageUpdate: boolean;
+  imgSrc: string;
+
+  address: string;
+  isActive: boolean;
+  userLevel: number;
+  userLevelName: string;
+  department: string;
+  maxAssignInteraction: number;
+  stateId: number;
+  cityId: number;
+  userType: string;
+  userRoles: any[];
+};
+
 type TextInputKey = Exclude<keyof OfficerForm, "photo">;
+
 type DropdownKey = "gender" | "state" | "city";
 
 type UserApiResponse = {
+  id: string | null;
+
   firstName: string | null;
   lastName: string | null;
   phoneNumber: string | null;
   email: string | null;
+
   gender: string | null;
   stateName: string | null;
   cityName: string | null;
   pinCode: string | null;
+
   profilePhoto: string | null;
+
+  // ✅ missing fields
+  address: string | null;
+  isActive: boolean | null;
+  userLevel: number | null;
+  userLevelName: string | null;
+  department: string | null;
+  maxAssignInteraction: number | null;
+  stateId: number | null;
+  cityId: number | null;
+  userType: string | null;
+  userRoles: any[];
 };
 
 /* ================= COMPONENT ================= */
@@ -69,9 +114,11 @@ export default function OfficerDetailsScreen() {
     state: null,
     city: null,
     pincode: null,
+    address: null,
   });
 
   /* ================= STATE ================= */
+  const [userProfile, setUserProfile] = useState<UserApiResponse | null>(null);
 
   const [form, setForm] = useState<OfficerForm>({
     firstName: "",
@@ -83,6 +130,7 @@ export default function OfficerDetailsScreen() {
     city: "",
     pincode: "",
     photo: null,
+    address: "",
   });
 
   const [errors, setErrors] = useState<Partial<Record<TextInputKey, string>>>(
@@ -102,8 +150,10 @@ export default function OfficerDetailsScreen() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      const data: UserApiResponse = response?.data;
+      console.log("fetch profile", response);
 
+      const data: UserApiResponse = response?.data;
+      setUserProfile(data);
       setForm({
         firstName: data?.firstName ?? "",
         lastName: data?.lastName ?? "",
@@ -114,6 +164,7 @@ export default function OfficerDetailsScreen() {
         city: data?.cityName ?? "",
         pincode: data?.pinCode ?? "",
         photo: data?.profilePhoto ?? null,
+        address: data?.address ?? "",
       });
     } catch (error) {
       console.error("Failed to fetch user data", error);
@@ -190,7 +241,7 @@ export default function OfficerDetailsScreen() {
 
   const onSave = () => {
     if (!validate()) return;
-
+    handleUpdateUser();
     console.log("UPDATE PAYLOAD:", form);
   };
 
@@ -211,6 +262,58 @@ export default function OfficerDetailsScreen() {
         return ["Mumbai", "Delhi", "Bengaluru"];
       default:
         return [];
+    }
+  };
+
+  const buildUpdatePayload = (): UpdateUserPayload => {
+    if (!userProfile) {
+      throw new Error("User profile not loaded");
+    }
+
+    return {
+      id: String(authState.userId),
+
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      email: form.email.trim(),
+      phoneNumber: form.phone,
+      gender: form.gender,
+      stateName: form.state,
+      cityName: form.city,
+      pinCode: form.pincode,
+
+      isImageUpdate: Boolean(form.photo),
+      imgSrc: form.photo ?? "",
+
+      address: form.address ?? "",
+      isActive: userProfile.isActive ?? true,
+      userLevel: userProfile.userLevel ?? 0,
+      userLevelName: userProfile.userLevelName ?? "",
+      department: userProfile.department ?? "",
+      maxAssignInteraction: userProfile.maxAssignInteraction ?? 0,
+      stateId: userProfile.stateId ?? 0,
+      cityId: userProfile.cityId ?? 0,
+      userType: userProfile.userType ?? "",
+      userRoles: userProfile.userRoles ?? [],
+    };
+  };
+
+  const handleUpdateUser = async () => {
+    if (!validate()) return;
+    if (!userProfile) return; // ✅ guard here
+
+    try {
+      const response = await updateUser({
+        token: authState.token!,
+        csrfToken: String(authState.antiforgeryToken),
+        data: buildUpdatePayload(), // ✅ always valid
+      });
+
+      if (response?.success) {
+        fetchUserData();
+      }
+    } catch (error: any) {
+      console.error("Update failed:", error?.response?.data ?? error.message);
     }
   };
 
@@ -278,6 +381,7 @@ export default function OfficerDetailsScreen() {
             {renderDropdown("State", "state", "Select state")}
             {renderDropdown("City", "city", "Select city")}
             {renderInput("Pincode", "pincode", "Enter pincode", true)}
+            {renderInput("Address", "address", "Enter ")}
 
             <TouchableOpacity
               style={[
