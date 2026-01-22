@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getAttendanceHistory } from "@/features/fro/addAttendance";
-
 import { addAttendance } from "@/features/fro/addAttendanceStatus";
 import { useAppSelector } from "@/store/hooks";
 import Toast from "react-native-toast-message";
@@ -22,6 +21,7 @@ type AttendanceItem = {
   checkOut: string;
   totalMinutes: number;
   status: AttendanceStatus;
+  rawData: any; // Store original API data
 };
 
 /* ================= STATUS COLORS ================= */
@@ -37,7 +37,10 @@ const statusTheme: Record<
 
 /* ================= HELPERS ================= */
 
-const getTodayKey = () => new Date().toDateString();
+const getTodayDateString = () => {
+  const today = new Date();
+  return today.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+};
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -95,6 +98,7 @@ const mapAttendanceFromApi = (item: any): AttendanceItem => {
     checkOut: formatTimeAMPM(checkOutDate),
     totalMinutes,
     status: normalizeStatus(item.status),
+    rawData: item, // Store original data for reference
   };
 };
 
@@ -109,6 +113,7 @@ export default function AttendanceTab() {
     [],
   );
   const [loading, setLoading] = useState(false);
+  const [currentDateAttendance, setCurrentDateAttendance] = useState<any>(null);
 
   /* ===== Punch States ===== */
   const [isPunchedIn, setIsPunchedIn] = useState(false);
@@ -116,8 +121,62 @@ export default function AttendanceTab() {
   const [workedMinutes, setWorkedMinutes] = useState(0);
   const [dutyEnded, setDutyEnded] = useState(false);
 
-  const [todayKey, setTodayKey] = useState(getTodayKey());
   const [activeTab, setActiveTab] = useState<"all" | AttendanceStatus>("all");
+
+  /* ================= FIND CURRENT DATE ATTENDANCE ================= */
+
+  const findCurrentDateAttendance = (data: any[]) => {
+    const today = getTodayDateString();
+    return data.find((item) => {
+      const itemDate = item.attendancedate || item.createddate?.split("T")[0];
+      return itemDate === today;
+    });
+  };
+
+  /* ================= INITIALIZE PUNCH STATUS ================= */
+
+  const initializePunchStatus = (currentData: any) => {
+    if (!currentData) {
+      // No attendance record for today
+      setIsPunchedIn(false);
+      setPunchInTime(null);
+      setWorkedMinutes(0);
+      setDutyEnded(false);
+      return;
+    }
+
+    const hasCheckIn = currentData.checkintime;
+    const hasCheckOut = currentData.checkouttime;
+
+    if (hasCheckIn && !hasCheckOut) {
+      // User punched in but not out
+      const checkInTime = new Date(currentData.checkintime);
+      setIsPunchedIn(true);
+      setPunchInTime(checkInTime);
+      setDutyEnded(false);
+
+      // Calculate worked minutes
+      const diff = Date.now() - checkInTime.getTime();
+      setWorkedMinutes(Math.floor(diff / 60000));
+    } else if (hasCheckIn && hasCheckOut) {
+      // User already completed duty today
+      const checkInTime = new Date(currentData.checkintime);
+      const checkOutTime = new Date(currentData.checkouttime);
+
+      setIsPunchedIn(false);
+      setPunchInTime(checkInTime);
+      setDutyEnded(true);
+
+      const diff = checkOutTime.getTime() - checkInTime.getTime();
+      setWorkedMinutes(Math.floor(diff / 60000));
+    } else {
+      // User hasn't punched in today
+      setIsPunchedIn(false);
+      setPunchInTime(null);
+      setWorkedMinutes(0);
+      setDutyEnded(false);
+    }
+  };
 
   /* ================= FETCH HISTORY ================= */
 
@@ -137,6 +196,14 @@ export default function AttendanceTab() {
         ? res.data.attendanceList
         : [];
 
+      // Find today's attendance
+      const todayAttendance = findCurrentDateAttendance(list);
+      setCurrentDateAttendance(todayAttendance);
+
+      // Initialize punch status based on today's data
+      initializePunchStatus(todayAttendance);
+
+      // Map and set history
       setAttendanceHistory(list.map(mapAttendanceFromApi));
     } catch (err) {
       console.error("Attendance API error:", err);
@@ -165,27 +232,6 @@ export default function AttendanceTab() {
       if (timer) clearInterval(timer);
     };
   }, [isPunchedIn, punchInTime]);
-
-  /* ================= DATE CHANGE AUTO RESET ================= */
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const currentKey = getTodayKey();
-
-      if (currentKey !== todayKey) {
-        setTodayKey(currentKey);
-
-        setDutyEnded(false);
-        setIsPunchedIn(false);
-        setPunchInTime(null);
-        setWorkedMinutes(0);
-
-        loadAttendance();
-      }
-    }, 60 * 1000); // check every minute
-
-    return () => clearInterval(interval);
-  }, [todayKey]);
 
   const filteredData =
     activeTab === "all"
@@ -219,7 +265,8 @@ export default function AttendanceTab() {
         text1: action === "start" ? "Duty Started" : "Duty Ended Successfully",
       });
 
-      loadAttendance();
+      // Reload attendance after successful action
+      await loadAttendance();
     } catch (error) {
       console.error("Attendance submit failed", error);
       Toast.show({
