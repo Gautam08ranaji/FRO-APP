@@ -16,7 +16,7 @@ export const addAttendance = ({
 }: AddAttendanceParams) => {
   return apiRequest<void>({
     method: "POST",
-    url: "/AttendanceHistory/AddAttendance",
+    url: "/MobileApp/AddAttendance",
     data,
     headers: {
       Accept: "application/json",

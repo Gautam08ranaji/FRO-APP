@@ -1,3 +1,4 @@
+import { getAttendanceHistory } from "@/features/fro/addAttendance";
 import { addAttendance } from "@/features/fro/addAttendanceStatus";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
@@ -5,11 +6,11 @@ import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 
+/* ================= CONSTANTS ================= */
+
 const TARGET_MINUTES = 8 * 60;
 
 /* ================= HELPERS ================= */
-
-const getTodayKey = () => new Date().toISOString().split("T")[0];
 
 function formatMinutesToTime(minutes: number) {
   const h = Math.floor(minutes / 60);
@@ -24,6 +25,14 @@ function formatTimeAMPM(date: Date) {
   });
 }
 
+function formatDateOnly(date: Date) {
+  return date.toISOString().split("T")[0]; // YYYY-MM-DD
+}
+
+function isValidDate(value?: string | null) {
+  return value && value.trim().length > 0;
+}
+
 /* ================= COMPONENT ================= */
 
 export default function PunchInCard() {
@@ -35,7 +44,71 @@ export default function PunchInCard() {
   const [isPunchedIn, setIsPunchedIn] = useState(false);
   const [dutyEnded, setDutyEnded] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [todayKey, setTodayKey] = useState(getTodayKey());
+
+  /* ================= LOAD ATTENDANCE ================= */
+
+  const loadAttendance = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getAttendanceHistory({
+        userId: String(authState.userId),
+        pageNumber: 1,
+        pageSize: 30,
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
+
+      const list = Array.isArray(res?.data?.attendanceList)
+        ? res.data.attendanceList
+        : [];
+
+      const today = formatDateOnly(new Date());
+
+      // 🔍 Find today's attendance
+      const todayAttendance = list.find(
+        (item: any) => item.attendancedate === today,
+      );
+
+      if (!todayAttendance) {
+        // ❌ Not punched in today
+        setIsPunchedIn(false);
+        setPunchInTime(null);
+        setWorkedMinutes(0);
+        setDutyEnded(false);
+        return;
+      }
+
+      const hasCheckIn = isValidDate(todayAttendance.checkintime);
+      const hasCheckOut = isValidDate(todayAttendance.checkouttime);
+
+      if (hasCheckIn && !hasCheckOut) {
+        // ✅ Punched in but not punched out
+        const checkInDate = new Date(todayAttendance.checkintime);
+
+        setPunchInTime(checkInDate);
+        setIsPunchedIn(true);
+        setDutyEnded(false);
+
+        const diffMs = Date.now() - checkInDate.getTime();
+        setWorkedMinutes(Math.floor(diffMs / 60000));
+      } else if (hasCheckIn && hasCheckOut) {
+        // ✅ Already punched out
+        setIsPunchedIn(false);
+        setDutyEnded(true);
+        setPunchInTime(null);
+        setWorkedMinutes(0);
+      }
+    } catch (err) {
+      console.error("Attendance API error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAttendance();
+  }, []);
 
   /* ================= TIMER ================= */
 
@@ -54,39 +127,21 @@ export default function PunchInCard() {
     };
   }, [isPunchedIn, punchInTime]);
 
-  /* ================= DATE CHANGE RESET ================= */
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const newKey = getTodayKey();
-
-      if (newKey !== todayKey) {
-        setTodayKey(newKey);
-        setPunchInTime(null);
-        setWorkedMinutes(0);
-        setIsPunchedIn(false);
-        setDutyEnded(false);
-      }
-    }, 60 * 1000); // check every minute
-
-    return () => clearInterval(interval);
-  }, [todayKey]);
-
   /* ================= PUNCH HANDLER ================= */
 
   const punchAttendance = async () => {
     if (loading || dutyEnded) return;
+
     setLoading(true);
 
     try {
       const now = new Date();
       const currentDateTime = now.toISOString();
-
       const action: "start" | "end" = isPunchedIn ? "end" : "start";
 
-      const res = await addAttendance({
+      await addAttendance({
         data: {
-          attendancedate: todayKey,
+          attendancedate: formatDateOnly(now),
           checkintime: action === "start" ? currentDateTime : "",
           checkouttime: action === "end" ? currentDateTime : "",
           status: "Present",
@@ -97,8 +152,6 @@ export default function PunchInCard() {
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
       });
-
-      console.log("attendaxc res", res);
 
       if (action === "start") {
         setPunchInTime(now);
@@ -123,8 +176,7 @@ export default function PunchInCard() {
     } catch (error: any) {
       const statusCode = error?.response?.data?.statusCode;
       const apiMessage =
-        error?.response?.data?.errors?.[0] ??
-        "Attendance already recorded for today";
+        error?.response?.data?.errors?.[0] ?? "Attendance already recorded";
 
       if (statusCode === 409) {
         setDutyEnded(true);
