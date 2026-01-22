@@ -105,7 +105,7 @@ export default function CasesScreen() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      console.log("Fetched intefdghractions:", res?.data);
+      // console.log("Fetched intefdghractions:", res?.data);
       setInteractions(res?.data?.interactions || []);
     } catch (error) {
       console.error("❌ Failed to fetch cases:", error);
@@ -143,20 +143,20 @@ export default function CasesScreen() {
   const selectedFilterKey = tabs[activeTab].key;
 
   const filteredData = useMemo(() => {
-    console.log("Filtering data with key:", selectedFilterKey);
-    console.log("Total interactions:", interactions.length);
+    // console.log("Filtering data with key:", selectedFilterKey);
+    // console.log("Total interactions:", interactions.length);
 
     if (selectedFilterKey === "all") {
-      console.log("Showing all cases");
+      // console.log("Showing all cases");
       return interactions;
     }
 
     const filtered = interactions.filter((item) => {
       // Get the case status from backend
       const caseStatus = item.caseStatusName || "";
-      console.log(
-        `Item ${item.transactionNumber}: caseStatusName="${caseStatus}"`,
-      );
+      // console.log(
+      //   `Item ${item.transactionNumber}: caseStatusName="${caseStatus}"`,
+      // );
 
       // For Open tab, check if it's "Open" (case-insensitive)
       if (selectedFilterKey === "open") {
@@ -167,7 +167,7 @@ export default function CasesScreen() {
       return caseStatus.toLowerCase() === selectedFilterKey.toLowerCase();
     });
 
-    console.log(`Filtered to ${filtered.length} items`);
+    // console.log(`Filtered to ${filtered.length} items`);
     return filtered;
   }, [interactions, selectedFilterKey]);
 

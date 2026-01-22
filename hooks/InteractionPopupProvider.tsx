@@ -115,6 +115,7 @@ export const useInteractionPopupPoller = () => {
           subStatusName: "Case Accepetd",
           comment: "Accepted By FRO",
           callBack: "",
+          assignToId: String(authState.userId),
         },
       });
 
@@ -136,7 +137,7 @@ export const useInteractionPopupPoller = () => {
     if (!current) return;
 
     try {
-      await updateInteraction({
+      const res = await updateInteraction({
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
         data: {
@@ -149,6 +150,8 @@ export const useInteractionPopupPoller = () => {
           callBack: "No",
         },
       });
+
+      // console.log("rejected", res);
 
       setShowRemarkModal(false);
       closePopup();

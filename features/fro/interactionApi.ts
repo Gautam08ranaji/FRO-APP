@@ -43,6 +43,7 @@ export type UpdateInteractionPayload = {
 
   comment?: string;
   callBack?: string;
+  assignToId?: string;
 };
 
 type UpdateInteractionParams = {
