@@ -86,6 +86,8 @@ export default function HomeScreen() {
     }
   };
 
+  // console.log("antifof", authState.antiforgeryToken);
+
   /* ================= CARD CONFIG ================= */
 
   const caseCardConfig = {
@@ -95,7 +97,7 @@ export default function HomeScreen() {
       iconBg: "#00C950",
       cardBg: theme.colors.validationSuccessBg,
       countColor: theme.colors.colorPrimary600,
-      filter: "approved",
+      filter: "Open",
     },
     pending: {
       title: "Pending",
@@ -103,7 +105,7 @@ export default function HomeScreen() {
       iconBg: theme.colors.validationWarningText,
       cardBg: theme.colors.validationWarningBg,
       countColor: theme.colors.validationWarningText,
-      filter: "working",
+      filter: "Pending",
     },
     resolved: {
       title: "Resolved",
@@ -111,10 +113,10 @@ export default function HomeScreen() {
       iconBg: theme.colors.colorHeadingH1,
       cardBg: theme.colors.validationInfoBg,
       countColor: theme.colors.colorHeadingH1,
-      filter: "onway",
+      filter: "Resolved",
     },
     closed: {
-      title: t("home.closedCases"),
+      title: "Closed",
       icon: "close-circle-line",
       iconBg: "#6A7282",
       cardBg: theme.colors.navDivider,

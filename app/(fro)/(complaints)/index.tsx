@@ -16,6 +16,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -24,17 +25,29 @@ import {
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
-/* ================= STATUS MAP ================= */
+/* ================= RESPONSIVE SCALING ================= */
+const scale = (size: number) => (width / 375) * size;
+const verticalScale = (size: number) => (height / 812) * size;
+const moderateScale = (size: number, factor = 0.5) =>
+  size + (scale(size) - size) * factor;
 
-const STATUS_MAP: Record<string, string> = {
-  Open: "new",
-  Approved: "approved",
-  "On The Way": "onway",
-  "In Progress": "working",
-  "Follow Up": "followup",
-  Closed: "closed",
+/* ================= STATUS MAPPING ================= */
+// Define the mapping between backend statuses and display statuses
+const STATUS_DISPLAY_MAP: Record<string, string> = {
+  Open: "Open", // Backend: "Open" -> Display: "Open"
+  Pending: "Pending", // Backend: "Pending" -> Display: "Pending"
+  Resolved: "Resolved", // Backend: "Resolved" -> Display: "Resolved"
+  Closed: "Closed", // Backend: "Closed" -> Display: "Closed"
+};
+
+// Map backend statuses to our filter keys (case-insensitive matching)
+const STATUS_TO_FILTER_MAP: Record<string, string> = {
+  open: "Open",
+  pending: "Pending",
+  resolved: "Resolved",
+  closed: "Closed",
 };
 
 export default function CasesScreen() {
@@ -53,16 +66,16 @@ export default function CasesScreen() {
   const [interactions, setInteractions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* ---------------- TABS ---------------- */
+  /* ---------------- TABS (5 TABS) ---------------- */
   const tabs = [
-    { label: "All", key: "all" },
-    { label: t("cases.tabNew"), key: "new" },
-    { label: t("cases.tabApproved"), key: "approved" },
-    { label: t("cases.tabOnWay"), key: "onway" },
-    { label: t("cases.tabWorking"), key: "working" },
-    { label: t("cases.tabFollowup"), key: "followup" },
-    { label: t("cases.tabClosed"), key: "closed" },
+    { label: "All", key: "all", displayKey: "all" },
+    { label: "Open", key: "open", displayKey: "Open" },
+    { label: "Pending", key: "pending", displayKey: "Pending" },
+    { label: "Resolved", key: "resolved", displayKey: "Resolved" },
+    { label: "Closed", key: "closed", displayKey: "Closed" },
   ];
+
+  console.log("param", params);
 
   const initialTabIndex = tabs.findIndex((t) => t.key === params.filter);
   const [activeTab, setActiveTab] = useState(
@@ -77,7 +90,7 @@ export default function CasesScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchInteractions();
-      setShowPopUp(true);
+      // setShowPopUp(true);
     }, []),
   );
 
@@ -93,6 +106,7 @@ export default function CasesScreen() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
+      console.log("Fetched intefdghractions:", res?.data);
       setInteractions(res?.data?.interactions || []);
     } catch (error) {
       console.error("❌ Failed to fetch cases:", error);
@@ -130,132 +144,201 @@ export default function CasesScreen() {
   const selectedFilterKey = tabs[activeTab].key;
 
   const filteredData = useMemo(() => {
-    if (selectedFilterKey === "all") return interactions;
+    console.log("Filtering data with key:", selectedFilterKey);
+    console.log("Total interactions:", interactions.length);
 
-    return interactions.filter(
-      (item) => STATUS_MAP[item.caseStatusName] === selectedFilterKey,
-    );
+    if (selectedFilterKey === "all") {
+      console.log("Showing all cases");
+      return interactions;
+    }
+
+    const filtered = interactions.filter((item) => {
+      // Get the case status from backend
+      const caseStatus = item.caseStatusName || "";
+      console.log(
+        `Item ${item.transactionNumber}: caseStatusName="${caseStatus}"`,
+      );
+
+      // For Open tab, check if it's "Open" (case-insensitive)
+      if (selectedFilterKey === "open") {
+        return caseStatus.toLowerCase() === "open";
+      }
+
+      // For other tabs, check exact match (case-insensitive)
+      return caseStatus.toLowerCase() === selectedFilterKey.toLowerCase();
+    });
+
+    console.log(`Filtered to ${filtered.length} items`);
+    return filtered;
   }, [interactions, selectedFilterKey]);
 
   /* ---------------- STATUS COLORS ---------------- */
 
-  const statusColors: any = {
-    new: "#E53935",
-    approved: "#6D4C41",
-    onway: "#1E88E5",
-    working: "#FDD835",
-    followup: "#FB8C00",
-    closed: "#43A047",
+  const statusColors: Record<string, string> = {
+    Open: "#00C950", // Green for Open
+    Pending: "#FDD835", // Yellow for Pending
+    Resolved: "#1E88E5", // Blue for Resolved
+    Closed: "#6A7282", // Gray for Closed
+  };
+
+  /* ---------------- GET DISPLAY STATUS ---------------- */
+
+  const getDisplayStatus = (caseStatusName: string) => {
+    // Return the status as is from backend, or default mapping
+    return STATUS_DISPLAY_MAP[caseStatusName] || caseStatusName;
+  };
+
+  const getStatusColor = (caseStatusName: string) => {
+    // Get color based on status name (case-insensitive)
+    const statusKey = Object.keys(statusColors).find(
+      (key) => key.toLowerCase() === caseStatusName.toLowerCase(),
+    );
+    return statusKey ? statusColors[statusKey] : "#6A7282"; // Default gray
   };
 
   /* ================= UI ================= */
 
   return (
     <BodyLayout type="screen" screenName={t("cases.screenTitle")}>
-      {/* ---------------- TABS ---------------- */}
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabContainer}
-      >
-        {tabs.map((tab, index) => (
-          <TouchableOpacity
-            key={tab.key}
-            ref={(el: any) => (tabRefs.current[index] = el)}
-            onPress={() => setActiveTab(index)}
-            style={[
-              styles.tab,
-              { backgroundColor: theme.colors.colorBgPage },
-              activeTab === index && {
-                backgroundColor: theme.colors.colorPrimary600,
-              },
-            ]}
-          >
-            <Text
+      {/* ---------------- TABS (5 TABS) ---------------- */}
+      <View style={styles.tabsWrapper}>
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabContainer}
+        >
+          {tabs.map((tab, index) => (
+            <TouchableOpacity
+              key={tab.key}
+              ref={(el: any) => (tabRefs.current[index] = el)}
+              onPress={() => {
+                console.log(`Tab clicked: ${tab.key} (${tab.displayKey})`);
+                setActiveTab(index);
+              }}
               style={[
-                styles.tabText,
-                { color: theme.colors.colorTextSecondary },
+                styles.tab,
+                { backgroundColor: theme.colors.colorBgPage },
                 activeTab === index && {
-                  color: theme.colors.colorBgPage,
+                  backgroundColor: theme.colors.colorPrimary600,
                 },
               ]}
             >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* ---------------- CASE LIST ---------------- */}
-      {filteredData.map((item, idx) => {
-        const statusKey = STATUS_MAP[item.caseStatusName];
-
-        return (
-          <View
-            key={idx}
-            style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
-          >
-            <View style={styles.rowBetween}>
               <Text
                 style={[
-                  styles.cardTitle,
+                  styles.tabText,
                   { color: theme.colors.colorTextSecondary },
+                  activeTab === index && {
+                    color: theme.colors.colorBgPage,
+                  },
                 ]}
               >
-                {item.name}
+                {tab.label}
               </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
-              <View
-                style={[
-                  styles.tagBadge,
-                  { backgroundColor: statusColors[statusKey] },
-                ]}
-              >
-                <Text style={styles.tagText}>{item.caseStatusName}</Text>
+      {/* ---------------- CASE LIST ---------------- */}
+      <ScrollView
+        style={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+      >
+        {filteredData.map((item, idx) => {
+          const displayStatus = getDisplayStatus(item.caseStatusName);
+          const statusColor = getStatusColor(item.caseStatusName);
+
+          return (
+            <View
+              key={idx}
+              style={[
+                styles.card,
+                { backgroundColor: theme.colors.colorBgPage },
+              ]}
+            >
+              <View style={styles.rowBetween}>
+                <Text
+                  style={[
+                    styles.cardTitle,
+                    { color: theme.colors.colorTextSecondary },
+                  ]}
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
+                  {item.name || "Unnamed Case"}
+                </Text>
+
+                <View
+                  style={[styles.tagBadge, { backgroundColor: statusColor }]}
+                >
+                  <Text style={styles.tagText}>{displayStatus}</Text>
+                </View>
               </View>
-            </View>
 
-            <Text style={styles.cardText}>
-              {t("cases.age")}: {item.ageofTheElder || "-"}
-            </Text>
-            <Text style={styles.cardText}>
-              {t("cases.category")}: {item.categoryName}
-            </Text>
-            <Text style={styles.cardText}>
-              {t("cases.ticket")}: {item.transactionNumber}
-            </Text>
-
-            <View style={styles.metaRow}>
-              <View style={styles.metaItem}>
-                <RemixIcon name="map-pin-line" size={16} />
-                <Text style={styles.metaText}>{item.districtName}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <RemixIcon name="time-line" size={16} />
-                <Text style={styles.metaText}>
-                  {new Date(item.callBackDateTime).toLocaleString()}
+              <View style={styles.infoContainer}>
+                <Text style={[styles.cardText, styles.infoText]}>
+                  {t("cases.age")}: {item.ageofTheElder || "-"}
+                </Text>
+                <Text style={[styles.cardText, styles.infoText]}>
+                  {t("cases.category")}: {item.categoryName || "-"}
+                </Text>
+                <Text style={[styles.cardText, styles.infoText]}>
+                  {t("cases.ticket")}: {item.transactionNumber || "-"}
                 </Text>
               </View>
-            </View>
 
-            <TouchableOpacity
+              <View style={styles.metaRow}>
+                <View style={styles.metaItem}>
+                  <RemixIcon name="map-pin-line" size={moderateScale(16)} />
+                  <Text style={styles.metaText} numberOfLines={1}>
+                    {item.districtName || "-"}
+                  </Text>
+                </View>
+                <View style={styles.metaItem}>
+                  <RemixIcon name="time-line" size={moderateScale(16)} />
+                  <Text style={styles.metaText} numberOfLines={1}>
+                    {item.createdDate
+                      ? new Date(item.createdDate).toLocaleString()
+                      : "-"}
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.actionBtn,
+                  { backgroundColor: theme.colors.colorPrimary600 },
+                ]}
+                onPress={() =>
+                  router.push({
+                    pathname: "/CaseDetailScreen",
+                    params: { item: JSON.stringify(item) },
+                  })
+                }
+              >
+                <Text style={styles.actionBtnText}>{t("cases.viewCase")}</Text>
+              </TouchableOpacity>
+            </View>
+          );
+        })}
+
+        {/* Empty state */}
+        {filteredData.length === 0 && !loading && (
+          <View style={styles.emptyContainer}>
+            <Text
               style={[
-                styles.actionBtn,
-                { backgroundColor: theme.colors.colorPrimary600 },
+                styles.emptyText,
+                { color: theme.colors.colorTextSecondary },
               ]}
-              onPress={() =>
-                router.push({
-                  pathname: "/CaseDetailScreen",
-                  params: { item: JSON.stringify(item) },
-                })
-              }
             >
-              <Text style={styles.actionBtnText}>{t("cases.viewCase")}</Text>
-            </TouchableOpacity>
+              No {selectedFilterKey !== "all" ? selectedFilterKey : ""} cases
+              found
+            </Text>
           </View>
-        );
-      })}
+        )}
+      </ScrollView>
 
       {/* ---------------- MODALS (UNCHANGED) ---------------- */}
       <NewCasePopupModal
@@ -312,77 +395,146 @@ export default function CasesScreen() {
   );
 }
 
-/* ---------------- STYLES ---------------- */
+/* ---------------- RESPONSIVE STYLES ---------------- */
 
 const styles = StyleSheet.create({
+  tabsWrapper: {
+    marginTop: verticalScale(4),
+    marginBottom: verticalScale(8),
+  },
   tabContainer: {
-    paddingHorizontal: 10,
-    paddingVertical: 12,
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: verticalScale(6),
+    minHeight: verticalScale(44),
   },
   tab: {
-    height: 38,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginRight: 10,
+    height: moderateScale(36),
+    paddingHorizontal: moderateScale(14),
+    borderRadius: moderateScale(8),
+    marginRight: moderateScale(6),
     justifyContent: "center",
     alignItems: "center",
+    minWidth: moderateScale(65),
   },
   tabText: {
-    fontSize: 14,
+    fontSize: moderateScale(13),
+    fontWeight: "500",
+    textAlign: "center",
+  },
+
+  listContainer: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: moderateScale(14),
+    paddingTop: verticalScale(4),
+    paddingBottom: verticalScale(24),
   },
   card: {
-    width: width - 28,
+    width: width - moderateScale(28),
     alignSelf: "center",
-    padding: 16,
-    marginBottom: 14,
-    borderRadius: 12,
-    marginTop: 10,
+    padding: moderateScale(14),
+    marginBottom: verticalScale(10),
+    borderRadius: moderateScale(10),
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   rowBetween: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    marginBottom: verticalScale(6),
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: moderateScale(15),
+    fontWeight: "600",
+    flex: 1,
+    marginRight: moderateScale(8),
+    lineHeight: moderateScale(20),
+  },
+  infoContainer: {
+    marginBottom: verticalScale(6),
   },
   cardText: {
-    marginTop: 4,
-    fontSize: 14,
+    fontSize: moderateScale(13),
+    color: "#666",
+    lineHeight: moderateScale(18),
+  },
+  infoText: {
+    marginBottom: verticalScale(3),
   },
   tagBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(4),
+    borderRadius: moderateScale(16),
+    minWidth: moderateScale(65),
+    alignItems: "center",
   },
   tagText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: moderateScale(11),
     fontWeight: "600",
+    textAlign: "center",
   },
   metaRow: {
     flexDirection: "row",
-    marginTop: 12,
+    flexWrap: "wrap",
+    marginTop: verticalScale(6),
+    marginBottom: verticalScale(8),
   },
   metaItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: 20,
+    marginRight: moderateScale(14),
+    marginBottom: verticalScale(2),
+    flex: 1,
+    minWidth: width * 0.35,
   },
   metaText: {
-    marginLeft: 4,
-    fontSize: 13,
+    marginLeft: moderateScale(5),
+    fontSize: moderateScale(12),
+    color: "#666",
+    flex: 1,
   },
   actionBtn: {
-    marginTop: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
+    marginTop: verticalScale(8),
+    paddingVertical: verticalScale(12),
+    borderRadius: moderateScale(8),
     alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.15,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   actionBtnText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: moderateScale(14),
     fontWeight: "600",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: verticalScale(40),
+  },
+  emptyText: {
+    fontSize: moderateScale(15),
+    textAlign: "center",
   },
 });

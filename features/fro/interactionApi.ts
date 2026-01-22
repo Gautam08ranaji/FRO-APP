@@ -18,11 +18,11 @@ export const getInteractionsListByAssignToId = async ({
 }: GetInteractionsParams) => {
   return apiRequest({
     method: "GET",
-    url: "/Interaction/GetInteractionsListByAssignToId",
+    url: "MobileApp/GetInteractionsListMobile",
     params: {
       PageNumber: pageNumber,
       PageSize: pageSize,
-      AssignToId: assignToId,
+      UserId: assignToId,
     },
     headers: {
       Authorization: `Bearer ${token}`,
