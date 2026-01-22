@@ -54,6 +54,8 @@ export default function HomeScreen() {
 
   /* ================= API CALLS ================= */
 
+  console.log("ant", authState?.antiforgeryToken);
+
   const fetchUserData = async () => {
     try {
       const response = await getUserDataById({

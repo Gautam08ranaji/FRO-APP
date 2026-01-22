@@ -1,6 +1,5 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import NewCasePopupModal from "@/components/reusables/NewCasePopupModal";
-import RemarkActionModal from "@/components/reusables/RemarkActionModal";
 import StatusModal from "@/components/reusables/StatusModal";
 import { getInteractionsListByAssignToId } from "@/features/fro/interactionApi";
 import { useAppSelector } from "@/store/hooks";
@@ -90,7 +89,7 @@ export default function CasesScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchInteractions();
-      setShowPopUp(true);
+      // setShowPopUp(true);
     }, []),
   );
 
@@ -354,20 +353,6 @@ export default function CasesScreen() {
         onDeny={() => {
           setShowPopUp(false);
           setShowRemarkModal(true);
-        }}
-      />
-
-      <RemarkActionModal
-        visible={showRemarkModal}
-        title="Why You Declined"
-        buttonText="Deny"
-        onClose={() => {
-          setShowRemarkModal(false);
-          setShowStatusModal(true);
-        }}
-        onSubmit={() => {
-          setShowRemarkModal(false);
-          setShowDeclinedStatusModal(true);
         }}
       />
 

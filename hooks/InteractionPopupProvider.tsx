@@ -1,29 +1,41 @@
 import NewCasePopupModal from "@/components/reusables/NewCasePopupModal";
-import { getInteractionsListByAssignToId } from "@/features/fro/interactionApi";
+import RemarkActionModal from "@/components/reusables/RemarkActionModal";
+import StatusModal from "@/components/reusables/StatusModal";
+import { useTheme } from "@/theme/ThemeContext";
+
+import {
+  getInteractionsListByAssignToId,
+  updateInteraction,
+} from "@/features/fro/interactionApi";
 import { useAppSelector } from "@/store/hooks";
 import React, { useEffect, useRef, useState } from "react";
 
 /**
  * 🔥 Singleton flag
  * Ensures polling starts ONLY ONCE
- * (even if hook is mounted multiple times)
  */
 let pollerStarted = false;
 
 export const useInteractionPopupPoller = () => {
   const authState = useAppSelector((state) => state.auth);
+  const [showAcceptedStatusModal, setShowAcceptedStatusModal] = useState(false);
+  const [showDeclinedStatusModal, setShowDeclinedStatusModal] = useState(false);
+  const { theme } = useTheme();
 
   const [queue, setQueue] = useState<any[]>([]);
   const [current, setCurrent] = useState<any | null>(null);
   const [visible, setVisible] = useState(false);
 
+  /** Reject modal */
+  const [showRemarkModal, setShowRemarkModal] = useState(false);
+
   /** Prevent duplicate popups */
   const seenIdsRef = useRef<Set<number>>(new Set());
 
-  /** React Native setInterval returns number */
+  /** Polling interval */
   const intervalRef = useRef<number | null>(null);
 
-  /* ================= POLLING EFFECT ================= */
+  /* ================= POLLING ================= */
 
   useEffect(() => {
     if (!authState.token) return;
@@ -41,37 +53,19 @@ export const useInteractionPopupPoller = () => {
           csrfToken: String(authState.antiforgeryToken),
         });
 
-        console.log("list", res?.data?.interactions);
-
         const interactions = res?.data?.interactions || [];
-
         const matched: any[] = [];
-        const alreadySeen: any[] = [];
-        const unmatched: any[] = [];
 
         interactions.forEach((item: any) => {
           const isMatch = item.caseStatusId === 1 && item.subStatusId === 9;
 
-          if (isMatch) {
-            if (seenIdsRef.current.has(item.id)) {
-              alreadySeen.push(item);
-            } else {
-              matched.push(item);
-            }
-          } else {
-            unmatched.push(item);
+          if (isMatch && !seenIdsRef.current.has(item.id)) {
+            seenIdsRef.current.add(item.id);
+            matched.push(item);
           }
         });
 
-        console.log("📡 Interaction Poll Result");
-        console.log("➡ Total:", interactions.length);
-        console.log("✅ New Matches:", matched.length);
-        console.log("🟡 Already Seen:", alreadySeen.length);
-        console.log("❌ Unmatched:", unmatched.length);
-
         if (matched.length > 0) {
-          matched.forEach((item) => seenIdsRef.current.add(item.id));
-
           setQueue((prev) => [...prev, ...matched]);
         }
       } catch (error) {
@@ -79,17 +73,11 @@ export const useInteractionPopupPoller = () => {
       }
     };
 
-    /** 🔥 FIRST CALL IMMEDIATELY */
     fetchInteractions();
-
-    /** 🔁 REPEAT EVERY 10 SECONDS */
     intervalRef.current = setInterval(fetchInteractions, 10000);
 
-    /** 🧹 CLEANUP */
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
       pollerStarted = false;
     };
   }, [authState.token]);
@@ -99,38 +87,132 @@ export const useInteractionPopupPoller = () => {
   useEffect(() => {
     if (!visible && queue.length > 0) {
       setCurrent(queue[0]);
-      setVisible(true);
       setQueue((prev) => prev.slice(1));
+      setVisible(true);
     }
   }, [queue, visible]);
 
-  /* ================= ACTIONS ================= */
+  /* ================= ACTION HANDLERS ================= */
 
   const closePopup = () => {
     setVisible(false);
     setCurrent(null);
   };
 
-  /* ================= MODAL RENDER ================= */
+  /* ---------- ACCEPT ---------- */
+  const handleAccept = async () => {
+    if (!current) return;
 
-  const Popup = current ? (
-    <NewCasePopupModal
-      visible={visible}
-      title="New Case"
-      urgentLabel="Urgent"
-      name={current.name}
-      age={current.ageofTheElder}
-      details={[
-        { label: "Category", value: current.categoryName },
-        { label: "Sub Category", value: current.subCategoryName },
-        { label: "Priority", value: current.priority },
-        { label: "District", value: current.districtName },
-      ]}
-      onAccept={closePopup}
-      onDeny={closePopup}
-      onTimeout={closePopup}
-    />
-  ) : null;
+    try {
+      await updateInteraction({
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+        data: {
+          id: current.id,
+          caseStatusId: 1,
+          caseStatusName: "Open",
+          subStatusId: 5,
+          subStatusName: "Assign To Team",
+          comment: "Accepted By FRO",
+          callBack: "",
+        },
+      });
+
+      closePopup();
+
+      // ✅ SHOW SUCCESS MODAL
+      setShowAcceptedStatusModal(true);
+    } catch (error) {
+      console.error("❌ Accept failed:", error);
+    }
+  };
+
+  /* ---------- REJECT ---------- */
+  const handleReject = () => {
+    setShowRemarkModal(true);
+  };
+
+  const submitReject = async (remarkText: string) => {
+    if (!current) return;
+
+    try {
+      await updateInteraction({
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+        data: {
+          id: current.id,
+          caseStatusId: 1,
+          caseStatusName: "Open",
+          subStatusId: 26,
+          subStatusName: "Rejected By FRO",
+          comment: remarkText,
+          callBack: "No",
+        },
+      });
+
+      setShowRemarkModal(false);
+      closePopup();
+
+      // ✅ SHOW DECLINED MODAL
+      setShowDeclinedStatusModal(true);
+    } catch (error) {
+      console.error("❌ Reject failed:", error);
+    }
+  };
+
+  /* ================= POPUP ================= */
+
+  const Popup = (
+    <>
+      {current && (
+        <NewCasePopupModal
+          visible={visible}
+          title="New Case"
+          urgentLabel="Urgent"
+          name={current.name}
+          age={current.ageofTheElder}
+          details={[
+            { label: "Category", value: current.categoryName },
+            { label: "Sub Category", value: current.subCategoryName },
+            { label: "Priority", value: current.priority },
+            { label: "District", value: current.districtName },
+          ]}
+          onAccept={handleAccept}
+          onDeny={handleReject}
+          onTimeout={closePopup}
+        />
+      )}
+
+      <RemarkActionModal
+        visible={showRemarkModal}
+        title="Why You Declined"
+        buttonText="Deny"
+        onClose={() => setShowRemarkModal(false)}
+        onSubmit={submitReject} // ✅ PASSES REMARK TEXT
+      />
+
+      <StatusModal
+        visible={showAcceptedStatusModal}
+        title="Case Accepted"
+        iconName="check-line"
+        iconColor="#00796B"
+        iconBgColor="#E0F2F1"
+        autoCloseAfter={2000}
+        onClose={() => setShowAcceptedStatusModal(false)}
+      />
+
+      <StatusModal
+        visible={showDeclinedStatusModal}
+        title="Case Declined"
+        iconName="check-line"
+        iconColor={theme.colors.validationErrorText}
+        iconBgColor={theme.colors.validationErrorText + "22"}
+        autoCloseAfter={2000}
+        titleColor={theme.colors.colorAccent500}
+        onClose={() => setShowDeclinedStatusModal(false)}
+      />
+    </>
+  );
 
   return { Popup };
 };

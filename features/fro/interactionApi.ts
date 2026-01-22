@@ -32,83 +32,23 @@ export const getInteractionsListByAssignToId = async ({
   });
 };
 
+export type UpdateInteractionPayload = {
+  id: number;
+
+  caseStatusId: number;
+  caseStatusName: string;
+
+  subStatusId: number;
+  subStatusName: string;
+
+  comment?: string;
+  callBack?: string;
+};
+
 type UpdateInteractionParams = {
-  data: {
-    id: number;
-
-    userId: string;
-    assignToId: string;
-
-    callTypeName?: string;
-    callTypeId?: number;
-
-    transactionNumber?: string;
-
-    caseStatusId?: number;
-    caseStatusName?: string;
-
-    subStatusId?: number;
-    subStatusName?: string;
-
-    categoryId?: number;
-    categoryName?: string;
-
-    subCategoryId?: number;
-    subCategoryName?: string;
-
-    subSubCategoryId?: number;
-    subSubCategoryName?: string;
-
-    subject?: string;
-    name?: string;
-    gender?: string;
-
-    stateId?: number;
-    stateName?: string;
-    districtId?: number;
-    districtName?: string;
-
-    finalDisposition?: string;
-    problemReported?: string;
-    agentRemarks?: string;
-    comment?: string;
-
-    callBack?: string;
-    priority?: string;
-
-    contactId?: number;
-    contactName?: string;
-
-    teamId?: number;
-    teamName?: string;
-
-    source?: string;
-    emailId?: string;
-    mobileNo?: string;
-
-    assignToName?: string;
-
-    dateOfIssuesOccured?: string;
-    callBackDateTime?: string;
-
-    isTestcall?: boolean;
-    isPrankCall?: boolean;
-    isBlankCall?: boolean;
-    isAbusiveCall?: boolean;
-    isCallDrop?: boolean;
-    isNotRelatedToElderly?: boolean;
-
-    caseDescription?: string;
-    ticketType?: string;
-
-    pinCode?: string;
-    alternateNo?: string;
-
-    [key: string]: any;
-  };
-
-  token: string; // ✅ passed explicitly
-  csrfToken?: string; // ✅ optional
+  data: UpdateInteractionPayload;
+  token: string;
+  csrfToken?: string;
 };
 
 export const updateInteraction = async ({
@@ -118,7 +58,8 @@ export const updateInteraction = async ({
 }: UpdateInteractionParams) => {
   return apiRequest({
     method: "PUT",
-    url: "/Interaction/UpdateInteraction",
+    // ✅ MATCHES cURL
+    url: "MobileApp/UpdateInteractionMobile",
     data,
     headers: {
       Authorization: `Bearer ${token}`,
