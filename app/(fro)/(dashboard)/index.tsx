@@ -3,6 +3,7 @@ import PunchInCard from "@/components/reusables/PunchInCard";
 import ReusableCard from "@/components/reusables/ReusableCard";
 import { getDashCount } from "@/features/fro/interaction/countApi";
 import { getUserDataById } from "@/features/fro/profile/getProfile";
+import { useInteractionPopupPoller } from "@/hooks/InteractionPopupProvider";
 import { useFROLocationUpdater } from "@/hooks/useFROLocationUpdater";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
@@ -27,6 +28,7 @@ export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const authState = useAppSelector((state) => state.auth);
+  const { Popup } = useInteractionPopupPoller();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -128,106 +130,110 @@ export default function HomeScreen() {
   /* ================= UI ================= */
 
   return (
-    <BodyLayout
-      type="dashboard"
-      userName={`${firstName} ${lastName}`}
-      userId=""
-      todaysDutyCount={count.tickets}
-      totalCases={count.tickets}
-      notificationCount={3}
-    >
-      {/* Attendance */}
-      <Text
-        style={[
-          theme.typography.fontH2,
-          { color: theme.colors.colorPrimary600 },
-        ]}
+    <>
+      {Popup}
+
+      <BodyLayout
+        type="dashboard"
+        userName={`${firstName} ${lastName}`}
+        userId=""
+        todaysDutyCount={count.tickets}
+        totalCases={count.tickets}
+        notificationCount={3}
       >
-        Attendance
-      </Text>
+        {/* Attendance */}
+        <Text
+          style={[
+            theme.typography.fontH2,
+            { color: theme.colors.colorPrimary600 },
+          ]}
+        >
+          Attendance
+        </Text>
 
-      <PunchInCard />
+        <PunchInCard />
 
-      {/* Case Overview */}
-      <Text
-        style={[
-          theme.typography.fontH2,
-          { color: theme.colors.colorPrimary600, marginTop: 20 },
-        ]}
-      >
-        {t("home.casesOverview")}
-      </Text>
+        {/* Case Overview */}
+        <Text
+          style={[
+            theme.typography.fontH2,
+            { color: theme.colors.colorPrimary600, marginTop: 20 },
+          ]}
+        >
+          {t("home.casesOverview")}
+        </Text>
 
-      {/* ROW 1 */}
-      <View style={styles.row}>
-        <ReusableCard
-          icon={caseCardConfig.open.icon}
-          count={String(count.open)}
-          title={caseCardConfig.open.title}
-          iconBg={caseCardConfig.open.iconBg}
-          cardBg={caseCardConfig.open.cardBg}
-          countColor={caseCardConfig.open.countColor}
-          titleColor={theme.colors.colorTextSecondary}
-          onPress={() =>
-            router.push({
-              pathname: "/(fro)/(complaints)",
-              params: { filter: caseCardConfig.open.filter },
-            })
-          }
-        />
+        {/* ROW 1 */}
+        <View style={styles.row}>
+          <ReusableCard
+            icon={caseCardConfig.open.icon}
+            count={String(count.open)}
+            title={caseCardConfig.open.title}
+            iconBg={caseCardConfig.open.iconBg}
+            cardBg={caseCardConfig.open.cardBg}
+            countColor={caseCardConfig.open.countColor}
+            titleColor={theme.colors.colorTextSecondary}
+            onPress={() =>
+              router.push({
+                pathname: "/(fro)/(complaints)",
+                params: { filter: caseCardConfig.open.filter },
+              })
+            }
+          />
 
-        <ReusableCard
-          icon={caseCardConfig.pending.icon}
-          count={String(count.pending)}
-          title={caseCardConfig.pending.title}
-          iconBg={caseCardConfig.pending.iconBg}
-          cardBg={caseCardConfig.pending.cardBg}
-          countColor={caseCardConfig.pending.countColor}
-          titleColor={theme.colors.colorTextSecondary}
-          onPress={() =>
-            router.push({
-              pathname: "/(fro)/(complaints)",
-              params: { filter: caseCardConfig.pending.filter },
-            })
-          }
-        />
-      </View>
+          <ReusableCard
+            icon={caseCardConfig.pending.icon}
+            count={String(count.pending)}
+            title={caseCardConfig.pending.title}
+            iconBg={caseCardConfig.pending.iconBg}
+            cardBg={caseCardConfig.pending.cardBg}
+            countColor={caseCardConfig.pending.countColor}
+            titleColor={theme.colors.colorTextSecondary}
+            onPress={() =>
+              router.push({
+                pathname: "/(fro)/(complaints)",
+                params: { filter: caseCardConfig.pending.filter },
+              })
+            }
+          />
+        </View>
 
-      {/* ROW 2 */}
-      <View style={styles.row}>
-        <ReusableCard
-          icon={caseCardConfig.resolved.icon}
-          count={String(count.resolved)}
-          title={caseCardConfig.resolved.title}
-          iconBg={caseCardConfig.resolved.iconBg}
-          cardBg={caseCardConfig.resolved.cardBg}
-          countColor={caseCardConfig.resolved.countColor}
-          titleColor={theme.colors.colorTextSecondary}
-          onPress={() =>
-            router.push({
-              pathname: "/(fro)/(complaints)",
-              params: { filter: caseCardConfig.resolved.filter },
-            })
-          }
-        />
+        {/* ROW 2 */}
+        <View style={styles.row}>
+          <ReusableCard
+            icon={caseCardConfig.resolved.icon}
+            count={String(count.resolved)}
+            title={caseCardConfig.resolved.title}
+            iconBg={caseCardConfig.resolved.iconBg}
+            cardBg={caseCardConfig.resolved.cardBg}
+            countColor={caseCardConfig.resolved.countColor}
+            titleColor={theme.colors.colorTextSecondary}
+            onPress={() =>
+              router.push({
+                pathname: "/(fro)/(complaints)",
+                params: { filter: caseCardConfig.resolved.filter },
+              })
+            }
+          />
 
-        <ReusableCard
-          icon={caseCardConfig.closed.icon}
-          count={String(count.closed)}
-          title={caseCardConfig.closed.title}
-          iconBg={caseCardConfig.closed.iconBg}
-          cardBg={caseCardConfig.closed.cardBg}
-          countColor={caseCardConfig.closed.countColor}
-          titleColor={theme.colors.colorTextSecondary}
-          onPress={() =>
-            router.push({
-              pathname: "/(fro)/(complaints)",
-              params: { filter: caseCardConfig.closed.filter },
-            })
-          }
-        />
-      </View>
-    </BodyLayout>
+          <ReusableCard
+            icon={caseCardConfig.closed.icon}
+            count={String(count.closed)}
+            title={caseCardConfig.closed.title}
+            iconBg={caseCardConfig.closed.iconBg}
+            cardBg={caseCardConfig.closed.cardBg}
+            countColor={caseCardConfig.closed.countColor}
+            titleColor={theme.colors.colorTextSecondary}
+            onPress={() =>
+              router.push({
+                pathname: "/(fro)/(complaints)",
+                params: { filter: caseCardConfig.closed.filter },
+              })
+            }
+          />
+        </View>
+      </BodyLayout>
+    </>
   );
 }
 

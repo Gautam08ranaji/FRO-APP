@@ -90,7 +90,7 @@ export default function CasesScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchInteractions();
-      // setShowPopUp(true);
+      setShowPopUp(true);
     }, []),
   );
 
