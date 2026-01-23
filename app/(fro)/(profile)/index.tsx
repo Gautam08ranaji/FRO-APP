@@ -296,6 +296,13 @@ export default function ProfileScreen() {
           () => router.push("/profileDetails"),
           theme.colors.validationInfoText,
         )}
+
+        {renderItem(
+          "Leaves",
+          "bar-chart-line",
+          () => router.push("/(fro)/(profile)/leave"),
+          theme.colors.colorWarning400,
+        )}
         {renderItem(
           "Knowledge Management",
           "building-line",
