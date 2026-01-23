@@ -2,8 +2,9 @@ import { getAttendanceHistory } from "@/features/fro/addAttendance";
 import { addAttendance } from "@/features/fro/addAttendanceStatus";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 /* ================= CONSTANTS ================= */
@@ -71,7 +72,6 @@ export default function PunchInCard() {
       );
 
       if (!todayAttendance) {
-        // ❌ Not punched in today
         setIsPunchedIn(false);
         setPunchInTime(null);
         setWorkedMinutes(0);
@@ -83,7 +83,6 @@ export default function PunchInCard() {
       const hasCheckOut = isValidDate(todayAttendance.checkouttime);
 
       if (hasCheckIn && !hasCheckOut) {
-        // ✅ Punched in but not punched out
         const checkInDate = new Date(todayAttendance.checkintime);
 
         setPunchInTime(checkInDate);
@@ -93,14 +92,39 @@ export default function PunchInCard() {
         const diffMs = Date.now() - checkInDate.getTime();
         setWorkedMinutes(Math.floor(diffMs / 60000));
       } else if (hasCheckIn && hasCheckOut) {
-        // ✅ Already punched out
         setIsPunchedIn(false);
         setDutyEnded(true);
         setPunchInTime(null);
         setWorkedMinutes(0);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Attendance API error:", err);
+
+      const status = err?.status || err?.response?.status;
+
+      if (status === 401) {
+        Alert.alert(
+          "Session Expired",
+          "Your session has expired. Please login again.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Optional: clear auth state / redux
+                // dispatch(logout());
+
+                router.replace("/login");
+              },
+            },
+          ],
+        );
+        return;
+      }
+
+      Alert.alert(
+        "Error",
+        err?.message || "Unable to load attendance. Please try again.",
+      );
     } finally {
       setLoading(false);
     }

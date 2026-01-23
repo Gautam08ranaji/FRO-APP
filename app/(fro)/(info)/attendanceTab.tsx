@@ -3,11 +3,12 @@ import i18n from "@/i18n";
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getAttendanceHistory } from "@/features/fro/addAttendance";
 import { addAttendance } from "@/features/fro/addAttendanceStatus";
 import { useAppSelector } from "@/store/hooks";
+import { router } from "expo-router";
 import Toast from "react-native-toast-message";
 
 /* ================= TYPES ================= */
@@ -200,13 +201,39 @@ export default function AttendanceTab() {
       const todayAttendance = findCurrentDateAttendance(list);
       setCurrentDateAttendance(todayAttendance);
 
-      // Initialize punch status based on today's data
+      // Initialize punch status
       initializePunchStatus(todayAttendance);
 
-      // Map and set history
+      // Map history
       setAttendanceHistory(list.map(mapAttendanceFromApi));
-    } catch (err) {
+    } catch (err: any) {
       console.error("Attendance API error:", err);
+
+      const status = err?.status || err?.response?.status;
+
+      if (status === 401) {
+        Alert.alert(
+          "Session Expired",
+          "Your session has expired. Please login again.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Optional: clear auth state here
+                // dispatch(logout());
+
+                router.replace("/(onboarding)/login");
+              },
+            },
+          ],
+        );
+        return;
+      }
+
+      Alert.alert(
+        "Error",
+        err?.message || "Unable to fetch attendance. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
