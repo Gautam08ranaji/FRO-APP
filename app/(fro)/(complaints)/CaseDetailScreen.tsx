@@ -760,6 +760,10 @@ export default function CaseDetailScreen() {
             onPress: () =>
               router.push({
                 pathname: "/(fro)/(complaints)/NoteHistory",
+                params: {
+                  caseId: item?.id,
+                  item: JSON.stringify(item),
+                },
               }),
           },
           {

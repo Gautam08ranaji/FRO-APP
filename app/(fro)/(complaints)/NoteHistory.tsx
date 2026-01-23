@@ -3,7 +3,7 @@ import { getNotesRecordList } from "@/features/fro/complaints/noteListApi";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
     ActivityIndicator,
@@ -24,10 +24,22 @@ type NoteItem = {
   relatedToName: string;
 };
 
+type CaseItem = {
+  id: number;
+  transactionNumber: string;
+};
+
 /* ================= SCREEN ================= */
 export default function NotesHistoryScreen() {
   const { theme } = useTheme();
   const authState = useAppSelector((state) => state.auth);
+  const params = useLocalSearchParams();
+  const caseId = params.caseId ? Number(params.caseId) : null;
+  const item: CaseItem | null = params.item
+    ? JSON.parse(params.item as string)
+    : null;
+
+  console.log("transactionNumber", item?.transactionNumber);
 
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -101,7 +113,15 @@ export default function NotesHistoryScreen() {
                   styles.addButton,
                   { backgroundColor: theme.colors.colorPrimary600 },
                 ]}
-                onPress={() => router.push("/(fro)/(complaints)/AddNote")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(fro)/(complaints)/AddNote",
+                    params: {
+                      caseId: String(item?.id),
+                      transactionNumber: item?.transactionNumber,
+                    },
+                  })
+                }
               >
                 <Ionicons
                   name="add"
