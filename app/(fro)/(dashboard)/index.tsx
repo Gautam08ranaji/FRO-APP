@@ -79,9 +79,11 @@ export default function HomeScreen() {
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
       });
+      console.log(authState.userId);
 
       if (response?.success) {
-        setCount(response.data);
+        setCount(response?.data);
+        console.log("count", response?.data);
       }
     } catch (error) {
       console.error("Failed to fetch count data", error);

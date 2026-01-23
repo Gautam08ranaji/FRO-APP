@@ -1,5 +1,4 @@
 import BodyLayout from "@/components/layout/BodyLayout";
-import RemarkActionModal from "@/components/reusables/RemarkActionModal";
 import { useTheme } from "@/theme/ThemeContext";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -23,36 +22,28 @@ export default function CaseDetailScreen() {
   const { theme } = useTheme();
   const [showModal, setShowModal] = useState(false);
 
-  const ticketNo = item?.transactionNumber || "TKT-00000-001";
-  const elderName = item?.name || item?.contactName || "रामलाल शर्मा";
-  const age = item?.ageofTheElder || "72";
-  const gender =
-    item?.gender === "Male"
-      ? "पुरुष"
-      : item?.gender === "Female"
-        ? "महिला"
-        : "पुरुष";
-  const phone = item?.mobileNo || "+91-9876543210";
-  const emergencyPhone =
-    item?.contactPolice || item?.contactAmbulance || "+91-9876543 / 211";
-  const category = item?.categoryName || "स्वास्थ्य सहायता";
-  const subCategory = item?.subCategoryName || "";
-  const subSubCategory = item?.subSubCategoryName || "";
+  const ticketNo = item?.transactionNumber;
+  const elderName = item?.name || item?.contactName;
+  const age = item?.ageofTheElder;
+  const gender = item?.gender;
+
+  const phone = item?.mobileNo;
+  const emergencyPhone = item?.contactPolice || item?.contactAmbulance;
+  const category = item?.categoryName;
+  const subCategory = item?.subCategoryName;
+  const subSubCategory = item?.subSubCategoryName;
   const details =
-    item?.caseDescription ||
-    item?.problemReported ||
-    item?.reasonForCalling ||
-    "बुजुर्ग को चलने में कठिनाई हो रही है...";
-  const address =
-    item?.completeAddress || item?.location || "123, गांधी नगर, मुंबई - 400001";
-  const state = item?.stateName || "";
-  const district = item?.districtName || "";
-  const agentRemarks = item?.agentRemarks || "";
-  const comment = item?.comment || "";
-  const priority = item?.priority || "Medium";
-  const callType = item?.callTypeName || "Actionable";
-  const caseStatus = item?.caseStatusName || "Open";
-  const subStatus = item?.subStatusName || "Open";
+    item?.caseDescription || item?.problemReported || item?.reasonForCalling;
+
+  const address = item?.completeAddress || item?.location;
+  const state = item?.stateName;
+  const district = item?.districtName;
+  const agentRemarks = item?.agentRemarks;
+  const comment = item?.comment;
+  const priority = item?.priority;
+  const callType = item?.callTypeName;
+  const caseStatus = item?.caseStatusName;
+  const subStatus = item?.subStatusName;
 
   // Extract coordinates with fallback
   const lat = item?.latitude || item?.lat || 19.076; // Default to Mumbai
@@ -68,15 +59,12 @@ export default function CaseDetailScreen() {
   };
 
   const steps = [
-    { title: "Registered", time: "10:30 AM" },
-    { title: "Assigned", time: "10:45 AM" },
-    { title: "Approved" },
-    { title: "On the way" },
-    { title: "Arrived" },
-    { title: "Working" },
+    { title: "Open" },
+    { title: "In-Progress" },
+    { title: "Closed" },
   ];
 
-  const completedSteps = 3;
+  const completedSteps = item?.caseStatusId - 1;
 
   const animatedProgress = useRef(new Animated.Value(0)).current;
 
@@ -564,7 +552,7 @@ export default function CaseDetailScreen() {
                     {item.title}
                   </Text>
 
-                  {item.time && (
+                  {/* {item.time && (
                     <Text
                       style={[
                         styles.progressTime,
@@ -573,7 +561,7 @@ export default function CaseDetailScreen() {
                     >
                       {item.time}
                     </Text>
-                  )}
+                  )} */}
                 </View>
               </View>
             );
@@ -761,12 +749,18 @@ export default function CaseDetailScreen() {
               }),
           },
           {
-            label: "Add Photo",
-            onPress: () => console.log("Add photo pressed"),
+            label: "Add Attchments",
+            onPress: () =>
+              router.push({
+                pathname: "/(fro)/(complaints)/AddPhotoScreen",
+              }),
           },
           {
             label: "Add Note",
-            onPress: () => console.log("Add note pressed"),
+            onPress: () =>
+              router.push({
+                pathname: "/(fro)/(complaints)/NoteHistory",
+              }),
           },
           {
             label: "Add Voice",
@@ -795,72 +789,7 @@ export default function CaseDetailScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-
-        <TouchableOpacity
-          style={[
-            styles.closeBtn,
-            {
-              backgroundColor: theme.colors.validationErrorBg,
-              flexDirection: "row",
-              justifyContent: "center",
-              gap: 10,
-              alignItems: "center",
-              borderWidth: 1,
-              borderColor: theme.colors.validationErrorText,
-            },
-          ]}
-          onPress={() => setShowModal(true)}
-        >
-          <RemixIcon
-            name="close-circle-line"
-            size={22}
-            color={theme.colors.validationErrorText}
-          />
-
-          <Text
-            style={[
-              styles.closeBtnText,
-              { color: theme.colors.validationErrorText },
-            ]}
-          >
-            Flag as Wrong Case
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.closeBtn,
-            {
-              backgroundColor: theme.colors.colorAccent500,
-              flexDirection: "row",
-              justifyContent: "center",
-              gap: 10,
-              alignItems: "center",
-            },
-          ]}
-        >
-          <RemixIcon
-            name="close-circle-line"
-            size={22}
-            color={theme.colors.colorBgPage}
-          />
-          <Text
-            style={[styles.closeBtnText, { color: theme.colors.colorBgPage }]}
-          >
-            Close Case
-          </Text>
-        </TouchableOpacity>
       </View>
-
-      <RemarkActionModal
-        title="Reason for Marking as Incorrect"
-        subtitle="Provide details to help us understand what is wrong."
-        visible={showModal}
-        onClose={() => setShowModal(false)}
-        onSubmit={() => {
-          setShowModal(false);
-        }}
-      />
     </BodyLayout>
   );
 }
@@ -1015,7 +944,7 @@ const styles = StyleSheet.create({
 
   lineContainer: {
     width: 2,
-    height: 40,
+    height: 50,
     backgroundColor: "#D8D8D8",
     overflow: "hidden",
     marginTop: -2,

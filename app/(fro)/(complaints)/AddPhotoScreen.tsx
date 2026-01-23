@@ -2,13 +2,7 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import RemixIcon from "react-native-remix-icon";
 
@@ -60,10 +54,7 @@ export default function AddPhotoScreen() {
 
       {/* Gallery Button */}
       <TouchableOpacity
-        style={[
-          styles.outlineBtn,
-          { borderColor: colors.btnPrimaryBg },
-        ]}
+        style={[styles.outlineBtn, { borderColor: colors.btnPrimaryBg }]}
         onPress={openGallery}
       >
         <RemixIcon name="image-line" size={20} color={colors.btnPrimaryBg} />
@@ -77,19 +68,25 @@ export default function AddPhotoScreen() {
         {t("addPhoto.selectedPhoto")}
       </Text>
 
-      <View style={[styles.previewBox, { backgroundColor: colors.colorBgSurface }]}>
+      <View
+        style={[styles.previewBox, { backgroundColor: colors.colorBgSurface }]}
+      >
         {selectedImage ? (
           <Image source={{ uri: selectedImage }} style={styles.previewImage} />
         ) : (
           <View style={styles.placeholder}>
-            <RemixIcon name="image-line" size={36} color={colors.colorOverlay} />
+            <RemixIcon
+              name="image-line"
+              size={36}
+              color={colors.colorOverlay}
+            />
           </View>
         )}
       </View>
 
       {/* Save Button */}
       <TouchableOpacity
-        style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
+        style={[styles.saveBtn, { backgroundColor: colors.btnPrimaryBg }]}
         onPress={() => {
           console.log("Saving image:", selectedImage);
         }}
@@ -109,6 +106,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
+  },
+  saveBtn: {
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 10,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    bottom: 0,
   },
   primaryBtnText: {
     fontSize: 16,
