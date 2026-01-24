@@ -1,39 +1,144 @@
 import BodyLayout from "@/components/layout/BodyLayout";
+import { addCommonDocument } from "@/features/fro/complaints/addDocument";
+import { useAppSelector } from "@/store/hooks";
+import type { Theme } from "@/theme/ThemeContext";
 import { useTheme } from "@/theme/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system/legacy";
+import * as ImagePicker from "expo-image-picker";
+import { t } from "i18next";
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
-import RemixIcon from "react-native-remix-icon";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-export default function AddPhotoScreen() {
+/* ---------- TYPES ---------- */
+type SelectedFile = {
+  uri: string;
+  name: string;
+  type: "image" | "pdf";
+};
+
+/* ---------- SCREEN ---------- */
+export default function UpdateDocumentScreen() {
   const { theme } = useTheme();
-  const colors = theme.colors;
-  const { t } = useTranslation();
+  const styles = createStyles(theme);
+  const authState = useAppSelector((state) => state.auth);
 
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+  const [file, setFile] = useState<SelectedFile | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // 📸 Camera
+  /* ---------- BASE64 ---------- */
+  const fileToBase64 = async (uri: string) => {
+    return await FileSystem.readAsStringAsync(uri, {
+      encoding: "base64",
+    });
+  };
+
+  /* ---------- CAMERA ---------- */
   const openCamera = async () => {
-    const result = await launchCamera({
-      mediaType: "photo",
-      quality: 0.8,
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission required", "Camera access is required");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
     });
 
-    if (!result.didCancel && result.assets?.length) {
-      setSelectedImage(result.assets[0].uri!);
+    if (!result.canceled) {
+      setFile({
+        uri: result.assets[0].uri,
+        name: "Camera Image.jpg",
+        type: "image",
+      });
     }
   };
 
-  // 🖼️ Gallery
+  /* ---------- GALLERY ---------- */
   const openGallery = async () => {
-    const result = await launchImageLibrary({
-      mediaType: "photo",
-      selectionLimit: 1,
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
     });
 
-    if (!result.didCancel && result.assets?.length) {
-      setSelectedImage(result.assets[0].uri!);
+    if (!result.canceled) {
+      setFile({
+        uri: result.assets[0].uri,
+        name: "Gallery Image.jpg",
+        type: "image",
+      });
+    }
+  };
+
+  /* ---------- PDF ---------- */
+  const openPdf = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "application/pdf",
+      copyToCacheDirectory: true,
+    });
+
+    if (result.assets?.length) {
+      setFile({
+        uri: result.assets[0].uri,
+        name: result.assets[0].name ?? "Document.pdf",
+        type: "pdf",
+      });
+    }
+  };
+
+  /* ---------- SUBMIT ---------- */
+  const onSubmit = async () => {
+    if (!description.trim()) {
+      Alert.alert("Validation", "Please enter description");
+      return;
+    }
+
+    if (!file) {
+      Alert.alert("Validation", "Please attach a document");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const base64 = await fileToBase64(file.uri);
+
+      const payload = {
+        relatedTo: "CAS",
+        relatedToId: 61,
+        documentType: file.type === "pdf" ? "PDF" : "Image",
+        documentName: file.name,
+        documentDescription: description,
+        fileName: file.name,
+        fileData: base64,
+        createdBy: "19389acb-f897-453d-b94b-b56587954c32",
+      };
+
+      console.log("FINAL PAYLOAD STRING", JSON.stringify(payload));
+
+      const res = await addCommonDocument(payload);
+      console.log("res", res);
+
+      Alert.alert("Success", res.message || "Document uploaded successfully");
+
+      setDescription("");
+      setFile(null);
+    } catch {
+      // ❌ DO NOTHING
+      // Global interceptor already shows error alert
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,122 +148,182 @@ export default function AddPhotoScreen() {
       screenName={t("addPhoto.screenTitle")}
       scrollContentStyle={{ paddingHorizontal: 20 }}
     >
-      {/* Camera Button */}
-      <TouchableOpacity
-        style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
-        onPress={openCamera}
-      >
-        <RemixIcon name="camera-line" size={20} color="#fff" />
-        <Text style={styles.primaryBtnText}>{t("addPhoto.openCamera")}</Text>
-      </TouchableOpacity>
+      {/* ---------- DESCRIPTION ---------- */}
+      <Text style={styles.label}>Description</Text>
+      <TextInput
+        style={styles.textArea}
+        placeholder="Enter document description"
+        placeholderTextColor={theme.colors.inputPlaceholder}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+      />
 
-      {/* Gallery Button */}
-      <TouchableOpacity
-        style={[styles.outlineBtn, { borderColor: colors.btnPrimaryBg }]}
-        onPress={openGallery}
-      >
-        <RemixIcon name="image-line" size={20} color={colors.btnPrimaryBg} />
-        <Text style={[styles.outlineBtnText, { color: colors.btnPrimaryBg }]}>
-          {t("addPhoto.chooseGallery")}
-        </Text>
-      </TouchableOpacity>
+      {/* ---------- ATTACH ---------- */}
+      <Text style={styles.label}>Attach Document</Text>
 
-      {/* Selected Photo */}
-      <Text style={[styles.sectionTitle, { color: colors.colorTextPrimary }]}>
-        {t("addPhoto.selectedPhoto")}
-      </Text>
-
-      <View
-        style={[styles.previewBox, { backgroundColor: colors.colorBgSurface }]}
-      >
-        {selectedImage ? (
-          <Image source={{ uri: selectedImage }} style={styles.previewImage} />
-        ) : (
-          <View style={styles.placeholder}>
-            <RemixIcon
-              name="image-line"
-              size={36}
-              color={colors.colorOverlay}
-            />
-          </View>
-        )}
+      <View style={styles.row}>
+        <ActionButton icon="camera" label="Camera" onPress={openCamera} />
+        <ActionButton icon="image" label="Gallery" onPress={openGallery} />
+        <ActionButton icon="document" label="PDF" onPress={openPdf} />
       </View>
 
-      {/* Save Button */}
+      {/* ---------- PREVIEW ---------- */}
+      {file && (
+        <View style={styles.previewCard}>
+          {file.type === "image" ? (
+            <Image source={{ uri: file.uri }} style={styles.previewImage} />
+          ) : (
+            <View style={styles.pdfPreview}>
+              <Ionicons
+                name="document-text"
+                size={40}
+                color={theme.colors.colorPrimary500}
+              />
+              <Text style={styles.pdfName}>{file.name}</Text>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={styles.removeBtn}
+            onPress={() => setFile(null)}
+          >
+            <Ionicons
+              name="close"
+              size={18}
+              color={theme.colors.colorTextInverse}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* ---------- SUBMIT ---------- */}
       <TouchableOpacity
-        style={[styles.saveBtn, { backgroundColor: colors.btnPrimaryBg }]}
-        onPress={() => {
-          console.log("Saving image:", selectedImage);
-        }}
+        style={[styles.submitBtn, loading && { opacity: 0.6 }]}
+        onPress={onSubmit}
+        disabled={loading}
       >
-        <Text style={styles.primaryBtnText}>{t("addPhoto.savePhoto")}</Text>
+        <Text style={styles.submitText}>
+          {loading ? "Uploading..." : "Update Document"}
+        </Text>
       </TouchableOpacity>
     </BodyLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  primaryBtn: {
-    width: "100%",
-    paddingVertical: 14,
-    borderRadius: 10,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  saveBtn: {
-    width: "100%",
-    paddingVertical: 14,
-    borderRadius: 10,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    bottom: 0,
-  },
-  primaryBtnText: {
-    fontSize: 16,
-    color: "#fff",
-    marginLeft: 8,
-  },
+/* ---------- REUSABLE BUTTON ---------- */
+const ActionButton = ({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: any;
+  label: string;
+  onPress: () => void;
+}) => {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
-  outlineBtn: {
-    width: "100%",
-    paddingVertical: 14,
-    borderRadius: 10,
-    borderWidth: 1.4,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  outlineBtnText: {
-    fontSize: 16,
-    marginLeft: 8,
-  },
+  return (
+    <TouchableOpacity style={styles.actionBtn} onPress={onPress}>
+      <Ionicons name={icon} size={22} color={theme.colors.colorPrimary500} />
+      <Text style={styles.actionText}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
 
-  sectionTitle: {
-    fontSize: 14,
-    marginBottom: 8,
-  },
+/* ---------- STYLES ---------- */
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    label: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: theme.colors.colorTextPrimary,
+      marginBottom: 6,
+    },
 
-  previewBox: {
-    width: 110,
-    height: 110,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 30,
-  },
+    textArea: {
+      backgroundColor: theme.colors.inputBg,
+      borderRadius: 12,
+      padding: 12,
+      minHeight: 100,
+      textAlignVertical: "top",
+      marginBottom: 16,
+      color: theme.colors.inputText,
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+    },
 
-  previewImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 12,
-  },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 16,
+    },
 
-  placeholder: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+    actionBtn: {
+      flex: 1,
+      backgroundColor: theme.colors.btnSecondaryBg,
+      borderRadius: 10,
+      paddingVertical: 14,
+      alignItems: "center",
+      marginHorizontal: 4,
+      borderWidth: 1,
+      borderColor: theme.colors.btnSecondaryBorder,
+    },
+
+    actionText: {
+      fontSize: 12,
+      color: theme.colors.colorPrimary500,
+      marginTop: 4,
+      fontWeight: "600",
+    },
+
+    previewCard: {
+      backgroundColor: theme.colors.colorBgSurface,
+      borderRadius: 14,
+      padding: 10,
+      marginBottom: 20,
+      position: "relative",
+      borderWidth: 1,
+      borderColor: theme.colors.colorBorder,
+    },
+
+    previewImage: {
+      width: "100%",
+      height: 200,
+      borderRadius: 10,
+    },
+
+    pdfPreview: {
+      alignItems: "center",
+      paddingVertical: 30,
+    },
+
+    pdfName: {
+      marginTop: 8,
+      fontSize: 13,
+      color: theme.colors.colorTextPrimary,
+    },
+
+    removeBtn: {
+      position: "absolute",
+      top: 8,
+      right: 8,
+      backgroundColor: theme.colors.btnSosBg,
+      borderRadius: 14,
+      padding: 4,
+    },
+
+    submitBtn: {
+      backgroundColor: theme.colors.btnPrimaryBg,
+      paddingVertical: 16,
+      borderRadius: 12,
+      alignItems: "center",
+    },
+
+    submitText: {
+      color: theme.colors.btnPrimaryText,
+      fontSize: 16,
+      fontWeight: "700",
+    },
+  });
