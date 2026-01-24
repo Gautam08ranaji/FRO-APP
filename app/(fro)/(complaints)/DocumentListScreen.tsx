@@ -2,6 +2,7 @@ import BodyLayout from "@/components/layout/BodyLayout";
 import { getCommonDocumentList } from "@/features/fro/complaints/getCommonDocumentList";
 import { useTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -68,21 +69,50 @@ export default function CommonDocumentListScreen() {
 
   const onAddDocument = () => {
     console.log("Add Document Pressed");
-    // router.push("/documents/add"); // connect later
+    router.push("/(fro)/(complaints)/AddPhotoScreen");
   };
 
-  const renderItem = ({ item }: { item: CommonDocument }) => (
-    <View style={styles.card}>
-      <Ionicons name="document-text-outline" size={22} color="#555" />
-      <View style={styles.info}>
-        <Text style={styles.name}>{item.documentName}</Text>
-        <Text style={styles.desc}>{item.documentDescription}</Text>
-        <Text style={styles.meta}>
-          {item.documentExtension} • {item.documentSize} bytes
-        </Text>
-      </View>
-    </View>
-  );
+  const renderItem = ({ item }: { item: CommonDocument }) => {
+    const isPdf = item.documentType === "PDF";
+
+    return (
+      <TouchableOpacity style={styles.card} activeOpacity={0.85}>
+        <View style={styles.iconBox}>
+          <Ionicons
+            name={isPdf ? "document-text" : "image"}
+            size={26}
+            color={theme.colors.colorPrimary500}
+          />
+        </View>
+
+        <View style={styles.info}>
+          <Text style={styles.name} numberOfLines={1}>
+            {item.documentName}
+          </Text>
+
+          <Text style={styles.desc} numberOfLines={2}>
+            {item.documentDescription}
+          </Text>
+
+          <View style={styles.metaRow}>
+            <Text style={styles.metaText}>
+              {(item.documentSize / 1024).toFixed(1)} KB
+            </Text>
+            <Text style={styles.metaDot}>•</Text>
+            <Text style={styles.metaText}>
+              {new Date(item.createdDate).toDateString()}
+            </Text>
+          </View>
+        </View>
+
+        <Ionicons
+          name="chevron-forward"
+          size={18}
+          color={theme.colors.colorTextSecondary}
+        />
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <BodyLayout type="screen" screenName="Documents">
@@ -136,34 +166,63 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
   },
+
   card: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 14,
-    marginVertical: 6,
-    marginHorizontal: 12,
     backgroundColor: "#fff",
-    borderRadius: 10,
-    elevation: 2,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    marginHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#E6E6E6",
   },
+
+  iconBox: {
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: "#F4F6FA",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: "#E1E4EA",
+  },
+
   info: {
-    marginLeft: 12,
     flex: 1,
   },
+
   name: {
-    fontSize: 15,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#111",
   },
+
   desc: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#666",
     marginTop: 2,
   },
-  meta: {
-    fontSize: 12,
-    color: "#999",
-    marginTop: 4,
+
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
   },
+
+  metaText: {
+    fontSize: 11,
+    color: "#888",
+  },
+
+  metaDot: {
+    marginHorizontal: 6,
+    color: "#888",
+  },
+
   empty: {
     textAlign: "center",
     marginTop: 40,
