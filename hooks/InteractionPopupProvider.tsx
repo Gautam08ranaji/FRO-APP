@@ -8,7 +8,9 @@ import {
   updateInteraction,
 } from "@/features/fro/interactionApi";
 import { useAppSelector } from "@/store/hooks";
+import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { Alert } from "react-native";
 
 /**
  * 🔥 Singleton flag
@@ -68,8 +70,12 @@ export const useInteractionPopupPoller = () => {
         if (matched.length > 0) {
           setQueue((prev) => [...prev, ...matched]);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("❌ Interaction polling failed:", error);
+        if (error?.status === 440 || 401) {
+          Alert.alert("Error", error?.data);
+          router.replace("/(onboarding)/login");
+        }
       }
     };
 

@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
+import { router, useLocalSearchParams } from "expo-router";
 import { t } from "i18next";
 import React, { useState } from "react";
 import {
@@ -31,10 +32,14 @@ export default function UpdateDocumentScreen() {
   const { theme } = useTheme();
   const styles = createStyles(theme);
   const authState = useAppSelector((state) => state.auth);
+  const params = useLocalSearchParams();
+  const caseId = params.caseId ? Number(params.caseId) : null;
 
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<SelectedFile | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // console.log("nav case", caseId);
 
   /* ---------- BASE64 ---------- */
   const fileToBase64 = async (uri: string) => {
@@ -116,13 +121,13 @@ export default function UpdateDocumentScreen() {
 
       const payload = {
         relatedTo: "CAS",
-        relatedToId: 61,
+        relatedToId: Number(caseId),
         documentType: file.type === "pdf" ? "PDF" : "Image",
         documentName: file.name,
         documentDescription: description,
         fileName: file.name,
         fileData: base64,
-        createdBy: "19389acb-f897-453d-b94b-b56587954c32",
+        createdBy: String(authState?.userId),
       };
 
       console.log("FINAL PAYLOAD STRING", JSON.stringify(payload));
@@ -131,6 +136,7 @@ export default function UpdateDocumentScreen() {
       console.log("res", res);
 
       Alert.alert("Success", res.message || "Document uploaded successfully");
+      router.push("/(fro)/(complaints)/DocumentListScreen");
 
       setDescription("");
       setFile(null);

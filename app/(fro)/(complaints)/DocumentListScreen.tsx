@@ -1,8 +1,9 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { getCommonDocumentList } from "@/features/fro/complaints/getCommonDocumentList";
+import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -26,14 +27,17 @@ interface CommonDocument {
 
 export default function CommonDocumentListScreen() {
   const { theme } = useTheme();
-
+  const params = useLocalSearchParams();
+  const caseId = params.caseId ? Number(params.caseId) : null;
   const [documents, setDocuments] = useState<CommonDocument[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const authState = useAppSelector((state) => state.auth);
+
+  console.log("caseiddd", caseId);
 
   const PAGE_SIZE = 10;
-  const RELATED_TO_ID = 61;
 
   const loadDocuments = async (pageNumber = 1) => {
     try {
@@ -42,7 +46,7 @@ export default function CommonDocumentListScreen() {
       const res = await getCommonDocumentList({
         pageNumber,
         pageSize: PAGE_SIZE,
-        relatedToId: RELATED_TO_ID,
+        relatedToId: Number(caseId),
       });
 
       setDocuments((prev) =>
@@ -69,7 +73,13 @@ export default function CommonDocumentListScreen() {
 
   const onAddDocument = () => {
     console.log("Add Document Pressed");
-    router.push("/(fro)/(complaints)/AddPhotoScreen");
+
+    router.push({
+      pathname: "/(fro)/(complaints)/AddPhotoScreen",
+      params: {
+        caseId: caseId,
+      },
+    });
   };
 
   const renderItem = ({ item }: { item: CommonDocument }) => {

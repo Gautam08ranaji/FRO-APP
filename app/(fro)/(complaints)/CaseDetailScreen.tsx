@@ -753,6 +753,10 @@ export default function CaseDetailScreen() {
             onPress: () =>
               router.push({
                 pathname: "/(fro)/(complaints)/DocumentListScreen",
+                params: {
+                  caseId: item?.id,
+                  item: JSON.stringify(item),
+                },
               }),
           },
           {
