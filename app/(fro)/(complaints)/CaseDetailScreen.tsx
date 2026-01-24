@@ -752,7 +752,7 @@ export default function CaseDetailScreen() {
             label: "Add Attchments",
             onPress: () =>
               router.push({
-                pathname: "/(fro)/(complaints)/AddPhotoScreen",
+                pathname: "/(fro)/(complaints)/DocumentListScreen",
               }),
           },
           {

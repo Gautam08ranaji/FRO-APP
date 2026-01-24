@@ -7,8 +7,8 @@ import { useInteractionPopupPoller } from "@/hooks/InteractionPopupProvider";
 import { useFROLocationUpdater } from "@/hooks/useFROLocationUpdater";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -47,10 +47,12 @@ export default function HomeScreen() {
 
   /* ================= EFFECTS ================= */
 
-  useEffect(() => {
-    fetchUserData();
-    fetchCountData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+      fetchCountData();
+    }, []),
+  );
 
   /* ================= API CALLS ================= */
 

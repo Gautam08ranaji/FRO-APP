@@ -41,14 +41,6 @@ const STATUS_DISPLAY_MAP: Record<string, string> = {
   Closed: "Closed", // Backend: "Closed" -> Display: "Closed"
 };
 
-// Map backend statuses to our filter keys (case-insensitive matching)
-const STATUS_TO_FILTER_MAP: Record<string, string> = {
-  open: "Open",
-  pending: "Pending",
-  resolved: "Resolved",
-  closed: "Closed",
-};
-
 export default function CasesScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
