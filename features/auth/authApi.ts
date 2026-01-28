@@ -13,7 +13,6 @@ export interface ApiResponse<T> {
 export interface LoginRequest {
   userName: string;
   password: string;
-  remoteIp?: string;
   latitude?: string;
   longitude?: string;
 }

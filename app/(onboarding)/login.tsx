@@ -26,6 +26,8 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REGEX =
   /^[A-Z](?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{7,}$/;
 
+console.log("LOGIN SCREEN LOADED");
+
 export default function LoginScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -54,8 +56,6 @@ export default function LoginScreen() {
     }
   };
 
-  console.log();
-
   const validate = () => {
     let valid = true;
     const trimmedEmail = email.trim();
@@ -77,18 +77,14 @@ export default function LoginScreen() {
     return valid;
   };
 
-  // console.log("login loc",address,location?.coords?.latitude,location?.coords?.longitude);
-
   const handleLogin = async () => {
     if (isLoading) return;
     if (!validate()) return;
 
     try {
-      // 1️⃣ LOGIN
       const res = await login({
         userName: email.trim(),
         password,
-        remoteIp: "127.0.0.1",
         latitude: location?.coords.latitude.toString() || "",
         longitude: location?.coords?.longitude.toString() || "",
       }).unwrap();

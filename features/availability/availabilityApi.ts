@@ -1,13 +1,15 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AvailabilityResponse, AvailabilityStatus } from "./types";
 
+console.log("AVAILABILITY API BASE URL:", process.env.EXPO_PUBLIC_API_URL);
+
 export const availabilityApi = createApi({
   reducerPath: "availabilityApi",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.EXPO_PUBLIC_API_URL,
   }),
   tagTypes: ["Availability"],
-  endpoints: builder => ({
+  endpoints: (builder) => ({
     getAvailability: builder.query<
       AvailabilityResponse,
       { userId: string; role: "FRO" | "FRL" }
@@ -25,7 +27,7 @@ export const availabilityApi = createApi({
         status: AvailabilityStatus;
       }
     >({
-      query: body => ({
+      query: (body) => ({
         url: "/availability",
         method: "POST",
         body,
@@ -35,7 +37,5 @@ export const availabilityApi = createApi({
   }),
 });
 
-export const {
-  useGetAvailabilityQuery,
-  useUpdateAvailabilityMutation,
-} = availabilityApi;
+export const { useGetAvailabilityQuery, useUpdateAvailabilityMutation } =
+  availabilityApi;
