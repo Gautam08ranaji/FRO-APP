@@ -4,20 +4,19 @@ import axios from "axios";
 /* ================= ADD / UPDATE FRO LOCATION ================= */
 
 export const addAndUpdateFROLocation = async (
-  payload: AddOrUpdateFROLocationPayload
+  payload: AddOrUpdateFROLocationPayload,
 ) => {
   const response = await axios.post(
-    `http://43.230.203.249:99/api/FROUsersLocations/AddAndUpdateFROLocation`,
+    "http://43.230.203.249:99/api/MobileApp/AddAndUpdateFROLocation", // ✅ FIXED
     payload,
     {
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json",
+        "Content-Type": "application/json-patch+json", // ✅ FIXED
       },
       timeout: 20000,
-    }
+    },
   );
 
   return response.data;
 };
-
