@@ -35,10 +35,9 @@ const moderateScale = (size: number, factor = 0.5) =>
 /* ================= STATUS MAPPING ================= */
 // Define the mapping between backend statuses and display statuses
 const STATUS_DISPLAY_MAP: Record<string, string> = {
-  Open: "Open", // Backend: "Open" -> Display: "Open"
-  Pending: "Pending", // Backend: "Pending" -> Display: "Pending"
-  Resolved: "Resolved", // Backend: "Resolved" -> Display: "Resolved"
-  Closed: "Closed", // Backend: "Closed" -> Display: "Closed"
+  Open: "Open",
+  "In-Progress": "In Progress", // Map backend "In-Progress" to display "In Progress"
+  Closed: "Closed",
 };
 
 export default function CasesScreen() {
@@ -57,16 +56,15 @@ export default function CasesScreen() {
   const [interactions, setInteractions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* ---------------- TABS (5 TABS) ---------------- */
+  /* ---------------- 4 TABS ---------------- */
   const tabs = [
     { label: "All", key: "all", displayKey: "all" },
     { label: "Open", key: "open", displayKey: "Open" },
-    { label: "Pending", key: "pending", displayKey: "Pending" },
-    { label: "Resolved", key: "resolved", displayKey: "Resolved" },
+    { label: "In Progress", key: "inProgress", displayKey: "In-Progress" },
     { label: "Closed", key: "closed", displayKey: "Closed" },
   ];
 
-  console.log("param", params);
+  // console.log("param", params);
 
   const initialTabIndex = tabs.findIndex((t) => t.key === params.filter);
   const [activeTab, setActiveTab] = useState(
@@ -97,7 +95,7 @@ export default function CasesScreen() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      // console.log("Fetched intefdghractions:", res?.data?.interactions);
+      // console.log("Fetched interactions:", res?.data?.interactions);
       setInteractions(res?.data?.interactions || []);
     } catch (error) {
       console.error("❌ Failed to fetch cases:", error);
@@ -155,34 +153,41 @@ export default function CasesScreen() {
         return caseStatus.toLowerCase() === "open";
       }
 
-      // For other tabs, check exact match (case-insensitive)
-      return caseStatus.toLowerCase() === selectedFilterKey.toLowerCase();
+      // For In Progress tab, check if it's "In-Progress" (case-insensitive)
+      if (selectedFilterKey === "inProgress") {
+        return caseStatus.toLowerCase() === "in-progress";
+      }
+
+      // For Closed tab, check if it's "Closed" (case-insensitive)
+      if (selectedFilterKey === "closed") {
+        return caseStatus.toLowerCase() === "closed";
+      }
+
+      return false;
     });
 
     // console.log(`Filtered to ${filtered.length} items`);
     return filtered;
   }, [interactions, selectedFilterKey]);
 
-  /* ---------------- STATUS COLORS ---------------- */
-
   const statusColors: Record<string, string> = {
-    Open: "#00C950", // Green for Open
-    Pending: "#FDD835", // Yellow for Pending
-    Resolved: "#1E88E5", // Blue for Resolved
-    Closed: "#6A7282", // Gray for Closed
+    Open: "#00C950",
+    "In-Progress": "#F57C00",
+    "In Progress": "#F57C00",
+    Closed: "#6A7282",
   };
 
-  /* ---------------- GET DISPLAY STATUS ---------------- */
-
   const getDisplayStatus = (caseStatusName: string) => {
-    // Return the status as is from backend, or default mapping
     return STATUS_DISPLAY_MAP[caseStatusName] || caseStatusName;
   };
 
   const getStatusColor = (caseStatusName: string) => {
-    // Get color based on status name (case-insensitive)
+    // First get the display status name
+    const displayStatus = getDisplayStatus(caseStatusName);
+
+    // Get color based on display status (case-insensitive)
     const statusKey = Object.keys(statusColors).find(
-      (key) => key.toLowerCase() === caseStatusName.toLowerCase(),
+      (key) => key.toLowerCase() === displayStatus.toLowerCase(),
     );
     return statusKey ? statusColors[statusKey] : "#6A7282"; // Default gray
   };
@@ -191,7 +196,7 @@ export default function CasesScreen() {
 
   return (
     <BodyLayout type="screen" screenName={t("cases.screenTitle")}>
-      {/* ---------------- TABS (5 TABS) ---------------- */}
+      {/* ---------------- TABS (4 TABS) ---------------- */}
       <View style={styles.tabsWrapper}>
         <ScrollView
           ref={scrollRef}
@@ -204,7 +209,7 @@ export default function CasesScreen() {
               key={tab.key}
               ref={(el: any) => (tabRefs.current[index] = el)}
               onPress={() => {
-                console.log(`Tab clicked: ${tab.key} (${tab.displayKey})`);
+                // console.log(`Tab clicked: ${tab.key} (${tab.displayKey})`);
                 setActiveTab(index);
               }}
               style={[

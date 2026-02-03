@@ -17,7 +17,7 @@ export default function CaseDetailScreen() {
   const params = useLocalSearchParams();
   const item = params.item ? JSON.parse(params.item as string) : null;
 
-  console.log("fet item", item);
+  // console.log("fet item", item);
 
   const { theme } = useTheme();
   const [showModal, setShowModal] = useState(false);

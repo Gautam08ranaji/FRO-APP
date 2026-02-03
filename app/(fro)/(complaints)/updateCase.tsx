@@ -2,7 +2,9 @@ import {
   getDropdownByEndpoint,
   getDropdownByEndpointAndId,
 } from "@/features/fro/dropdownApi";
+import { addAndUpdateFROLocation } from "@/features/fro/froLocationApi";
 import { updateInteraction } from "@/features/fro/interactionApi";
+import { useLocation } from "@/hooks/LocationContext";
 import { useAppSelector } from "@/store/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
@@ -71,7 +73,7 @@ const UpdateStatusScreen = () => {
   const caseId = params.caseId ? Number(params.caseId) : null;
   const itemString = params.item as string;
 
-  console.log("case", caseId);
+  // console.log("case", caseId);
 
   useEffect(() => {
     fetchStatusDropdown();
@@ -153,6 +155,7 @@ const UpdateStatusScreen = () => {
             onPress: () => router.replace("/(fro)/(complaints)"),
           },
         ]);
+        sendLocation(caseId);
         return;
       }
 
@@ -221,6 +224,7 @@ const UpdateStatusScreen = () => {
   const [dropdownType, setDropdownType] = useState<"CASE" | "SUB" | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const { hasPermission, fetchLocation, address } = useLocation();
 
   const scrollViewRef = useRef<ScrollView>(null);
   const notesInputRef = useRef<TextInput>(null);
@@ -228,7 +232,7 @@ const UpdateStatusScreen = () => {
 
   /* ================= INITIALIZE ================= */
 
-  console.log("int", interactionItem);
+  // console.log("int", interactionItem);
 
   useEffect(() => {
     if (!interactionItem || initializedRef.current) {
@@ -280,6 +284,37 @@ const UpdateStatusScreen = () => {
       ]);
     }
   }, []);
+
+  const sendLocation = async (id: any) => {
+    try {
+      console.log("call");
+
+      const location = await fetchLocation();
+      if (!location) return;
+
+      console.log("called");
+
+      const { latitude, longitude } = location.coords;
+      const payload = {
+        name: address ?? "Unknown location", // ✅ READABLE ADDRESS
+        latitute: latitude.toString(), // ✅ real latitude
+        longititute: longitude.toString(), // ✅ real longitude
+        discriptions: address ?? "",
+        elderPinLocation: "string",
+        froPinLocation: String(address),
+        tikcetNumber: String(id),
+        froStatus: "Online",
+        userId: String(authState.userId), // ✅ use passed userId
+      };
+
+      // console.log("📤 Sending payload:", payload);
+
+      const res = await addAndUpdateFROLocation(payload);
+      console.log("✅ Update Ticket:", res);
+    } catch (error) {
+      console.error("❌ Location update error:", error);
+    }
+  };
 
   /* ================= FILE PICKER ================= */
   const pickFile = useCallback(async () => {
@@ -362,7 +397,7 @@ const UpdateStatusScreen = () => {
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <View style={styles.headerContent}>
-              <Text style={styles.headerTitle}>Update Case #{caseId}</Text>
+              <Text style={styles.headerTitle}>Update Case {caseId}</Text>
               {!!interactionItem.subject && (
                 <Text style={styles.headerSubtitle} numberOfLines={1}>
                   {interactionItem.subject}
@@ -605,3 +640,6 @@ const styles = StyleSheet.create({
   },
   sheetItemText: { fontSize: 16 },
 });
+function fetchLocation() {
+  throw new Error("Function not implemented.");
+}

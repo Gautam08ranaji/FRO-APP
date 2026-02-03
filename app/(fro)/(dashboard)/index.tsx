@@ -17,8 +17,7 @@ import { StyleSheet, Text, View } from "react-native";
 type DashCount = {
   closed: number;
   open: number;
-  pending: number;
-  resolved: number;
+  inProgress: number;
   tickets: number;
 };
 
@@ -37,8 +36,7 @@ export default function HomeScreen() {
   const [count, setCount] = useState<DashCount>({
     closed: 0,
     open: 0,
-    pending: 0,
-    resolved: 0,
+    inProgress: 0,
     tickets: 0,
   });
 
@@ -53,8 +51,6 @@ export default function HomeScreen() {
       fetchCountData();
     }, []),
   );
-
-  /* ================= API CALLS ================= */
 
   // console.log("ant", authState?.antiforgeryToken);
 
@@ -107,21 +103,21 @@ export default function HomeScreen() {
       countColor: theme.colors.colorPrimary600,
       filter: "Open",
     },
-    pending: {
-      title: "Pending",
+    InProgress: {
+      title: "In-Progress",
       icon: "time-line",
       iconBg: theme.colors.validationWarningText,
       cardBg: theme.colors.validationWarningBg,
       countColor: theme.colors.validationWarningText,
-      filter: "Pending",
+      filter: "inProgress",
     },
-    resolved: {
-      title: "Resolved",
+    Total: {
+      title: "Total",
       icon: "arrow-right-box-line",
       iconBg: theme.colors.colorHeadingH1,
       cardBg: theme.colors.validationInfoBg,
       countColor: theme.colors.colorHeadingH1,
-      filter: "Resolved",
+      filter: "tickets",
     },
     closed: {
       title: "Closed",
@@ -129,7 +125,7 @@ export default function HomeScreen() {
       iconBg: "#6A7282",
       cardBg: theme.colors.navDivider,
       countColor: theme.colors.colorTextSecondary,
-      filter: "closed",
+      filter: "Closed",
     },
   };
 
@@ -172,6 +168,21 @@ export default function HomeScreen() {
         {/* ROW 1 */}
         <View style={styles.row}>
           <ReusableCard
+            icon={caseCardConfig.Total.icon}
+            count={String(count.tickets)}
+            title={caseCardConfig.Total.title}
+            iconBg={caseCardConfig.Total.iconBg}
+            cardBg={caseCardConfig.Total.cardBg}
+            countColor={caseCardConfig.Total.countColor}
+            titleColor={theme.colors.colorTextSecondary}
+            onPress={() =>
+              router.push({
+                pathname: "/(fro)/(complaints)",
+                params: { filter: caseCardConfig.Total.filter },
+              })
+            }
+          />
+          <ReusableCard
             icon={caseCardConfig.open.icon}
             count={String(count.open)}
             title={caseCardConfig.open.title}
@@ -186,38 +197,22 @@ export default function HomeScreen() {
               })
             }
           />
-
-          <ReusableCard
-            icon={caseCardConfig.pending.icon}
-            count={String(count.pending)}
-            title={caseCardConfig.pending.title}
-            iconBg={caseCardConfig.pending.iconBg}
-            cardBg={caseCardConfig.pending.cardBg}
-            countColor={caseCardConfig.pending.countColor}
-            titleColor={theme.colors.colorTextSecondary}
-            onPress={() =>
-              router.push({
-                pathname: "/(fro)/(complaints)",
-                params: { filter: caseCardConfig.pending.filter },
-              })
-            }
-          />
         </View>
 
         {/* ROW 2 */}
         <View style={styles.row}>
           <ReusableCard
-            icon={caseCardConfig.resolved.icon}
-            count={String(count.resolved)}
-            title={caseCardConfig.resolved.title}
-            iconBg={caseCardConfig.resolved.iconBg}
-            cardBg={caseCardConfig.resolved.cardBg}
-            countColor={caseCardConfig.resolved.countColor}
+            icon={caseCardConfig.InProgress.icon}
+            count={String(count.inProgress)}
+            title={caseCardConfig.InProgress.title}
+            iconBg={caseCardConfig.InProgress.iconBg}
+            cardBg={caseCardConfig.InProgress.cardBg}
+            countColor={caseCardConfig.InProgress.countColor}
             titleColor={theme.colors.colorTextSecondary}
             onPress={() =>
               router.push({
                 pathname: "/(fro)/(complaints)",
-                params: { filter: caseCardConfig.resolved.filter },
+                params: { filter: caseCardConfig.InProgress.filter },
               })
             }
           />

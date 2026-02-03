@@ -27,7 +27,7 @@ export const useFROLocationUpdater = (userId?: string | null) => {
           userId, // ✅ use passed userId
         };
 
-        console.log("📤 Sending payload:", payload);
+        // console.log("📤 Sending payload:", payload);
 
         const res = await addAndUpdateFROLocation(payload);
         // console.log("✅ Location update success:", res);

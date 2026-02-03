@@ -3,6 +3,7 @@ import RemarkActionModal from "@/components/reusables/RemarkActionModal";
 import StatusModal from "@/components/reusables/StatusModal";
 import { useTheme } from "@/theme/ThemeContext";
 
+import { addAndUpdateFROLocation } from "@/features/fro/froLocationApi";
 import {
   getInteractionsListByAssignToId,
   updateInteraction,
@@ -11,6 +12,7 @@ import { useAppSelector } from "@/store/hooks";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
+import { useLocation } from "./LocationContext";
 
 /**
  * 🔥 Singleton flag
@@ -23,9 +25,11 @@ export const useInteractionPopupPoller = () => {
   const [showAcceptedStatusModal, setShowAcceptedStatusModal] = useState(false);
   const [showDeclinedStatusModal, setShowDeclinedStatusModal] = useState(false);
   const { theme } = useTheme();
+  const { hasPermission, fetchLocation, address } = useLocation();
 
   const [queue, setQueue] = useState<any[]>([]);
   const [current, setCurrent] = useState<any | null>(null);
+  const [currentTicket] = useState<any | null>(null);
   const [visible, setVisible] = useState(false);
 
   /** Reject modal */
@@ -36,6 +40,33 @@ export const useInteractionPopupPoller = () => {
 
   /** Polling interval */
   const intervalRef = useRef<number | null>(null);
+
+  const sendLocation = async (id: any) => {
+    try {
+      const location = await fetchLocation();
+      if (!location) return;
+
+      const { latitude, longitude } = location.coords;
+      const payload = {
+        name: address ?? "Unknown location", // ✅ READABLE ADDRESS
+        latitute: latitude.toString(), // ✅ real latitude
+        longititute: longitude.toString(), // ✅ real longitude
+        discriptions: address ?? "",
+        elderPinLocation: "string",
+        froPinLocation: String(address),
+        tikcetNumber: String(id),
+        froStatus: "Online",
+        userId: String(authState.userId), // ✅ use passed userId
+      };
+
+      // console.log("📤 Sending payload:", payload);
+
+      const res = await addAndUpdateFROLocation(payload);
+      console.log("✅ Update Ticket:", res);
+    } catch (error) {
+      console.error("❌ Location update error:", error);
+    }
+  };
 
   /* ================= POLLING ================= */
 
@@ -125,6 +156,7 @@ export const useInteractionPopupPoller = () => {
         },
       });
 
+      sendLocation(current.id);
       closePopup();
 
       // ✅ SHOW SUCCESS MODAL
@@ -158,6 +190,7 @@ export const useInteractionPopupPoller = () => {
       });
 
       // console.log("rejected", res);
+      sendLocation(current.id);
 
       setShowRemarkModal(false);
       closePopup();
@@ -225,3 +258,6 @@ export const useInteractionPopupPoller = () => {
 
   return { Popup };
 };
+function fetchLocation() {
+  throw new Error("Function not implemented.");
+}
