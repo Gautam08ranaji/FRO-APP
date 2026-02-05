@@ -44,7 +44,8 @@ const knowledgeBaseData = [
   {
     id: 6,
     title: "Cultural, Spiritual, Art",
-    subtitle: "Cultural / Spiritual programs, Art workshops, Recreational events",
+    subtitle:
+      "Cultural / Spiritual programs, Art workshops, Recreational events",
     type: "cultural",
   },
   {
@@ -58,9 +59,8 @@ const knowledgeBaseData = [
 export default function InformationTab({ search = "" }) {
   const { theme } = useTheme();
 
-
   const routeMap: any = {
-    health: "/health",
+    health: "/detailCardScreen",
     shelter: "/detailCardScreen",
     nutrition: "/detailCardScreen",
     dayCare: "/detailCardScreen",
@@ -68,7 +68,6 @@ export default function InformationTab({ search = "" }) {
     cultural: "/detailCardScreen",
     companionship: "/detailCardScreen",
   };
-
 
   const uiMap: any = {
     health: {
@@ -117,7 +116,7 @@ export default function InformationTab({ search = "" }) {
     return knowledgeBaseData.filter(
       (item) =>
         item.title.toLowerCase().includes(search.toLowerCase()) ||
-        item.subtitle.toLowerCase().includes(search.toLowerCase())
+        item.subtitle.toLowerCase().includes(search.toLowerCase()),
     );
   }, [search]);
 
