@@ -11,6 +11,9 @@ export default function DocumentPreviewScreen() {
 
   // Replace with your real API / CDN URL
   const documentUrl = `http://43.230.203.249:99/api/commomn/download/${id}`;
+
+  console.log(documentUrl);
+
   console.log(id);
 
   const isPdf = type === "PDF";

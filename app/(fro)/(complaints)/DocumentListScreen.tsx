@@ -49,7 +49,7 @@ export default function CommonDocumentListScreen() {
         relatedToId: Number(caseId),
       });
 
-      // console.log("cmn", res);
+      console.log("cmn", caseId);
 
       setDocuments((prev) =>
         pageNumber === 1 ? res.list : [...prev, ...res.list],
@@ -90,7 +90,20 @@ export default function CommonDocumentListScreen() {
     const isPdf = item.documentType === "PDF";
 
     return (
-      <TouchableOpacity style={styles.card} activeOpacity={0.85}>
+      <TouchableOpacity
+        style={styles.card}
+        activeOpacity={0.85}
+        onPress={() =>
+          router.push({
+            pathname: "/(fro)/(complaints)/preview",
+            params: {
+              id: item.id,
+              name: item.documentName,
+              type: item.documentType,
+            },
+          })
+        }
+      >
         <View style={styles.iconBox}>
           <Ionicons
             name={isPdf ? "document-text" : "image"}

@@ -640,6 +640,3 @@ const styles = StyleSheet.create({
   },
   sheetItemText: { fontSize: 16 },
 });
-function fetchLocation() {
-  throw new Error("Function not implemented.");
-}
