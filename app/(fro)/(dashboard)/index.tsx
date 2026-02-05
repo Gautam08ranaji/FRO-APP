@@ -1,4 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
+import CircularKPIChart from "@/components/reusables/CircularKPIChart";
+import DashboardAnimatedChart from "@/components/reusables/DashboardAnimatedChart";
+import FROPerformanceCard from "@/components/reusables/FROPerformanceCard";
 import PunchInCard from "@/components/reusables/PunchInCard";
 import ReusableCard from "@/components/reusables/ReusableCard";
 import { getDashCount } from "@/features/fro/interaction/countApi";
@@ -31,8 +34,6 @@ export default function HomeScreen() {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const [count, setCount] = useState<DashCount>({
     closed: 0,
     open: 0,
@@ -40,19 +41,32 @@ export default function HomeScreen() {
     tickets: 0,
   });
 
-  // 🔴 Live location update
-  useFROLocationUpdater(authState?.userId);
+  /* 🔴 Demo Attendance Values (replace with API later) */
+  const presentDays = 20;
+  const absentDays = 6;
 
-  /* ================= EFFECTS ================= */
+  const totalDays = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + 1,
+    0,
+  ).getDate();
+
+  const attendanceRateNum = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
+
+  /* 🔴 KPI calculation */
+
+  const completionRate =
+    count.tickets > 0 ? (count.closed / count.tickets) * 100 : 0;
+
+  useFROLocationUpdater(authState?.userId);
 
   useFocusEffect(
     useCallback(() => {
-      fetchUserData();
-      fetchCountData();
+      Promise.all([fetchUserData(), fetchCountData()]);
     }, []),
   );
 
-  // console.log("ant", authState?.antiforgeryToken);
+  /* ================= API ================= */
 
   const fetchUserData = async () => {
     try {
@@ -65,32 +79,25 @@ export default function HomeScreen() {
       setFirstName(response?.data?.firstName || "User");
       setLastName(response?.data?.lastName || "");
     } catch (error) {
-      console.error("Failed to fetch user data", error);
+      console.error("User fetch error:", error);
     }
   };
 
   const fetchCountData = async () => {
     try {
-      setLoading(true);
       const response = await getDashCount({
         userId: String(authState.userId),
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
       });
-      console.log(authState.userId);
 
       if (response?.success) {
-        setCount(response?.data);
-        console.log("count", response?.data);
+        setCount(response.data);
       }
     } catch (error) {
-      console.error("Failed to fetch count data", error);
-    } finally {
-      setLoading(false);
+      console.error("Count fetch error:", error);
     }
   };
-
-  // console.log("antifof", authState.antiforgeryToken);
 
   /* ================= CARD CONFIG ================= */
 
@@ -165,7 +172,7 @@ export default function HomeScreen() {
           {t("home.casesOverview")}
         </Text>
 
-        {/* ROW 1 */}
+        {/* Case Cards */}
         <View style={styles.row}>
           <ReusableCard
             icon={caseCardConfig.Total.icon}
@@ -199,7 +206,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* ROW 2 */}
         <View style={styles.row}>
           <ReusableCard
             icon={caseCardConfig.InProgress.icon}
@@ -233,6 +239,28 @@ export default function HomeScreen() {
             }
           />
         </View>
+
+        {/* Performance Card */}
+        <FROPerformanceCard
+          total={count.tickets}
+          closed={count.closed}
+          open={count.open}
+          inProgress={count.inProgress}
+        />
+
+        {/* Animated Chart */}
+        <DashboardAnimatedChart
+          closed={count.closed}
+          open={count.open}
+          inProgress={count.inProgress}
+        />
+
+        {/* KPI Circular Charts */}
+        <View style={styles.kpiRow}>
+          <CircularKPIChart percentage={attendanceRateNum} label="Attendance" />
+
+          <CircularKPIChart percentage={completionRate} label="Cases Closed" />
+        </View>
       </BodyLayout>
     </>
   );
@@ -246,5 +274,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 20,
     marginTop: 20,
+  },
+
+  kpiRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 30,
   },
 });
