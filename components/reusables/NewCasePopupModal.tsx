@@ -1,12 +1,6 @@
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useEffect, useState } from "react";
-import {
-    Modal,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
 interface CaseDetailItem {
@@ -120,7 +114,7 @@ export default function NewCasePopupModal({
 
           <Text
             style={[
-              theme.typography.fontH2,
+              theme.typography.fontH5,
               styles.timer,
               { color: theme.colors.colorError400 },
               stylesOverride.timer,
@@ -130,11 +124,13 @@ export default function NewCasePopupModal({
           </Text>
 
           {/* ---------- CASE CARD ---------- */}
-          <View style={[styles.caseCard, { borderColor: theme.colors.inputBorder }]}>
+          <View
+            style={[styles.caseCard, { borderColor: theme.colors.inputBorder }]}
+          >
             <View style={styles.caseHeader}>
               <Text
                 style={[
-                  theme.typography.fontH2,
+                  theme.typography.fontH5,
                   stylesOverride.name,
                   { color: theme.colors.colorTextPrimary },
                 ]}
@@ -176,8 +172,7 @@ export default function NewCasePopupModal({
                     styles.detailValue,
                     stylesOverride.detailValue,
                     {
-                      color:
-                        item.valueColor ?? theme.colors.colorPrimary600,
+                      color: item.valueColor ?? theme.colors.colorPrimary600,
                     },
                   ]}
                 >
@@ -197,7 +192,11 @@ export default function NewCasePopupModal({
               ]}
               onPress={onDeny}
             >
-              <RemixIcon name="close-circle-line" size={18} color={theme.colors.colorError400} />
+              <RemixIcon
+                name="close-circle-line"
+                size={18}
+                color={theme.colors.colorError400}
+              />
               <Text style={{ color: theme.colors.colorError400 }}>Deny</Text>
             </TouchableOpacity>
 
@@ -209,7 +208,11 @@ export default function NewCasePopupModal({
               ]}
               onPress={onAccept}
             >
-              <RemixIcon name="checkbox-circle-line" size={18} color={theme.colors.colorBgPage} />
+              <RemixIcon
+                name="checkbox-circle-line"
+                size={18}
+                color={theme.colors.colorBgPage}
+              />
               <Text style={{ color: "#fff" }}>Accept</Text>
             </TouchableOpacity>
           </View>

@@ -32,17 +32,32 @@ export default function DashboardAnimatedChart({
   }, [closed, open, inProgress]);
 
   return (
-    <Animated.View style={{ opacity: fadeAnim }}>
-      <Text style={[styles.title, { color: theme.colors.colorPrimary600 }]}>
+    <Animated.View
+      style={[
+        styles.card,
+        {
+          opacity: fadeAnim,
+          backgroundColor: theme.colors.colorBgPage,
+        },
+      ]}
+    >
+      {/* ✅ Heading inside card */}
+      <Text
+        style={[
+          theme.typography.fontH6,
+          { color: theme.colors.colorPrimary600, marginBottom: 8 },
+        ]}
+      >
         Case Performance Trend
       </Text>
 
+      {/* ✅ Chart */}
       <LineChart
         data={{
           labels: ["Closed", "Open", "Progress"],
           datasets: [{ data: chartData }],
         }}
-        width={screenWidth - 32}
+        width={screenWidth - 60} // smaller to fit card padding
         height={220}
         yAxisInterval={1}
         bezier
@@ -60,14 +75,14 @@ export default function DashboardAnimatedChart({
 }
 
 const styles = StyleSheet.create({
-  chart: {
-    marginVertical: 10,
+  card: {
     borderRadius: 16,
+    padding: 14,
+    marginTop: 20,
+    elevation: 2,
   },
 
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginTop: 20,
+  chart: {
+    borderRadius: 16,
   },
 });

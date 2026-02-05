@@ -91,7 +91,7 @@ export default function OnboardingScreen() {
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ delay: 700, duration: 800 }}
           style={[
-            theme.typography.fontH2,
+            theme.typography.fontH5,
             {
               color: theme.colors.colorSuccess600,
               textAlign: "center",

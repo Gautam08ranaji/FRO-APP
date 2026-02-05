@@ -9,17 +9,14 @@ import { router } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 import { useSelector } from "react-redux";
-
-
-
 
 const caseStatusData = [
   {
@@ -117,24 +114,19 @@ const topPerformers = [
   },
 ];
 
-
-
 export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const screenWidth = Dimensions.get("window").width;
-  const authState = useAppSelector(state => state.auth);
+  const authState = useAppSelector((state) => state.auth);
 
   const antiforgeryToken = useSelector(
-  (state: RootState) => state.antiForgery.antiforgeryToken
-);
+    (state: RootState) => state.antiForgery.antiforgeryToken,
+  );
 
-// console.log("antiforgeryToken",antiforgeryToken);
-// console.log(authState.userId);
-// console.log(authState.token);
-
-
-
+  // console.log("antiforgeryToken",antiforgeryToken);
+  // console.log(authState.userId);
+  // console.log(authState.token);
 
   const getAlertColor = (title: string) => {
     if (title.toLowerCase().includes("high")) {
@@ -160,24 +152,21 @@ export default function HomeScreen() {
     return theme.colors.validationInfoBg;
   };
 
-  
-
   return (
     <BodyLayout type="frl">
       <Text
         style={[
-          theme.typography.fontH2,
+          theme.typography.fontH5,
           { color: theme.colors.colorPrimary600 },
         ]}
       >
         Attendance
       </Text>
 
-   
-        <PunchInCard />
+      <PunchInCard />
       <Text
         style={[
-          theme.typography.fontH2,
+          theme.typography.fontH5,
           { color: theme.colors.colorPrimary600, marginTop: 20 },
         ]}
       >
@@ -261,8 +250,8 @@ export default function HomeScreen() {
 
       <Text
         style={[
-          theme.typography.fontH2,
-          { color: theme.colors.colorPrimary600,marginTop:20 },
+          theme.typography.fontH5,
+          { color: theme.colors.colorPrimary600, marginTop: 20 },
         ]}
       >
         {t("frl.home.quickActions")}
@@ -312,11 +301,10 @@ export default function HomeScreen() {
         </View>
       </Card>
 
-
-     <Text
+      <Text
         style={[
-          theme.typography.fontH2,
-          { color: theme.colors.colorPrimary600,marginTop:20 },
+          theme.typography.fontH5,
+          { color: theme.colors.colorPrimary600, marginTop: 20 },
         ]}
       >
         Case Status Overview
@@ -380,10 +368,11 @@ export default function HomeScreen() {
             Recent Alerts
           </Text>
 
-          <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-          onPress={()=>{
-            router.push('/alert')
-          }}
+          <TouchableOpacity
+            style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            onPress={() => {
+              router.push("/alert");
+            }}
           >
             <Text
               style={[

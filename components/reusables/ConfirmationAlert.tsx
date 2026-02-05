@@ -63,7 +63,7 @@ export default function ConfirmationAlert({
           <Text
             style={[
               styles.title,
-              theme.typography.fontH2,
+              theme.typography.fontH5,
               { color: finalConfirmColor },
             ]}
           >
@@ -91,7 +91,7 @@ export default function ConfirmationAlert({
             <Text
               style={[
                 styles.confirmText,
-                theme.typography.fontH2,
+                theme.typography.fontH5,
                 { color: theme.colors.btnSosText },
               ]}
             >

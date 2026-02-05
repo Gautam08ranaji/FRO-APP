@@ -14,20 +14,17 @@ interface Props {
   count: number | string;
   title: string;
 
-  // ✅ Card background
   cardBg?: string;
   bg?: string;
 
   iconBg?: string;
   iconColor?: string;
 
-  // ✅ Count Controls
   countBg?: string;
   countColor?: string;
   countContainerStyle?: StyleProp<ViewStyle>;
   countTextStyle?: StyleProp<TextStyle>;
 
-  // ✅ Second Optional Title
   subTitle?: number | string;
   subTitleColor?: string;
   subTitleStyle?: StyleProp<TextStyle>;
@@ -42,8 +39,6 @@ export default function ReusableCard({
   icon,
   count,
   title,
-
-  // ✅ Card background priority
   cardBg,
   bg = "#FFFFFF",
 
@@ -69,19 +64,18 @@ export default function ReusableCard({
       activeOpacity={0.85}
       onPress={onPress}
       style={{
-        backgroundColor: cardBg ?? bg, // ✅ priority applied
-        padding: 16,
-        borderRadius: 14,
+        backgroundColor: cardBg ?? bg,
+        padding: 10, // 👈 reduced padding
+        borderRadius: 10, // 👈 smaller radius
         flex: 1,
-        minWidth: 0,
-        elevation: 6,
+        elevation: 3, // 👈 lighter shadow
         shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
       }}
     >
-      {/* ---------------- TOP ROW ---------------- */}
+      {/* TOP ROW */}
       <View
         style={{
           flexDirection: "row",
@@ -92,11 +86,11 @@ export default function ReusableCard({
         <View
           style={{
             backgroundColor: iconBg,
-            padding: 10,
-            borderRadius: 12,
+            padding: 6, // 👈 smaller icon padding
+            borderRadius: 8,
           }}
         >
-          <RemixIcon name={icon as any} size={30} color={iconColor} />
+          <RemixIcon name={icon as any} size={22} color={iconColor} />
         </View>
 
         {countBg ? (
@@ -104,9 +98,9 @@ export default function ReusableCard({
             style={[
               {
                 backgroundColor: countBg,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                borderRadius: 8,
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 6,
               },
               countContainerStyle,
             ]}
@@ -114,7 +108,7 @@ export default function ReusableCard({
             <Text
               style={[
                 {
-                  fontSize: 18,
+                  fontSize: 14, // 👈 smaller count
                   fontWeight: "600",
                   color: countColor,
                 },
@@ -128,7 +122,7 @@ export default function ReusableCard({
           <Text
             style={[
               {
-                fontSize: 22,
+                fontSize: 16, // 👈 smaller count
                 fontWeight: "600",
                 color: countColor,
               },
@@ -140,13 +134,13 @@ export default function ReusableCard({
         )}
       </View>
 
-      {/* ---------------- TITLES ---------------- */}
+      {/* SUBTITLE */}
       {subTitle ? (
         <Text
           style={[
             {
-              marginTop: 14,
-              fontSize: 24,
+              marginTop: 8,
+              fontSize: 16,
               color: subTitleColor,
             },
             subTitleStyle,
@@ -156,11 +150,12 @@ export default function ReusableCard({
         </Text>
       ) : null}
 
-      <View style={{ marginTop: subTitle ? 10 : 15 }}>
+      {/* TITLE */}
+      <View style={{ marginTop: subTitle ? 6 : 8 }}>
         <Text
           style={[
             {
-              fontSize: 18,
+              fontSize: 14, // 👈 smaller title
               color: titleColor,
             },
             titleStyle,

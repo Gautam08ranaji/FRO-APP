@@ -1,12 +1,6 @@
 import { useTheme } from "@/theme/ThemeContext";
 import React, { ReactNode, useEffect } from "react";
-import {
-    Modal,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 
 interface StatusModalProps {
@@ -82,8 +76,7 @@ export default function StatusModal({
               styles.iconWrapper,
               stylesOverride.iconWrapper,
               {
-                backgroundColor:
-                  iconBgColor ?? theme.colors.colorPrimary100,
+                backgroundColor: iconBgColor ?? theme.colors.colorPrimary100,
               },
             ]}
           >
@@ -98,12 +91,11 @@ export default function StatusModal({
           {title && (
             <Text
               style={[
-                theme.typography.fontH2,
+                theme.typography.fontH5,
                 styles.title,
                 stylesOverride.title,
                 {
-                  color:
-                    titleColor ?? theme.colors.colorPrimary600,
+                  color: titleColor ?? theme.colors.colorPrimary600,
                 },
               ]}
             >
@@ -119,9 +111,7 @@ export default function StatusModal({
                 styles.description,
                 stylesOverride.description,
                 {
-                  color:
-                    descriptionColor ??
-                    theme.colors.colorTextSecondary,
+                  color: descriptionColor ?? theme.colors.colorTextSecondary,
                 },
               ]}
             >

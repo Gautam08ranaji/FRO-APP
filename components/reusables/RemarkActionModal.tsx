@@ -1,12 +1,12 @@
 import { useTheme } from "@/theme/ThemeContext";
 import React, { ReactNode, useState } from "react";
 import {
-  Modal,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Modal,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 
@@ -85,12 +85,11 @@ export default function RemarkActionModal({
               {title && (
                 <Text
                   style={[
-                    theme.typography.fontH2,
+                    theme.typography.fontH5,
                     styles.title,
                     stylesOverride.title,
                     {
-                      color:
-                        titleColor ?? theme.colors.colorPrimary600,
+                      color: titleColor ?? theme.colors.colorPrimary600,
                     },
                   ]}
                 >
@@ -105,9 +104,7 @@ export default function RemarkActionModal({
                     styles.subtitle,
                     stylesOverride.subtitle,
                     {
-                      color:
-                        subtitleColor ??
-                        theme.colors.colorTextSecondary,
+                      color: subtitleColor ?? theme.colors.colorTextSecondary,
                     },
                   ]}
                 >
@@ -158,8 +155,7 @@ export default function RemarkActionModal({
                 styles.buttonText,
                 stylesOverride.buttonText,
                 {
-                  color:
-                    buttonTextColor ?? theme.colors.colorBgPage,
+                  color: buttonTextColor ?? theme.colors.colorBgPage,
                 },
               ]}
             >

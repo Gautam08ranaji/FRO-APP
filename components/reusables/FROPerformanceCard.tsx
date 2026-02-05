@@ -23,7 +23,12 @@ export default function FROPerformanceGraph({
 
   return (
     <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
-      <Text style={[styles.heading, { color: theme.colors.colorPrimary600 }]}>
+      <Text
+        style={[
+          theme.typography.fontH5,
+          { color: theme.colors.colorPrimary600 },
+        ]}
+      >
         Case Performance Day Wise
       </Text>
 
@@ -60,13 +65,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     elevation: 2,
   },
-
-  heading: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 6,
-  },
-
   chart: {
     borderRadius: 16,
     alignSelf: "center",

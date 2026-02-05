@@ -151,9 +151,10 @@ export default function HomeScreen() {
         notificationCount={3}
       >
         {/* Attendance */}
+
         <Text
           style={[
-            theme.typography.fontH2,
+            theme.typography.fontH5,
             { color: theme.colors.colorPrimary600 },
           ]}
         >
@@ -162,10 +163,17 @@ export default function HomeScreen() {
 
         <PunchInCard />
 
+        {/* KPI Circular Charts */}
+        <View style={styles.kpiRow}>
+          <CircularKPIChart percentage={attendanceRateNum} label="Attendance" />
+
+          <CircularKPIChart percentage={completionRate} label="Leaves" />
+        </View>
+
         {/* Case Overview */}
         <Text
           style={[
-            theme.typography.fontH2,
+            theme.typography.fontH6,
             { color: theme.colors.colorPrimary600, marginTop: 20 },
           ]}
         >
@@ -254,13 +262,6 @@ export default function HomeScreen() {
           open={count.open}
           inProgress={count.inProgress}
         />
-
-        {/* KPI Circular Charts */}
-        <View style={styles.kpiRow}>
-          <CircularKPIChart percentage={attendanceRateNum} label="Attendance" />
-
-          <CircularKPIChart percentage={completionRate} label="Cases Closed" />
-        </View>
       </BodyLayout>
     </>
   );
