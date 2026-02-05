@@ -6,13 +6,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 /* ================= TYPES ================= */
@@ -39,7 +39,7 @@ export default function NotesHistoryScreen() {
     ? JSON.parse(params.item as string)
     : null;
 
-  console.log("transactionNumber", item?.transactionNumber);
+  // console.log("transactionNumber", item?.transactionNumber);
 
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -54,8 +54,10 @@ export default function NotesHistoryScreen() {
           bearerToken: String(authState.token),
           antiForgeryToken: String(authState.antiforgeryToken),
         },
-        relatedToId: "61",
+        relatedToId: String(caseId),
       });
+
+      console.log("res", res?.data);
 
       const list = Array.isArray(res?.data?.notesList)
         ? res.data.notesList
@@ -199,7 +201,7 @@ export default function NotesHistoryScreen() {
                   { color: theme.colors.colorTextPrimary },
                 ]}
               >
-                {item.noteDesc}
+                Description: {item.noteDesc}
               </Text>
             </View>
           )}

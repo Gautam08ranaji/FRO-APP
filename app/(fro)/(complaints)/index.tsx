@@ -258,12 +258,12 @@ export default function CasesScreen() {
                 <Text
                   style={[
                     styles.cardTitle,
-                    { color: theme.colors.colorTextSecondary },
+                    { color: theme.colors.colorPrimary600 },
                   ]}
                   numberOfLines={2}
                   ellipsizeMode="tail"
                 >
-                  {item.name || "Unnamed Case"}
+                  {t("cases.ticket")}: {item.transactionNumber || "-"}
                 </Text>
 
                 <View
@@ -275,13 +275,13 @@ export default function CasesScreen() {
 
               <View style={styles.infoContainer}>
                 <Text style={[styles.cardText, styles.infoText]}>
+                  {item.name || "Unnamed Case"}
+                </Text>
+                <Text style={[styles.cardText, styles.infoText]}>
                   {t("cases.age")}: {item.ageofTheElder || "-"}
                 </Text>
                 <Text style={[styles.cardText, styles.infoText]}>
                   {t("cases.category")}: {item.categoryName || "-"}
-                </Text>
-                <Text style={[styles.cardText, styles.infoText]}>
-                  {t("cases.ticket")}: {item.transactionNumber || "-"}
                 </Text>
               </View>
 

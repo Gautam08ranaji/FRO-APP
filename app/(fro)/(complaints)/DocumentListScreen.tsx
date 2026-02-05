@@ -3,9 +3,9 @@ import { getCommonDocumentList } from "@/features/fro/complaints/getCommonDocume
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -35,7 +35,7 @@ export default function CommonDocumentListScreen() {
   const [loading, setLoading] = useState(false);
   const authState = useAppSelector((state) => state.auth);
 
-  console.log("caseiddd", caseId);
+  // console.log("caseiddd", caseId);
 
   const PAGE_SIZE = 10;
 
@@ -49,6 +49,8 @@ export default function CommonDocumentListScreen() {
         relatedToId: Number(caseId),
       });
 
+      // console.log("cmn", res);
+
       setDocuments((prev) =>
         pageNumber === 1 ? res.list : [...prev, ...res.list],
       );
@@ -61,9 +63,11 @@ export default function CommonDocumentListScreen() {
     }
   };
 
-  useEffect(() => {
-    loadDocuments(1);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadDocuments(1);
+    }, []),
+  );
 
   const loadMore = () => {
     if (documents.length < total && !loading) {

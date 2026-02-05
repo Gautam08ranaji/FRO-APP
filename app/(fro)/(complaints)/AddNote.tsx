@@ -23,6 +23,8 @@ const NOTE_TYPES = ["PUBLIC", "PRIVATE"];
 
 export default function AddNoteScreen() {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   const authState = useAppSelector((state) => state.auth);
 
   const [noteType, setNoteType] = useState("");
@@ -31,13 +33,10 @@ export default function AddNoteScreen() {
 
   const [showSheet, setShowSheet] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const params = useLocalSearchParams();
 
+  const params = useLocalSearchParams();
   const caseId = params.caseId ? Number(params.caseId) : null;
   const transactionNumber = params.transactionNumber as string | undefined;
-
-  console.log("caseId:", caseId);
-  console.log("transactionNumber:", transactionNumber);
 
   /* ---------- TOMORROW ONLY ---------- */
   const getTomorrow = () => {
@@ -109,35 +108,15 @@ export default function AddNoteScreen() {
   return (
     <BodyLayout type="screen">
       <View style={styles.container}>
-        {/* ---------- NOTE TYPE ---------- */}
-
         {/* ---------- FOLLOW UP DATE ---------- */}
-        <Text
-          style={[
-            styles.label,
-            { color: theme.colors.colorTextSecondary, marginTop: 20 },
-          ]}
-        >
-          Next Follow-up Date
-        </Text>
+        <Text style={styles.label}>Next Follow-up Date</Text>
 
         <TouchableOpacity
-          style={[
-            styles.dropdown,
-            {
-              backgroundColor: theme.colors.colorBgSurface,
-              borderColor: theme.colors.navDivider,
-            },
-          ]}
+          style={styles.dropdown}
           onPress={() => setShowDatePicker(true)}
         >
           <Text
-            style={{
-              color: followUpDate
-                ? theme.colors.colorTextPrimary
-                : theme.colors.colorTextSecondary,
-              fontSize: 14,
-            }}
+            style={followUpDate ? styles.textPrimary : styles.textSecondary}
           >
             {followUpDate
               ? followUpDate.toDateString()
@@ -151,35 +130,17 @@ export default function AddNoteScreen() {
           />
         </TouchableOpacity>
 
-        <Text
-          style={[
-            styles.label,
-            { color: theme.colors.colorTextSecondary, marginTop: 10 },
-          ]}
-        >
-          Note Type
-        </Text>
+        {/* ---------- NOTE TYPE ---------- */}
+        <Text style={[styles.label, { marginTop: 16 }]}>Note Type</Text>
 
         <TouchableOpacity
-          style={[
-            styles.dropdown,
-            {
-              backgroundColor: theme.colors.colorBgSurface,
-              borderColor: theme.colors.navDivider,
-            },
-          ]}
+          style={styles.dropdown}
           onPress={() => setShowSheet(true)}
         >
-          <Text
-            style={{
-              color: noteType
-                ? theme.colors.colorTextPrimary
-                : theme.colors.colorTextSecondary,
-              fontSize: 14,
-            }}
-          >
+          <Text style={noteType ? styles.textPrimary : styles.textSecondary}>
             {noteType || "Select note type"}
           </Text>
+
           <Ionicons
             name="chevron-down"
             size={18}
@@ -188,14 +149,7 @@ export default function AddNoteScreen() {
         </TouchableOpacity>
 
         {/* ---------- DESCRIPTION ---------- */}
-        <Text
-          style={[
-            styles.label,
-            { color: theme.colors.colorTextSecondary, marginTop: 20 },
-          ]}
-        >
-          Description
-        </Text>
+        <Text style={[styles.label, { marginTop: 20 }]}>Description</Text>
 
         <TextInput
           multiline
@@ -203,29 +157,12 @@ export default function AddNoteScreen() {
           onChangeText={setDescription}
           placeholder="Write note description..."
           placeholderTextColor={theme.colors.colorTextSecondary}
-          style={[
-            styles.textArea,
-            {
-              backgroundColor: theme.colors.colorBgSurface,
-              color: theme.colors.colorTextPrimary,
-              borderColor: theme.colors.navDivider,
-            },
-          ]}
+          style={styles.textArea}
         />
 
         {/* ---------- SAVE BUTTON ---------- */}
-        <TouchableOpacity
-          style={[
-            styles.saveButton,
-            { backgroundColor: theme.colors.colorPrimary600 },
-          ]}
-          onPress={submitNote}
-        >
-          <Text
-            style={{ color: theme.colors.colorBgSurface, fontWeight: "600" }}
-          >
-            Save Note
-          </Text>
+        <TouchableOpacity style={styles.saveButton} onPress={submitNote}>
+          <Text style={styles.saveText}>Save Note</Text>
         </TouchableOpacity>
       </View>
 
@@ -235,12 +172,10 @@ export default function AddNoteScreen() {
           value={followUpDate ?? getTomorrow()}
           mode="date"
           display={Platform.OS === "ios" ? "spinner" : "default"}
-          minimumDate={getTomorrow()} // 🚫 today disabled
+          minimumDate={getTomorrow()}
           onChange={(event, selectedDate) => {
             setShowDatePicker(false);
-            if (selectedDate) {
-              setFollowUpDate(selectedDate);
-            }
+            if (selectedDate) setFollowUpDate(selectedDate);
           }}
         />
       )}
@@ -249,17 +184,8 @@ export default function AddNoteScreen() {
       <Modal transparent visible={showSheet} animationType="slide">
         <Pressable style={styles.overlay} onPress={() => setShowSheet(false)} />
 
-        <View
-          style={[
-            styles.sheet,
-            { backgroundColor: theme.colors.colorBgSurface },
-          ]}
-        >
-          <Text
-            style={[styles.sheetTitle, { color: theme.colors.colorHeadingH1 }]}
-          >
-            Select Note Type
-          </Text>
+        <View style={styles.sheet}>
+          <Text style={styles.sheetTitle}>Select Note Type</Text>
 
           {NOTE_TYPES.map((type) => (
             <TouchableOpacity
@@ -270,14 +196,7 @@ export default function AddNoteScreen() {
                 setShowSheet(false);
               }}
             >
-              <Text
-                style={{
-                  fontSize: 15,
-                  color: theme.colors.colorTextPrimary,
-                }}
-              >
-                {type}
-              </Text>
+              <Text style={styles.textPrimary}>{type}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -286,64 +205,90 @@ export default function AddNoteScreen() {
   );
 }
 
-/* ---------- STYLES ---------- */
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
+/* ---------- THEMED STYLES ---------- */
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: theme.colors.colorBgPage,
+    },
 
-  label: {
-    fontSize: 13,
-    marginBottom: 6,
-  },
+    label: {
+      fontSize: 13,
+      marginBottom: 6,
+      color: theme.colors.colorTextSecondary,
+    },
 
-  dropdown: {
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
+    dropdown: {
+      borderWidth: 1,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: theme.colors.colorBgSurface,
+      borderColor: theme.colors.navDivider,
+    },
 
-  textArea: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
-    minHeight: 120,
-    textAlignVertical: "top",
-    fontSize: 14,
-  },
+    textPrimary: {
+      color: theme.colors.colorTextPrimary,
+      fontSize: 14,
+    },
 
-  saveButton: {
-    marginTop: 30,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
+    textSecondary: {
+      color: theme.colors.colorTextSecondary,
+      fontSize: 14,
+    },
 
-  /* ---------- BOTTOM SHEET ---------- */
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
+    textArea: {
+      borderWidth: 1,
+      borderRadius: 12,
+      padding: 14,
+      minHeight: 120,
+      textAlignVertical: "top",
+      fontSize: 14,
+      backgroundColor: theme.colors.colorBgSurface,
+      borderColor: theme.colors.navDivider,
+      color: theme.colors.colorTextPrimary,
+    },
 
-  sheet: {
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginBottom: 100,
-  },
+    saveButton: {
+      marginTop: 30,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: "center",
+      backgroundColor: theme.colors.colorPrimary600,
+    },
 
-  sheetTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 16,
-  },
+    saveText: {
+      color: theme.colors.colorBgSurface,
+      fontWeight: "600",
+    },
 
-  sheetItem: {
-    paddingVertical: 14,
-  },
-});
+    /* Bottom Sheet */
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.4)",
+    },
+
+    sheet: {
+      padding: 20,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      backgroundColor: theme.colors.colorBgSurface,
+      marginBottom: 80,
+    },
+
+    sheetTitle: {
+      fontSize: 16,
+      fontWeight: "600",
+      marginBottom: 16,
+      color: theme.colors.colorHeadingH1,
+    },
+
+    sheetItem: {
+      paddingVertical: 14,
+    },
+  });

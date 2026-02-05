@@ -119,6 +119,8 @@ export default function UpdateDocumentScreen() {
     try {
       const base64 = await fileToBase64(file.uri);
 
+      console.log("lndkl", caseId);
+
       const payload = {
         relatedTo: "CAS",
         relatedToId: Number(caseId),
@@ -130,17 +132,21 @@ export default function UpdateDocumentScreen() {
         createdBy: String(authState?.userId),
       };
 
-      console.log("FINAL PAYLOAD STRING", JSON.stringify(payload));
+      // console.log("FINAL PAYLOAD STRING", JSON.stringify(payload));
 
       const res = await addCommonDocument(payload);
-      console.log("res", res);
+      // console.log("res", res);
 
       Alert.alert("Success", res.message || "Document uploaded successfully");
-      router.push("/(fro)/(complaints)/DocumentListScreen");
-
+      router.push({
+        pathname: "/(fro)/(complaints)/DocumentListScreen",
+        params: { caseId },
+      });
       setDescription("");
       setFile(null);
-    } catch {
+    } catch (error) {
+      console.log("err", error);
+
       // ❌ DO NOTHING
       // Global interceptor already shows error alert
     } finally {

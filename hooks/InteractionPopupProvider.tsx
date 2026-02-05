@@ -89,6 +89,8 @@ export const useInteractionPopupPoller = () => {
         const interactions = res?.data?.interactions || [];
         const matched: any[] = [];
 
+        // console.log("res api", res);
+
         interactions.forEach((item: any) => {
           const isMatch = item.caseStatusId === 1 && item.subStatusId === 9;
 
@@ -111,7 +113,7 @@ export const useInteractionPopupPoller = () => {
     };
 
     fetchInteractions();
-    intervalRef.current = setInterval(fetchInteractions, 10000);
+    intervalRef.current = setInterval(fetchInteractions, 1000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -141,7 +143,7 @@ export const useInteractionPopupPoller = () => {
     if (!current) return;
 
     try {
-      await updateInteraction({
+      const res = await updateInteraction({
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
         data: {
@@ -149,12 +151,14 @@ export const useInteractionPopupPoller = () => {
           caseStatusId: 2,
           caseStatusName: "In-Progress",
           subStatusId: 22,
-          subStatusName: "Case Accepetd",
+          subStatusName: "Case Accepted",
           comment: "Accepted By FRO",
           callBack: "",
           assignToId: String(authState.userId),
         },
       });
+
+      console.log("accept case", res);
 
       sendLocation(current.id);
       closePopup();
