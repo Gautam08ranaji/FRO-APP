@@ -1,4 +1,5 @@
 import BodyLayout from "@/components/layout/BodyLayout";
+import { useLocation } from "@/hooks/LocationContext";
 import { useTheme } from "@/theme/ThemeContext";
 import * as Location from "expo-location";
 import { useLocalSearchParams } from "expo-router";
@@ -16,20 +17,19 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 
-/* ================= FALLBACK LOCATION ================= */
-
-const STATIC_DESTINATION = {
-  latitude: 28.56719,
-  longitude: 77.320892,
-};
-
-/* ⚠️ Use UNRESTRICTED (WEB) Google Directions API key */
+/* ⚠️ Restrict this API key in Google Cloud Console */
 const GOOGLE_MAPS_API_KEY = "AIzaSyDVl4s2zlYODWTIpEfzYePa_hj5nrWksuE";
 
-/* ================= HELPERS ================= */
+/* ================= HELPER ================= */
 
 const getDestinationFromItem = (item: any) => {
-  // Case 1: geographicLocation object
+  if (item?.latitude && item?.longitude) {
+    return {
+      latitude: Number(item.latitude),
+      longitude: Number(item.longitude),
+    };
+  }
+
   if (
     item?.geographicLocation?.latitude &&
     item?.geographicLocation?.longitude
@@ -37,27 +37,18 @@ const getDestinationFromItem = (item: any) => {
     return {
       latitude: Number(item.geographicLocation.latitude),
       longitude: Number(item.geographicLocation.longitude),
-      isStatic: false,
     };
   }
 
-  // Case 2: "lat,lng" string
   if (typeof item?.location === "string" && item.location.includes(",")) {
     const [lat, lng] = item.location.split(",");
-    if (!isNaN(Number(lat)) && !isNaN(Number(lng))) {
-      return {
-        latitude: Number(lat),
-        longitude: Number(lng),
-        isStatic: false,
-      };
-    }
+    return {
+      latitude: Number(lat),
+      longitude: Number(lng),
+    };
   }
 
-  // ❌ Fallback
-  return {
-    ...STATIC_DESTINATION,
-    isStatic: true,
-  };
+  return null;
 };
 
 /* ================= SCREEN ================= */
@@ -67,13 +58,12 @@ export default function StartNavigationScreen() {
   const { t } = useTranslation();
   const colors = theme.colors;
 
+  const { fetchLocation } = useLocation();
+
   const params = useLocalSearchParams();
   const item = params.item ? JSON.parse(params.item as string) : null;
 
-  console.log("nav item", item);
-
   const destination = getDestinationFromItem(item);
-
   const mapRef = useRef<MapView>(null);
 
   const [userLocation, setUserLocation] =
@@ -85,48 +75,23 @@ export default function StartNavigationScreen() {
   /* ================= GET USER LOCATION ================= */
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status !== "granted") {
-        console.log("❌ Location permission denied");
-        return;
+    const loadLocation = async () => {
+      try {
+        const loc = await fetchLocation();
+        if (loc?.coords) setUserLocation(loc.coords);
+      } catch (err) {
+        console.log("Location fetch error:", err);
       }
+    };
 
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
-
-      setUserLocation(location.coords);
-    })();
+    loadLocation();
   }, []);
-
-  /* ================= AUTO ZOOM ================= */
-
-  useEffect(() => {
-    if (!userLocation || !mapRef.current) return;
-
-    mapRef.current.fitToCoordinates(
-      [
-        {
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
-        },
-        {
-          latitude: destination.latitude,
-          longitude: destination.longitude,
-        },
-      ],
-      {
-        edgePadding: { top: 60, right: 40, bottom: 60, left: 40 },
-        animated: true,
-      },
-    );
-  }, [userLocation, destination]);
 
   /* ================= OPEN GOOGLE MAPS ================= */
 
   const openGoogleMaps = () => {
+    if (!destination) return;
+
     const lat = destination.latitude;
     const lng = destination.longitude;
 
@@ -146,7 +111,7 @@ export default function StartNavigationScreen() {
       screenName={t("navigation.screenTitle")}
       scrollContentStyle={{ paddingHorizontal: 0 }}
     >
-      {/* ================= MAP ================= */}
+      {/* MAP */}
       <View style={[styles.mapContainer, { borderColor: colors.colorBorder }]}>
         <MapView
           ref={mapRef}
@@ -154,23 +119,20 @@ export default function StartNavigationScreen() {
           style={StyleSheet.absoluteFillObject}
           showsUserLocation
           showsMyLocationButton
+          followsUserLocation
         >
-          <Marker
-            coordinate={{
-              latitude: destination.latitude,
-              longitude: destination.longitude,
-            }}
-            title={item?.contactName || "Destination"}
-            description={item?.completeAddress || "Location"}
-          />
+          {destination && (
+            <Marker
+              coordinate={destination}
+              title={item?.contactName || "Destination"}
+              description={item?.completeAddress || "Location"}
+            />
+          )}
 
-          {userLocation && (
+          {userLocation && destination && (
             <MapViewDirections
               origin={userLocation}
-              destination={{
-                latitude: destination.latitude,
-                longitude: destination.longitude,
-              }}
+              destination={destination}
               apikey={GOOGLE_MAPS_API_KEY}
               strokeWidth={5}
               strokeColor="#1E90FF"
@@ -179,23 +141,24 @@ export default function StartNavigationScreen() {
                 setDistance(result.distance);
                 setDuration(result.duration);
 
+                // Tight zoom ONLY on route
                 mapRef.current?.fitToCoordinates(result.coordinates, {
                   edgePadding: {
-                    top: 60,
-                    right: 40,
-                    bottom: 60,
-                    left: 40,
+                    top: 40,
+                    right: 20,
+                    bottom: 40,
+                    left: 20,
                   },
                   animated: true,
                 });
               }}
-              onError={(err) => console.log("❌ DIRECTIONS ERROR:", err)}
+              onError={(err) => console.log("Directions error:", err)}
             />
           )}
         </MapView>
       </View>
 
-      {/* ================= DETAILS CARD ================= */}
+      {/* DETAILS CARD */}
       <View
         style={[
           styles.card,
@@ -238,15 +201,9 @@ export default function StartNavigationScreen() {
         <Text style={[styles.address, { color: colors.colorTextPrimary }]}>
           {item?.completeAddress || "Address not available"}
         </Text>
-
-        {destination.isStatic && (
-          <Text style={{ color: "orange", fontSize: 12, marginTop: 6 }}>
-            📍 Location shown is static (exact location not available)
-          </Text>
-        )}
       </View>
 
-      {/* ================= BUTTONS ================= */}
+      {/* BUTTONS */}
       <TouchableOpacity
         onPress={openGoogleMaps}
         style={[styles.primaryBtn, { backgroundColor: colors.btnPrimaryBg }]}
