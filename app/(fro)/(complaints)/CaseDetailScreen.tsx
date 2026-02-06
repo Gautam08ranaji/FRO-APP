@@ -981,7 +981,7 @@ export default function CaseDetailScreen() {
             ]}
           >
             <RemixIcon
-              name="subtract-line"
+              name="flag-line"
               size={16}
               color={theme.colors.colorAccent700}
             />

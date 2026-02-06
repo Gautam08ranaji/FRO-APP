@@ -8,16 +8,12 @@ import { useLocation } from "@/hooks/LocationContext";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import * as DocumentPicker from "expo-document-picker";
-import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  FlatList,
-  Image,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
@@ -28,7 +24,7 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
 
 type DropdownItem = {
@@ -224,7 +220,6 @@ const UpdateStatusScreen = () => {
     name: string;
   } | null>(null);
   const [notes, setNotes] = useState("");
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [dropdownType, setDropdownType] = useState<"CASE" | "SUB" | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -262,30 +257,6 @@ const UpdateStatusScreen = () => {
     setIsInitializing(false);
   }, [interactionItem]);
 
-  const pickImage = useCallback(async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Permission required", "Please allow gallery access");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setAttachments((p) => [
-        ...p,
-        {
-          uri: result.assets[0].uri,
-          name: result.assets[0].fileName || `image_${Date.now()}.jpg`,
-          type: "image",
-        },
-      ]);
-    }
-  }, []);
-
   const sendLocation = async (id: any) => {
     try {
       const location = await fetchLocation();
@@ -309,32 +280,6 @@ const UpdateStatusScreen = () => {
     }
   };
 
-  const pickFile = useCallback(async () => {
-    const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
-    if (!result.canceled && result.assets[0]) {
-      setAttachments((p) => [
-        ...p,
-        {
-          uri: result.assets[0].uri,
-          name: result.assets[0].name,
-          type: "file",
-        },
-      ]);
-    }
-  }, []);
-
-  const addAttachment = useCallback(() => {
-    Alert.alert("Add Attachment", "Choose option", [
-      { text: "Gallery", onPress: pickImage },
-      { text: "Files", onPress: pickFile },
-      { text: "Cancel", style: "cancel" },
-    ]);
-  }, [pickImage, pickFile]);
-
-  const removeAttachment = (index: number) => {
-    setAttachments((p) => p.filter((_, i) => i !== index));
-  };
-
   const handleSubStatusPress = () => {
     if (!caseStatus) {
       setShowSubStatusWarning(true);
@@ -356,7 +301,7 @@ const UpdateStatusScreen = () => {
 
     setIsLoading(true);
     handleUpdate();
-  }, [caseStatus, subStatus, notes, attachments]);
+  }, [caseStatus, subStatus, notes]);
 
   if (isInitializing) {
     return (
@@ -597,81 +542,6 @@ const UpdateStatusScreen = () => {
 
             <TouchableOpacity
               style={[
-                styles.attachmentBtn,
-                {
-                  borderColor: theme.colors.colorPrimary600,
-                  backgroundColor: theme.colors.colorPrimary600 + "10",
-                },
-              ]}
-              onPress={addAttachment}
-            >
-              <Ionicons
-                name="attach-outline"
-                size={moderateScale(20)}
-                color={theme.colors.colorPrimary600}
-              />
-              <Text
-                style={[
-                  styles.attachmentText,
-                  { color: theme.colors.colorPrimary600 },
-                ]}
-              >
-                Add Attachment
-              </Text>
-            </TouchableOpacity>
-
-            {attachments.length > 0 && (
-              <FlatList
-                data={attachments}
-                horizontal
-                keyExtractor={(_, i) => i.toString()}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.attachmentsList}
-                renderItem={({ item, index }) => (
-                  <View
-                    style={[
-                      styles.attachmentPreview,
-                      {
-                        borderColor: theme.colors.colorBorder,
-                        backgroundColor: theme.colors.colorBgSurface,
-                      },
-                    ]}
-                  >
-                    <TouchableOpacity
-                      style={styles.removeAttachmentBtn}
-                      onPress={() => removeAttachment(index)}
-                    >
-                      <Ionicons
-                        name="close-circle"
-                        size={moderateScale(20)}
-                        color={theme.colors.colorAccent700}
-                      />
-                    </TouchableOpacity>
-                    {item.type === "image" ? (
-                      <Image source={{ uri: item.uri }} style={styles.image} />
-                    ) : (
-                      <Ionicons
-                        name="document-text-outline"
-                        size={moderateScale(42)}
-                        color={theme.colors.colorPrimary600}
-                      />
-                    )}
-                    <Text
-                      style={[
-                        styles.fileName,
-                        { color: theme.colors.colorTextSecondary },
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {item.name}
-                    </Text>
-                  </View>
-                )}
-              />
-            )}
-
-            <TouchableOpacity
-              style={[
                 styles.submitBtn,
                 { backgroundColor: theme.colors.colorPrimary600 },
               ]}
@@ -852,33 +722,6 @@ const styles = StyleSheet.create({
     padding: moderateScale(12),
     textAlignVertical: "top",
     fontSize: moderateScale(14),
-  },
-  attachmentBtn: {
-    marginTop: verticalScale(20),
-    borderWidth: 1,
-    borderRadius: moderateScale(10),
-    padding: moderateScale(14),
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: moderateScale(8),
-  },
-  attachmentText: {
-    fontSize: moderateScale(14),
-    fontWeight: "500",
-  },
-  attachmentsList: {
-    paddingVertical: verticalScale(12),
-  },
-  attachmentPreview: {
-    width: moderateScale(100),
-    height: moderateScale(100),
-    marginRight: moderateScale(10),
-    borderWidth: 1,
-    borderRadius: moderateScale(10),
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
   },
   image: {
     width: "100%",
