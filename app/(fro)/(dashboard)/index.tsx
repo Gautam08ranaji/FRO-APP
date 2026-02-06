@@ -69,6 +69,9 @@ export default function HomeScreen() {
   /* ================= API ================= */
 
   const fetchUserData = async () => {
+    console.log("authState.userId", authState.userId);
+    console.log("authState.token", authState.token);
+
     try {
       const response = await getUserDataById({
         userId: String(authState.userId),
@@ -76,10 +79,16 @@ export default function HomeScreen() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
+      console.log("use Data", response);
+
       setFirstName(response?.data?.firstName || "User");
       setLastName(response?.data?.lastName || "");
     } catch (error) {
       console.error("User fetch error:", error);
+      alert(
+        "Failed to fetch user data. " +
+          (error instanceof Error ? error?.message : "Unknown error"),
+      );
     }
   };
 

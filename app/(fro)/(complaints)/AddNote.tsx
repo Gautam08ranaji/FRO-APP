@@ -27,7 +27,7 @@ export default function AddNoteScreen() {
 
   const authState = useAppSelector((state) => state.auth);
 
-  const [noteType, setNoteType] = useState("");
+  const [noteType, setNoteType] = useState("PUBLIC");
   const [description, setDescription] = useState("");
   const [followUpDate, setFollowUpDate] = useState<Date | null>(null);
 

@@ -182,6 +182,7 @@ export default function OfficerDetailsScreen() {
   /* ================= FETCH USER ================= */
   const getProfileImageUrl = (photoPath: string | null) => {
     if (!photoPath) return null;
+    console.log("photoPath", photoPath);
 
     const normalizedPath = photoPath.replace(/\\/g, "/");
     return `${baseUrlApi}/${normalizedPath}`;
@@ -216,6 +217,8 @@ export default function OfficerDetailsScreen() {
         photo: getProfileImageUrl(data?.profilePhoto),
         photoBase64: null,
       });
+
+      console.log(data);
 
       if (data?.stateId) {
         fetchDistrictDropdown(data.stateId);
@@ -446,6 +449,8 @@ export default function OfficerDetailsScreen() {
         csrfToken: String(authState.antiforgeryToken),
         data: buildUpdatePayload(),
       });
+
+      console.log("updt yser", response);
 
       if (response?.success) {
         fetchUserData();

@@ -1,14 +1,17 @@
 import ConfirmationAlert from "@/components/reusables/ConfirmationAlert";
+import { baseUrlApi } from "@/features/api/baseUrl.ts";
 import { logout } from "@/features/auth/authSlice";
 import { logoutUser } from "@/features/auth/logoutApi";
+import { getUserDataById } from "@/features/fro/profile/getProfile";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
   Alert,
+  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -20,12 +23,76 @@ import RemixIcon from "react-native-remix-icon";
 
 type AvailabilityStatus = "available" | "busy" | "in_meeting" | "unavailable";
 
+type UserApiResponse = {
+  id: string | null;
+
+  firstName: string | null;
+  lastName: string | null;
+  phoneNumber: string | null;
+  email: string | null;
+
+  gender: string | null;
+  stateName: string | null;
+  cityName: string | null;
+  pinCode: string | null;
+
+  profilePhoto: string | null;
+
+  address: string | null;
+  isActive: boolean | null;
+  userLevel: number | null;
+  userLevelName: string | null;
+  department: string | null;
+  maxAssignInteraction: number | null;
+  stateId: number | null;
+  cityId: number | null;
+  userType: string | null;
+  userRoles: any[];
+};
+
+type OfficerForm = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  gender: string;
+  genderValue: number;
+  state: string;
+  stateValue: number;
+  city: string;
+  cityValue: number;
+  pincode: string;
+  address: string;
+  photo: string | null;
+  department: string;
+  photoBase64: string | null;
+};
+
 export default function ProfileScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
   const authState = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
+  const [userProfile, setUserProfile] = useState<UserApiResponse | null>(null);
+
+  const [form, setForm] = useState<OfficerForm>({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    gender: "",
+    genderValue: 0,
+    state: "",
+    stateValue: 0,
+    city: "",
+    cityValue: 0,
+    pincode: "",
+    address: "",
+    photo: null,
+    department: "",
+    photoBase64: null,
+  });
 
   const [showAlert, setShowAlert] = useState(false);
   const [showAvailability, setShowAvailability] = useState(false);
@@ -37,6 +104,57 @@ export default function ProfileScreen() {
   const antiforgeryToken = useAppSelector(
     (state) => state.auth.antiforgeryToken,
   );
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+    }, []),
+  );
+
+  /* ================= FETCH USER ================= */
+  const getProfileImageUrl = (photoPath: string | null) => {
+    if (!photoPath) return null;
+    console.log("photoPath", photoPath);
+
+    const normalizedPath = photoPath.replace(/\\/g, "/");
+    return `${baseUrlApi}/${normalizedPath}`;
+  };
+
+  const fetchUserData = async () => {
+    try {
+      const response = await getUserDataById({
+        userId: String(authState.userId),
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
+
+      const data: UserApiResponse = response?.data;
+      setUserProfile(data);
+
+      setForm({
+        firstName: data?.firstName ?? "",
+        lastName: data?.lastName ?? "",
+        phone: data?.phoneNumber ?? "",
+        email: data?.email ?? "",
+        gender: data?.gender ?? "",
+        genderValue: 0,
+        state: data?.stateName ?? "",
+        stateValue: data?.stateId ?? 0,
+        city: data?.cityName ?? "",
+        cityValue: data?.cityId ?? 0,
+        pincode: data?.pinCode ?? "",
+        address: data?.address ?? "",
+        department: data?.department ?? "",
+        photo: getProfileImageUrl(data?.profilePhoto),
+        photoBase64: null,
+      });
+
+      console.log("response", response);
+    } catch (error) {
+      console.error("Failed to fetch user data", error);
+    } finally {
+    }
+  };
 
   const logOutApi = async () => {
     try {
@@ -171,21 +289,25 @@ export default function ProfileScreen() {
             { backgroundColor: theme.colors.colorBgSurface },
           ]}
         >
-          <RemixIcon
-            name="user-3-line"
-            size={38}
-            color={theme.colors.colorPrimary600}
-          />
+          {form.photo ? (
+            <Image source={{ uri: form.photo }} style={styles.profileImage} />
+          ) : (
+            <RemixIcon
+              name="user-3-line"
+              size={38}
+              color={theme.colors.colorPrimary600}
+            />
+          )}
         </View>
 
         <Text style={[styles.name, { color: theme.colors.colorBgPage }]}>
-          {t("profile.name")}
+          {form.firstName} {form.lastName}
         </Text>
         <Text style={[styles.code, { color: theme.colors.colorBgPage }]}>
-          {t("profile.code")}
+          {form.email}
         </Text>
         <Text style={[styles.role, { color: theme.colors.colorBgPage }]}>
-          {t("profile.role")}
+          {form.department}
         </Text>
       </View>
 
@@ -406,7 +528,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
+    marginTop: 30,
   },
 
   name: { fontSize: 20, fontWeight: "600", marginTop: 5 },
@@ -435,5 +557,10 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 16,
     fontWeight: "600",
+  },
+  profileImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
   },
 });

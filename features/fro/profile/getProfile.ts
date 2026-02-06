@@ -14,7 +14,7 @@ export const getUserDataById = async ({
 }: GetUserDataByIdParams) => {
   return apiRequest({
     method: "GET",
-    url: `/MobileApp/ GetUserDataById/${userId}`, // ✅ FIX
+    url: `/MobileApp/GetUserDataById/${userId}`, // ✅ FIX
     headers: {
       Authorization: `Bearer ${token}`,
       ...(csrfToken && { "X-CSRF-TOKEN": csrfToken }),
