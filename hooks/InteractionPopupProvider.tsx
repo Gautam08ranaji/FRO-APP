@@ -4,10 +4,12 @@ import StatusModal from "@/components/reusables/StatusModal";
 import { useTheme } from "@/theme/ThemeContext";
 
 import { addAndUpdateFROLocation } from "@/features/fro/froLocationApi";
+import { addInteractionActivityHistory } from "@/features/fro/interaction/ActivityHistory";
 import {
   getInteractionsListByAssignToId,
   updateInteraction,
 } from "@/features/fro/interactionApi";
+import { getUserDataById } from "@/features/fro/profile/getProfile";
 import { useAppSelector } from "@/store/hooks";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -22,24 +24,48 @@ let pollerStarted = false;
 
 export const useInteractionPopupPoller = () => {
   const authState = useAppSelector((state) => state.auth);
-  const [showAcceptedStatusModal, setShowAcceptedStatusModal] = useState(false);
-  const [showDeclinedStatusModal, setShowDeclinedStatusModal] = useState(false);
   const { theme } = useTheme();
-  const { hasPermission, fetchLocation, address } = useLocation();
+  const { fetchLocation, address } = useLocation();
 
   const [queue, setQueue] = useState<any[]>([]);
   const [current, setCurrent] = useState<any | null>(null);
-  const [currentTicket] = useState<any | null>(null);
   const [visible, setVisible] = useState(false);
 
-  /** Reject modal */
+  console.log("current", current);
+
   const [showRemarkModal, setShowRemarkModal] = useState(false);
+  const [showAcceptedStatusModal, setShowAcceptedStatusModal] = useState(false);
+  const [showDeclinedStatusModal, setShowDeclinedStatusModal] = useState(false);
 
-  /** Prevent duplicate popups */
   const seenIdsRef = useRef<Set<number>>(new Set());
-
-  /** Polling interval */
   const intervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  /* ================= LOCATION ================= */
+
+  const fetchUserData = async () => {
+    // console.log("authState.userId", authState.userId);
+    // console.log("authState.token", authState.token);
+
+    try {
+      const response = await getUserDataById({
+        userId: String(authState.userId),
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
+
+      // console.log("ussse Data", response);
+    } catch (error) {
+      console.error("User fetch error:", error);
+      alert(
+        "Failed to fetch user data. " +
+          (error instanceof Error ? error?.message : "Unknown error"),
+      );
+    }
+  };
 
   const sendLocation = async (id: any) => {
     try {
@@ -47,30 +73,85 @@ export const useInteractionPopupPoller = () => {
       if (!location) return;
 
       const { latitude, longitude } = location.coords;
+
       const payload = {
-        name: address ?? "Unknown location", // ✅ READABLE ADDRESS
-        latitute: latitude.toString(), // ✅ real latitude
-        longititute: longitude.toString(), // ✅ real longitude
+        name: address ?? "Unknown location",
+        latitute: latitude.toString(),
+        longititute: longitude.toString(),
         discriptions: address ?? "",
         elderPinLocation: "string",
         froPinLocation: String(address),
-        userId: String(authState.userId), // ✅ use passed userId
+        userId: String(authState.userId),
       };
 
-      // console.log("📤 Sending payload:", payload);
+      console.log("📤 Location Payload:", payload);
 
       const res = await addAndUpdateFROLocation(payload);
-      console.log("✅ Update Ticket Location:", res);
+      console.log("✅ Location Response:", res);
     } catch (error) {
       console.error("❌ Location update error:", error);
+    }
+  };
+
+  /* ================= ACTIVITY HISTORY ================= */
+
+  const saveActivity = async ({
+    interactionId,
+    oldCaseStatus,
+    newCaseStatus,
+    oldSubStatus,
+    newSubStatus,
+    activityStatus,
+    transactionNumber,
+  }: any) => {
+    try {
+      /* ---------------- FETCH USER DATA FIRST ---------------- */
+      const userRes = await getUserDataById({
+        userId: String(authState?.userId),
+        token: String(authState?.token),
+        csrfToken: String(authState?.antiforgeryToken),
+      });
+
+      // console.log("👤 User Data Response:", userRes);
+
+      const firstName = userRes?.data?.firstName || "";
+      const lastName = userRes?.data?.lastName || "";
+      const activityByName = `${firstName} ${lastName}`.trim();
+
+      // console.log("wdfcfs", firstName, lastName);
+
+      /* ---------------- ACTIVITY PAYLOAD ---------------- */
+      const payload = {
+        activityTime: new Date().toISOString(),
+        activityInteractionId: interactionId,
+        activityActionName: "UPDATE",
+        activityDescription: `StatusName changed from "${oldCaseStatus}" --> "${newCaseStatus}", SubStatusName changed from "${oldSubStatus}" --> "${newSubStatus}"`,
+        activityStatus,
+        activityById: String(authState?.userId),
+        activityByName,
+        activityRelatedTo: "CAS",
+        activityRelatedToId: interactionId,
+        activityRelatedToName: transactionNumber,
+      };
+
+      console.log("📤 Activity Payload:", payload);
+
+      const response = await addInteractionActivityHistory({
+        token: String(authState?.token),
+        csrfToken: String(authState?.antiforgeryToken),
+        body: payload,
+      });
+
+      console.log("✅ Activity Response:", response);
+    } catch (err) {
+      console.error("❌ Activity save error:", err);
     }
   };
 
   /* ================= POLLING ================= */
 
   useEffect(() => {
-    if (!authState.token) return;
-    if (pollerStarted) return;
+    if (!authState.token || pollerStarted) return;
 
     pollerStarted = true;
 
@@ -87,8 +168,6 @@ export const useInteractionPopupPoller = () => {
         const interactions = res?.data?.interactions || [];
         const matched: any[] = [];
 
-        // console.log("res api", res);
-
         interactions.forEach((item: any) => {
           const isMatch = item.caseStatusId === 1 && item.subStatusId === 9;
 
@@ -103,8 +182,9 @@ export const useInteractionPopupPoller = () => {
         }
       } catch (error: any) {
         console.error("❌ Interaction polling failed:", error);
-        if (error?.status === 440 || 401) {
-          Alert.alert("Error", error?.data);
+
+        if (error?.status === 440 || error?.status === 401) {
+          Alert.alert("Session Expired", "Please login again.");
           router.replace("/(onboarding)/login");
         }
       }
@@ -129,14 +209,13 @@ export const useInteractionPopupPoller = () => {
     }
   }, [queue, visible]);
 
-  /* ================= ACTION HANDLERS ================= */
-
   const closePopup = () => {
     setVisible(false);
     setCurrent(null);
   };
 
-  /* ---------- ACCEPT ---------- */
+  /* ================= ACCEPT ================= */
+
   const handleAccept = async () => {
     if (!current) return;
 
@@ -156,22 +235,29 @@ export const useInteractionPopupPoller = () => {
         },
       });
 
-      console.log("accept case", res);
+      // console.log("✅ Accept Response:", res);
+
+      await saveActivity({
+        interactionId: current.id,
+        oldCaseStatus: current.caseStatusName,
+        newCaseStatus: "In-Progress",
+        oldSubStatus: current.subStatusName,
+        newSubStatus: "Case Accepted",
+        activityStatus: "Busy",
+        transactionNumber: current?.transactionNumber,
+      });
 
       sendLocation(current.id);
       closePopup();
-
-      // ✅ SHOW SUCCESS MODAL
       setShowAcceptedStatusModal(true);
     } catch (error) {
       console.error("❌ Accept failed:", error);
     }
   };
 
-  /* ---------- REJECT ---------- */
-  const handleReject = () => {
-    setShowRemarkModal(true);
-  };
+  /* ================= REJECT ================= */
+
+  const handleReject = () => setShowRemarkModal(true);
 
   const submitReject = async (remarkText: string) => {
     if (!current) return;
@@ -191,20 +277,28 @@ export const useInteractionPopupPoller = () => {
         },
       });
 
-      // console.log("rejected", res);
-      sendLocation(current.id);
+      console.log("✅ Reject Response:", res);
 
+      await saveActivity({
+        interactionId: current.id,
+        oldCaseStatus: current.caseStatusName,
+        newCaseStatus: "Open",
+        oldSubStatus: current.subStatusName,
+        newSubStatus: "Rejected By FRO",
+        activityStatus: "Available",
+        transactionNumber: current?.transactionNumber,
+      });
+
+      sendLocation(current.id);
       setShowRemarkModal(false);
       closePopup();
-
-      // ✅ SHOW DECLINED MODAL
       setShowDeclinedStatusModal(true);
     } catch (error) {
       console.error("❌ Reject failed:", error);
     }
   };
 
-  /* ================= POPUP ================= */
+  /* ================= POPUP UI ================= */
 
   const Popup = (
     <>
@@ -232,7 +326,7 @@ export const useInteractionPopupPoller = () => {
         title="Why You Declined"
         buttonText="Deny"
         onClose={() => setShowRemarkModal(false)}
-        onSubmit={submitReject} // ✅ PASSES REMARK TEXT
+        onSubmit={submitReject}
       />
 
       <StatusModal
@@ -260,6 +354,3 @@ export const useInteractionPopupPoller = () => {
 
   return { Popup };
 };
-function fetchLocation() {
-  throw new Error("Function not implemented.");
-}

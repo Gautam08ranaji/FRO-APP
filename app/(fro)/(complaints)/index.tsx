@@ -95,7 +95,7 @@ export default function CasesScreen() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      console.log("Fetched interactions:", res?.data?.interactions);
+      // console.log("Fetched interactions:", res?.data?.interactions);
       setInteractions(res?.data?.interactions || []);
     } catch (error) {
       console.error("❌ Failed to fetch cases:", error);
