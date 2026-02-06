@@ -65,7 +65,7 @@ export default function CommonDocumentListScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadDocuments(1);
+      loadDocuments();
     }, []),
   );
 

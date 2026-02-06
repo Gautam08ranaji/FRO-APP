@@ -34,7 +34,7 @@ export const useFROLocationUpdater = (userId?: string | null) => {
       }
     };
 
-    sendLocation();
+    // sendLocation();
     intervalRef.current = setInterval(sendLocation, 30000);
 
     return () => {

@@ -1,10 +1,15 @@
 import BodyLayout from "@/components/layout/BodyLayout";
+import { getCommonDocumentList } from "@/features/fro/complaints/getCommonDocumentList";
+import { getNotesRecordList } from "@/features/fro/complaints/noteListApi";
+import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
-import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useRef } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Easing,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,14 +18,25 @@ import {
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import RemixIcon from "react-native-remix-icon";
 
+interface Note {
+  id: string;
+  noteDesc: string;
+  createdDate: string;
+  createdBy: string;
+  noteType: string;
+  nextFollowUpDate?: string;
+  relatedToName: string;
+}
+
 export default function CaseDetailScreen() {
   const params = useLocalSearchParams();
   const item = params.item ? JSON.parse(params.item as string) : null;
+  const authState = useAppSelector((state) => state.auth);
 
   const { theme } = useTheme();
-
-  // console.log("itesm", item);
-
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loadingNotes, setLoadingNotes] = useState(false);
   const ticketNo = item?.transactionNumber;
   const elderName = item?.name || item?.contactName;
   const age = item?.age;
@@ -43,6 +59,8 @@ export default function CaseDetailScreen() {
   const callType = item?.callTypeName;
   const caseStatus = item?.caseStatusName;
   const subStatus = item?.subStatusName;
+
+  const caseId = item?.id;
 
   // Extract coordinates with fallback
   const lat = item?.latitude || item?.lat || 19.076;
@@ -76,6 +94,459 @@ export default function CaseDetailScreen() {
       useNativeDriver: false,
     }).start();
   }, [animatedProgress]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadDocuments();
+      loadNotes();
+    }, []),
+  );
+
+  const loadNotes = async () => {
+    try {
+      setLoadingNotes(true);
+      const res = await getNotesRecordList({
+        auth: {
+          bearerToken: String(authState.token),
+          antiForgeryToken: String(authState.antiforgeryToken),
+        },
+        relatedToId: String(caseId),
+      });
+
+      console.log("res notes", res?.data);
+
+      if (res?.data?.notesList && Array.isArray(res.data.notesList)) {
+        setNotes(res.data.notesList);
+      } else {
+        setNotes([]);
+      }
+    } catch (error: any) {
+      const status = error?.response?.status;
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong. Please try again.";
+
+      if (status === 401) {
+        Alert.alert(
+          "Session Expired",
+          "Your session has expired. Please login again.",
+          [
+            {
+              text: "OK",
+              onPress: () => router.replace("/(onboarding)/login"),
+            },
+          ],
+        );
+        return;
+      }
+
+      Alert.alert("Error", message);
+      setNotes([]);
+    } finally {
+      setLoadingNotes(false);
+    }
+  };
+
+  const loadDocuments = async (pageNumber = 1) => {
+    try {
+      const res = await getCommonDocumentList({
+        pageNumber,
+        pageSize: 10,
+        relatedToId: Number(caseId),
+      });
+
+      if (res?.list) {
+        setDocuments(res.list);
+      }
+    } catch (error) {
+      console.error("Failed to load documents", error);
+    }
+  };
+
+  // Helper function to get appropriate icon based on document type
+  const getFileIcon = (documentType: string) => {
+    if (!documentType) return "file-line";
+
+    const type = documentType.toLowerCase();
+
+    switch (type) {
+      case "word":
+      case "doc":
+      case "docx":
+        return "file-word-line";
+      case "excel":
+      case "xls":
+      case "xlsx":
+        return "file-excel-line";
+      case "powerpoint":
+      case "ppt":
+      case "pptx":
+        return "file-ppt-line";
+      case "text":
+      case "txt":
+        return "file-text-line";
+      case "video":
+      case "mp4":
+      case "avi":
+      case "mov":
+        return "file-video-line";
+      case "audio":
+      case "mp3":
+      case "wav":
+        return "file-music-line";
+      case "zip":
+      case "rar":
+      case "7z":
+        return "file-zip-line";
+      default:
+        return "file-line";
+    }
+  };
+
+  // Get file color based on document type
+  const getFileColor = (documentType: string) => {
+    if (!documentType) return "#6B7280";
+
+    const type = documentType.toLowerCase();
+
+    switch (type) {
+      case "pdf":
+        return "#FF6B6B";
+      case "image":
+        return "#10B981";
+      case "word":
+      case "doc":
+      case "docx":
+        return "#2B579A";
+      case "excel":
+      case "xls":
+      case "xlsx":
+        return "#217346";
+      case "powerpoint":
+      case "ppt":
+      case "pptx":
+        return "#D24726";
+      default:
+        return "#6B7280";
+    }
+  };
+
+  // Get background color based on document type
+  const getFileBgColor = (documentType: string) => {
+    if (!documentType) return "#F9FAFB";
+
+    const type = documentType.toLowerCase();
+
+    switch (type) {
+      case "pdf":
+        return "#FEE2E2";
+      case "image":
+        return "#D1FAE5";
+      case "word":
+      case "doc":
+      case "docx":
+        return "#DBEAFE";
+      case "excel":
+      case "xls":
+      case "xlsx":
+        return "#D1FAE5";
+      case "powerpoint":
+      case "ppt":
+      case "pptx":
+        return "#FEE2E2";
+      default:
+        return "#F3F4F6";
+    }
+  };
+
+  // Handle attachment press based on document type
+  const handleAttachmentPress = (doc: any, index: number) => {
+    const fileName = doc.fileName || doc.name || "";
+    const documentType = doc.documentType || "";
+    const type = documentType.toLowerCase();
+    const hasFileData = doc.fileData && typeof doc.fileData === "string";
+    const hasFileUrl = doc.fileUrl && typeof doc.fileUrl === "string";
+
+    if (type === "pdf") {
+      router.push({
+        pathname: "/(fro)/(complaints)/DocumentListScreen",
+        params: {
+          title: fileName,
+          fileUrl: hasFileData
+            ? `data:application/pdf;base64,${doc.fileData}`
+            : hasFileUrl
+              ? doc.fileUrl
+              : "",
+          isPDF: "true",
+          documentType: "pdf",
+        },
+      });
+    } else if (type === "image") {
+      router.push({
+        pathname: "/(fro)/(complaints)/DocumentListScreen",
+        params: {
+          caseId: caseId,
+          item: JSON.stringify(item),
+          selectedIndex: index,
+          documentType: "image",
+        },
+      });
+    } else {
+      // For other document types
+      router.push({
+        pathname: "/(fro)/(complaints)/DocumentListScreen",
+        params: {
+          caseId: caseId,
+          item: JSON.stringify(item),
+          documentType: type,
+        },
+      });
+    }
+  };
+
+  // Render individual attachment item
+  const renderAttachmentItem = (
+    doc: any,
+    index: number,
+    isLast: boolean,
+    extraCount: number,
+  ) => {
+    const fileName = doc.fileName || doc.name || "";
+    const documentType = doc.documentType || "";
+    const type = documentType.toLowerCase();
+    const hasFileData = doc.fileData && typeof doc.fileData === "string";
+    const hasFileUrl = doc.fileUrl && typeof doc.fileUrl === "string";
+
+    const isImage = type === "image";
+    const isPDF = type === "pdf";
+
+    const fileColor = getFileColor(documentType);
+    const bgColor = getFileBgColor(documentType);
+    const iconName = isPDF
+      ? "file-pdf-line"
+      : isImage
+        ? "file-image-line"
+        : getFileIcon(documentType);
+
+    return (
+      <TouchableOpacity
+        key={doc.id}
+        style={styles.attachmentThumb}
+        onPress={() => handleAttachmentPress(doc, index)}
+      >
+        {isImage && (hasFileData || hasFileUrl) ? (
+          // Show image thumbnail for Image type
+          <Image
+            source={{
+              uri: hasFileData
+                ? `data:image/jpeg;base64,${doc.fileData}`
+                : doc.fileUrl,
+            }}
+            style={styles.attachmentImage}
+            resizeMode="cover"
+          />
+        ) : (
+          // Show file icon for non-image files
+          <View
+            style={[styles.fileIconContainer, { backgroundColor: bgColor }]}
+          >
+            <RemixIcon name={iconName as any} size={32} color={fileColor} />
+            <Text
+              style={[styles.fileNameText, { color: fileColor }]}
+              numberOfLines={1}
+            >
+              {fileName.length > 10
+                ? fileName.substring(0, 8) + "..."
+                : fileName}
+            </Text>
+            {documentType && (
+              <Text style={[styles.fileTypeText, { color: fileColor }]}>
+                {type.toUpperCase()}
+              </Text>
+            )}
+          </View>
+        )}
+
+        {isLast && (
+          <View style={styles.extraOverlay}>
+            <Text style={styles.extraText}>+{extraCount}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  const renderAttachments = () => {
+    if (!documents?.length) {
+      return (
+        <View style={styles.attachmentBox}>
+          <RemixIcon name="image-2-line" size={24} color="#888" />
+          <Text style={styles.attachmentText}>No attachments yet</Text>
+        </View>
+      );
+    }
+
+    const firstFour = documents.slice(0, 4);
+    const extraCount = documents.length - 4;
+
+    return (
+      <View style={styles.attachmentRow}>
+        {firstFour.map((doc, index) => {
+          const isLast = index === 3 && extraCount > 0;
+          return renderAttachmentItem(doc, index, isLast, extraCount);
+        })}
+      </View>
+    );
+  };
+
+  // Render individual note item
+  const renderNoteItem = (
+    note: Note,
+    index: number,
+    isLast: boolean,
+    extraCount: number,
+  ) => {
+    const formatDate = (dateString: string) => {
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+      } catch (error) {
+        return dateString;
+      }
+    };
+
+    const formatTime = (dateString: string) => {
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+      } catch (error) {
+        return "";
+      }
+    };
+
+    return (
+      <TouchableOpacity
+        key={note.id}
+        style={styles.noteItem}
+        onPress={() => {
+          // Navigate to note details or show full note
+          router.push({
+            pathname: "/(fro)/(complaints)/NoteHistory",
+            params: {
+              caseId: caseId,
+              item: JSON.stringify(item),
+            },
+          });
+        }}
+      >
+        <View style={styles.noteContent}>
+          <View style={styles.noteHeader}>
+            <RemixIcon
+              name="sticky-note-line"
+              size={16}
+              color={theme.colors.colorPrimary600}
+            />
+            <Text
+              style={[styles.noteType, { color: theme.colors.colorPrimary600 }]}
+            >
+              {note.noteType === "public" ? "Public Note" : "Private Note"}
+            </Text>
+            <Text style={styles.noteDate}>{formatDate(note.createdDate)}</Text>
+          </View>
+          <Text
+            style={[styles.noteDesc, { color: theme.colors.colorTextPrimary }]}
+            numberOfLines={2}
+          >
+            {note.noteDesc}
+          </Text>
+          <View style={styles.noteFooter}>
+            <Text
+              style={[
+                styles.noteTime,
+                { color: theme.colors.colorTextSecondary },
+              ]}
+            >
+              {formatTime(note.createdDate)}
+            </Text>
+            {note.nextFollowUpDate && (
+              <View style={styles.followUpBadge}>
+                <RemixIcon name="calendar-line" size={12} color="#FF6B6B" />
+                <Text style={styles.followUpText}>
+                  Follow-up: {formatDate(note.nextFollowUpDate)}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {isLast && extraCount > 0 && (
+          <View style={styles.noteExtraOverlay}>
+            <Text style={styles.noteExtraText}>+{extraCount}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  const renderNotes = () => {
+    if (loadingNotes) {
+      return (
+        <View style={styles.notesLoadingContainer}>
+          <Text
+            style={[
+              styles.loadingText,
+              { color: theme.colors.colorTextSecondary },
+            ]}
+          >
+            Loading notes...
+          </Text>
+        </View>
+      );
+    }
+
+    if (!notes?.length) {
+      return (
+        <TouchableOpacity
+          style={styles.noNotesContainer}
+          onPress={() => {
+            router.push({
+              pathname: "/(fro)/(complaints)/NoteHistory",
+              params: {
+                caseId: caseId,
+                item: JSON.stringify(item),
+              },
+            });
+          }}
+        >
+          <RemixIcon name="sticky-note-line" size={24} color="#888" />
+          <Text style={styles.noNotesText}>
+            No notes yet. Tap to add a note
+          </Text>
+        </TouchableOpacity>
+      );
+    }
+
+    const firstTwo = notes.slice(0, 2);
+    const extraCount = notes.length - 2;
+
+    return (
+      <View style={styles.notesContainer}>
+        {firstTwo.map((note, index) => {
+          const isLast = index === 1 && extraCount > 0;
+          return renderNoteItem(note, index, isLast, extraCount);
+        })}
+      </View>
+    );
+  };
 
   // Action buttons with colors
   const actionButtons = [
@@ -606,15 +1077,27 @@ export default function CaseDetailScreen() {
                 Attachments:
               </Text>
             </View>
-            <View
-              style={[
-                styles.attachmentBox,
-                { backgroundColor: theme.colors.colorBgSurface },
-              ]}
-            >
-              <RemixIcon name="image-2-line" size={24} color="#888" />
-              <Text style={styles.attachmentText}>No attachments yet</Text>
+            {renderAttachments()}
+          </View>
+
+          <View style={styles.detailItem}>
+            <View style={styles.labelContainer}>
+              <RemixIcon
+                name="sticky-note-line"
+                size={14}
+                color={theme.colors.colorTextSecondary}
+                style={styles.labelIcon}
+              />
+              <Text
+                style={[
+                  styles.detailLabel,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                Notes:
+              </Text>
             </View>
+            {renderNotes()}
           </View>
         </View>
       </View>
@@ -1203,15 +1686,15 @@ const styles = StyleSheet.create({
 
   keyValueRow: {
     flexDirection: "row",
-    alignItems: "flex-start", // Changed from 'center' to 'flex-start'
+    alignItems: "flex-start",
     marginBottom: 8,
     flexWrap: "wrap",
   },
   labelContainer: {
     flexDirection: "row",
     alignItems: "center",
-    minWidth: 140, // Minimum width for label
-    maxWidth: 140, // Maximum width to prevent stretching
+    minWidth: 140,
+    maxWidth: 140,
   },
   labelIcon: {
     marginRight: 6,
@@ -1220,7 +1703,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     opacity: 0.8,
-    flexShrink: 1, // Allow shrinking if needed
+    flexShrink: 1,
   },
   labelValue: {
     fontSize: 14,
@@ -1228,7 +1711,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexWrap: "wrap",
     paddingLeft: 8,
-    marginLeft: 0, // Reset margin
+    marginLeft: 0,
   },
   valueContainer: {
     flex: 1,
@@ -1334,7 +1817,6 @@ const styles = StyleSheet.create({
   },
   navBtn: {
     marginTop: 16,
-    // backgroundColor: "#027A61",
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
@@ -1386,7 +1868,6 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     paddingBottom: 8,
     flex: 1,
-    // justifyContent: "center",
   },
   progressTitle: {
     fontSize: 14,
@@ -1462,5 +1943,188 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
     lineHeight: 14,
+  },
+  attachmentRow: {
+    flexDirection: "row",
+    marginTop: 10,
+    flexWrap: "wrap",
+    gap: 8,
+  },
+
+  attachmentThumb: {
+    width: 75,
+    height: 75,
+    borderRadius: 10,
+    overflow: "hidden",
+    marginBottom: 8,
+  },
+
+  attachmentImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  extraOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  extraText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  fileIconContainer: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    padding: 6,
+  },
+
+  fileNameText: {
+    fontSize: 9,
+    marginTop: 4,
+    textAlign: "center",
+    fontWeight: "500",
+    maxWidth: "100%",
+  },
+
+  fileTypeText: {
+    fontSize: 7,
+    marginTop: 2,
+    textAlign: "center",
+    fontWeight: "600",
+    opacity: 0.8,
+  },
+
+  // Notes styles
+  notesContainer: {
+    marginTop: 8,
+  },
+
+  notesLoadingContainer: {
+    height: 80,
+    borderRadius: 12,
+    marginTop: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    borderStyle: "dashed",
+  },
+
+  loadingText: {
+    fontSize: 12,
+    marginTop: 6,
+  },
+
+  noNotesContainer: {
+    height: 80,
+    borderRadius: 12,
+    marginTop: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    borderStyle: "dashed",
+  },
+
+  noNotesText: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 6,
+  },
+
+  noteItem: {
+    marginBottom: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#F9FAFB",
+    padding: 12,
+    position: "relative",
+    overflow: "hidden",
+  },
+
+  noteContent: {
+    flex: 1,
+  },
+
+  noteHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
+    gap: 8,
+  },
+
+  noteType: {
+    fontSize: 12,
+    fontWeight: "600",
+    flex: 1,
+  },
+
+  noteDate: {
+    fontSize: 11,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+
+  noteDesc: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+
+  noteFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  noteTime: {
+    fontSize: 11,
+  },
+
+  followUpBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEE2E2",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 4,
+  },
+
+  followUpText: {
+    fontSize: 10,
+    color: "#DC2626",
+    fontWeight: "500",
+  },
+
+  noteExtraOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  noteExtraText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#027A61",
   },
 });
