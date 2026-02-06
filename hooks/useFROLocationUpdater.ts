@@ -22,15 +22,13 @@ export const useFROLocationUpdater = (userId?: string | null) => {
           discriptions: address ?? "",
           elderPinLocation: "string",
           froPinLocation: "string",
-          tikcetNumber: "string",
-          froStatus: "",
           userId, // ✅ use passed userId
         };
 
         // console.log("📤 Sending payload:", payload);
 
         const res = await addAndUpdateFROLocation(payload);
-        // console.log("✅ Location update success:", res);
+        console.log("✅ Location update success:", res);
       } catch (error) {
         console.error("❌ Location update error:", error);
       }

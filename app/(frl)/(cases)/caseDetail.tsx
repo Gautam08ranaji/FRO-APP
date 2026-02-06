@@ -44,8 +44,7 @@ const caseDetailData = {
   },
 
   location: {
-    address:
-      "123, Ameerpur, Sector 5, Agra, Uttar Pradesh - 400001",
+    address: "123, Ameerpur, Sector 5, Agra, Uttar Pradesh - 400001",
   },
 
   timeline: {
@@ -69,8 +68,7 @@ export default function CaseDetailScreen() {
   const { assigned } = useLocalSearchParams();
   const isAssigned = assigned === "yes";
 
-  const { user, complaint, fro, location, timeline, ticketNo } =
-    caseDetailData;
+  const { user, complaint, fro, location, timeline, ticketNo } = caseDetailData;
 
   const completedSteps = timeline.completedSteps;
   const animatedProgress = useRef(new Animated.Value(0)).current;
@@ -100,13 +98,20 @@ export default function CaseDetailScreen() {
           <View style={styles.profileLeftRow}>
             <Image source={{ uri: user.avatar }} style={styles.profileAvatar} />
             <View style={{ maxWidth: width * 0.55 }}>
-              <Text style={[styles.profileName, { color: theme.colors.inputBg }]}>
+              <Text
+                style={[styles.profileName, { color: theme.colors.inputBg }]}
+              >
                 {user.name}
               </Text>
-              <Text style={[styles.profileSub, { color: theme.colors.inputBg }]}>
+              <Text
+                style={[styles.profileSub, { color: theme.colors.inputBg }]}
+              >
                 {user.age} Years • {user.gender}
               </Text>
-              <Text numberOfLines={1} style={[styles.profileSub, { color: theme.colors.inputBg }]}>
+              <Text
+                numberOfLines={1}
+                style={[styles.profileSub, { color: theme.colors.inputBg }]}
+              >
                 {user.address} • {ticketNo}
               </Text>
             </View>
@@ -124,50 +129,106 @@ export default function CaseDetailScreen() {
 
         <View style={styles.profileBottomRow}>
           <View>
-            <Text style={[styles.profileLabel, { color: theme.colors.inputBg }]}>Phone No.:</Text>
-            <Text style={[styles.profileValue, { color: theme.colors.inputBg }]}>{user.phone}</Text>
+            <Text
+              style={[styles.profileLabel, { color: theme.colors.inputBg }]}
+            >
+              Phone No.:
+            </Text>
+            <Text
+              style={[styles.profileValue, { color: theme.colors.inputBg }]}
+            >
+              {user.phone}
+            </Text>
           </View>
 
           <View>
-            <Text style={[styles.profileLabel, { color: theme.colors.inputBg }]}>Emergency Contact:</Text>
-            <Text style={[styles.profileValue, { color: theme.colors.inputBg }]}>{user.emergencyPhone}</Text>
+            <Text
+              style={[styles.profileLabel, { color: theme.colors.inputBg }]}
+            >
+              Emergency Contact:
+            </Text>
+            <Text
+              style={[styles.profileValue, { color: theme.colors.inputBg }]}
+            >
+              {user.emergencyPhone}
+            </Text>
           </View>
         </View>
       </View>
 
       {/* ✅ COMPLAINT INFO */}
-      <View style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}>
-        <Text style={[styles.cardTitle,{ color: theme.colors.colorPrimary600 }]}>
+      <View
+        style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
+      >
+        <Text
+          style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
+        >
           {t("caseDetail.complaintInfo")}
         </Text>
 
-        <Text style={[styles.labelKey,{ color: theme.colors.colorTextSecondary }]}>
+        <Text
+          style={[styles.labelKey, { color: theme.colors.colorTextSecondary }]}
+        >
           {t("caseDetail.category")}:
         </Text>
-        <Text style={[styles.labelValue,{ color: theme.colors.colorTextSecondary }]}>
+        <Text
+          style={[
+            styles.labelValue,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+        >
           {complaint.category}
         </Text>
 
-        <Text style={[styles.labelKey,styles.mt12,{ color: theme.colors.colorTextSecondary }]}>
+        <Text
+          style={[
+            styles.labelKey,
+            styles.mt12,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+        >
           {t("caseDetail.details")}:
         </Text>
-        <Text style={[styles.labelValue,{ color: theme.colors.colorTextSecondary }]}>
+        <Text
+          style={[
+            styles.labelValue,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+        >
           {complaint.details}
         </Text>
 
-        <Text style={[styles.labelKey,styles.mt12,{ color: theme.colors.colorTextSecondary }]}>
+        <Text
+          style={[
+            styles.labelKey,
+            styles.mt12,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+        >
           {t("caseDetail.attachments")}:
         </Text>
 
-        <View style={[styles.attachmentBox,{ backgroundColor: theme.colors.colorPrimary50 }]}>
-          <RemixIcon name="image-line" size={32} color={theme.colors.colorPrimary600} />
+        <View
+          style={[
+            styles.attachmentBox,
+            { backgroundColor: theme.colors.colorPrimary50 },
+          ]}
+        >
+          <RemixIcon
+            name="image-line"
+            size={32}
+            color={theme.colors.colorPrimary600}
+          />
         </View>
       </View>
 
       {/* ✅ ASSIGN BUTTON ONLY IF NOT ASSIGNED */}
       {!isAssigned && (
         <TouchableOpacity
-          style={[styles.assignBtn,{ backgroundColor: theme.colors.btnPrimaryBg }]}
+          style={[
+            styles.assignBtn,
+            { backgroundColor: theme.colors.btnPrimaryBg },
+          ]}
           onPress={() => router.push("/assignScreen")}
         >
           <Text style={styles.assignText}>Assign to FRO</Text>
@@ -177,22 +238,46 @@ export default function CaseDetailScreen() {
       {/* ✅ ASSIGNED TO (ONLY IF ASSIGNED) */}
       {isAssigned && (
         <>
-          <Text style={[theme.typography.fontBody,styles.mt20,{ color: theme.colors.colorPrimary600 }]}>
+          <Text
+            style={[
+              theme.typography.fontBody,
+              styles.mt20,
+              { color: theme.colors.colorPrimary600 },
+            ]}
+          >
             Assigned to
           </Text>
 
-          <View style={[styles.froCard,{ backgroundColor: theme.colors.colorPrimary600 }]}>
+          <View
+            style={[
+              styles.froCard,
+              { backgroundColor: theme.colors.colorPrimary600 },
+            ]}
+          >
             <View style={styles.froTopRow}>
               <View style={styles.froLeftRow}>
                 <Image source={{ uri: fro.avatar }} style={styles.froAvatar} />
                 <View>
-                  <Text style={[styles.froName,{ color: theme.colors.inputBg }]}>{fro.name}</Text>
-                  <Text style={[styles.froCode,{ color: theme.colors.inputBg }]}>{fro.code}</Text>
+                  <Text
+                    style={[styles.froName, { color: theme.colors.inputBg }]}
+                  >
+                    {fro.name}
+                  </Text>
+                  <Text
+                    style={[styles.froCode, { color: theme.colors.inputBg }]}
+                  >
+                    {fro.code}
+                  </Text>
                 </View>
               </View>
 
               <View style={styles.statusBadge}>
-                <Text style={[theme.typography.fontBadge,{ color: theme.colors.colorPrimary600 }]}>
+                <Text
+                  style={[
+                    theme.typography.fontBadge,
+                    { color: theme.colors.colorPrimary600 },
+                  ]}
+                >
                   {fro.status}
                 </Text>
               </View>
@@ -208,16 +293,30 @@ export default function CaseDetailScreen() {
 
       {/* ✅ FRO LOCATION ONLY IF ASSIGNED */}
       {isAssigned && (
-        <View style={[styles.mapContainer,{ backgroundColor: theme.colors.colorBgPage }]}>
-          <Text style={[theme.typography.fontBody,{ color: theme.colors.colorPrimary600 }]}>
+        <View
+          style={[
+            styles.mapContainer,
+            { backgroundColor: theme.colors.colorBgPage },
+          ]}
+        >
+          <Text
+            style={[
+              theme.typography.fontBody,
+              { color: theme.colors.colorPrimary600 },
+            ]}
+          >
             {"Fro's Location"}
           </Text>
 
-          <Text style={[styles.mapText,{ color: theme.colors.colorTextSecondary }]}>
+          <Text
+            style={[styles.mapText, { color: theme.colors.colorTextSecondary }]}
+          >
             Live Location:
           </Text>
 
-          <Text style={[styles.mapText,{ color: theme.colors.colorTextSecondary }]}>
+          <Text
+            style={[styles.mapText, { color: theme.colors.colorTextSecondary }]}
+          >
             {location.address}
           </Text>
 
@@ -233,8 +332,12 @@ export default function CaseDetailScreen() {
       )}
 
       {/* ✅ TIMELINE */}
-      <View style={[styles.card,{ backgroundColor: theme.colors.colorBgPage }]}>
-        <Text style={[styles.cardTitle,{ color: theme.colors.colorPrimary600 }]}>
+      <View
+        style={[styles.card, { backgroundColor: theme.colors.colorBgPage }]}
+      >
+        <Text
+          style={[styles.cardTitle, { color: theme.colors.colorPrimary600 }]}
+        >
           {t("caseDetail.timeline")}
         </Text>
 
@@ -294,7 +397,12 @@ export default function CaseDetailScreen() {
                   </Text>
 
                   {item.time && (
-                    <Text style={[styles.progressTime,{ color: theme.colors.colorTextSecondary }]}>
+                    <Text
+                      style={[
+                        styles.progressTime,
+                        { color: theme.colors.colorTextSecondary },
+                      ]}
+                    >
                       {item.time}
                     </Text>
                   )}
@@ -409,7 +517,7 @@ const styles = StyleSheet.create({
 
   callButtonText: { color: "#fff", fontWeight: "600" },
 
-  timelineContainer: { marginTop: 4 },
+  timelineContainer: { marginTop: 10010 },
   progressRow: { flexDirection: "row", minHeight: 55 },
   progressLeft: { width: 30, alignItems: "center" },
 

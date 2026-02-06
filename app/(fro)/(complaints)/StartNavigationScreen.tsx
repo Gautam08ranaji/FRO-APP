@@ -199,7 +199,7 @@ export default function StartNavigationScreen() {
         </Text>
 
         <Text style={[styles.address, { color: colors.colorTextPrimary }]}>
-          {item?.completeAddress || "Address not available"}
+          {item?.area || "Address not available"}
         </Text>
       </View>
 

@@ -19,7 +19,7 @@ export default function CaseDetailScreen() {
 
   const { theme } = useTheme();
 
-  console.log("itesm", item);
+  // console.log("itesm", item);
 
   const ticketNo = item?.transactionNumber;
   const elderName = item?.name || item?.contactName;
@@ -34,7 +34,7 @@ export default function CaseDetailScreen() {
   const details =
     item?.caseDescription || item?.problemReported || item?.reasonForCalling;
 
-  const address = item?.completeAddress || item?.location;
+  const address = item?.area || item?.location;
   const state = item?.stateName;
   const district = item?.districtName;
   const agentRemarks = item?.agentRemarks;
@@ -761,7 +761,10 @@ export default function CaseDetailScreen() {
 
           <TouchableOpacity
             activeOpacity={0.8}
-            style={styles.navBtn}
+            style={[
+              styles.navBtn,
+              { backgroundColor: theme.colors.colorPrimary600 },
+            ]}
             onPress={() =>
               router.push({
                 pathname: "/(fro)/(complaints)/StartNavigationScreen",
@@ -1331,7 +1334,7 @@ const styles = StyleSheet.create({
   },
   navBtn: {
     marginTop: 16,
-    backgroundColor: "#027A61",
+    // backgroundColor: "#027A61",
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
@@ -1383,7 +1386,7 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     paddingBottom: 8,
     flex: 1,
-    justifyContent: "center",
+    // justifyContent: "center",
   },
   progressTitle: {
     fontSize: 14,

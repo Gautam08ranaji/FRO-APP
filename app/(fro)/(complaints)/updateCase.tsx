@@ -6,6 +6,7 @@ import { addAndUpdateFROLocation } from "@/features/fro/froLocationApi";
 import { updateInteraction } from "@/features/fro/interactionApi";
 import { useLocation } from "@/hooks/LocationContext";
 import { useAppSelector } from "@/store/hooks";
+import { useTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
@@ -14,6 +15,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   FlatList,
   Image,
   Keyboard,
@@ -61,8 +63,16 @@ type InteractionItem = {
   caseDescription?: string;
 };
 
+/* ================= RESPONSIVE SCALING ================= */
+const { width, height } = Dimensions.get("window");
+const scale = (size: number) => (width / 375) * size;
+const verticalScale = (size: number) => (height / 812) * size;
+const moderateScale = (size: number, factor = 0.5) =>
+  size + (scale(size) - size) * factor;
+
 const UpdateStatusScreen = () => {
   const authState = useAppSelector((state) => state.auth);
+  const { theme } = useTheme();
 
   const params = useLocalSearchParams();
   const [statusDropdown, setStatusDropdown] = useState<DropdownItem[]>([]);
@@ -72,8 +82,6 @@ const UpdateStatusScreen = () => {
 
   const caseId = params.caseId ? Number(params.caseId) : null;
   const itemString = params.item as string;
-
-  // console.log("case", caseId);
 
   useEffect(() => {
     fetchStatusDropdown();
@@ -169,7 +177,6 @@ const UpdateStatusScreen = () => {
         error?.response?.data?.error ||
         "Something went wrong. Please try again.";
 
-      // 🔐 Session expired
       if (status === 401) {
         Alert.alert("Session Expired", "Please login again.", [
           {
@@ -180,13 +187,11 @@ const UpdateStatusScreen = () => {
         return;
       }
 
-      // ❌ Validation / Bad request
       if (status === 400) {
         Alert.alert("Update Failed", message);
         return;
       }
 
-      // 🌐 Network / timeout
       if (!error?.response) {
         Alert.alert(
           "Network Error",
@@ -195,7 +200,6 @@ const UpdateStatusScreen = () => {
         return;
       }
 
-      // ❓ Fallback
       Alert.alert("Error", message);
     } finally {
       setIsLoading(false);
@@ -224,15 +228,12 @@ const UpdateStatusScreen = () => {
   const [dropdownType, setDropdownType] = useState<"CASE" | "SUB" | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [showSubStatusWarning, setShowSubStatusWarning] = useState(false);
   const { hasPermission, fetchLocation, address } = useLocation();
 
   const scrollViewRef = useRef<ScrollView>(null);
   const notesInputRef = useRef<TextInput>(null);
   const initializedRef = useRef(false);
-
-  /* ================= INITIALIZE ================= */
-
-  // console.log("int", interactionItem);
 
   useEffect(() => {
     if (!interactionItem || initializedRef.current) {
@@ -245,6 +246,7 @@ const UpdateStatusScreen = () => {
         id: interactionItem.caseStatusId,
         name: interactionItem.caseStatusName,
       });
+      fetchSubStatusDropdown(interactionItem.caseStatusId);
     }
 
     if (interactionItem.subStatusId && interactionItem.subStatusName) {
@@ -260,7 +262,6 @@ const UpdateStatusScreen = () => {
     setIsInitializing(false);
   }, [interactionItem]);
 
-  /* ================= IMAGE PICKER ================= */
   const pickImage = useCallback(async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -287,36 +288,27 @@ const UpdateStatusScreen = () => {
 
   const sendLocation = async (id: any) => {
     try {
-      console.log("call");
-
       const location = await fetchLocation();
       if (!location) return;
 
-      console.log("called");
-
       const { latitude, longitude } = location.coords;
       const payload = {
-        name: address ?? "Unknown location", // ✅ READABLE ADDRESS
-        latitute: latitude.toString(), // ✅ real latitude
-        longititute: longitude.toString(), // ✅ real longitude
+        name: address ?? "Unknown location",
+        latitute: latitude.toString(),
+        longititute: longitude.toString(),
         discriptions: address ?? "",
         elderPinLocation: "string",
         froPinLocation: String(address),
-        tikcetNumber: String(id),
-        froStatus: "Online",
-        userId: String(authState.userId), // ✅ use passed userId
+        userId: String(authState.userId),
       };
 
-      // console.log("📤 Sending payload:", payload);
-
       const res = await addAndUpdateFROLocation(payload);
-      console.log("✅ Update Ticket:", res);
+      // console.log("✅ Update Ticket:", res);
     } catch (error) {
       console.error("❌ Location update error:", error);
     }
   };
 
-  /* ================= FILE PICKER ================= */
   const pickFile = useCallback(async () => {
     const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
     if (!result.canceled && result.assets[0]) {
@@ -343,7 +335,14 @@ const UpdateStatusScreen = () => {
     setAttachments((p) => p.filter((_, i) => i !== index));
   };
 
-  /* ================= SUBMIT (STATIC) ================= */
+  const handleSubStatusPress = () => {
+    if (!caseStatus) {
+      setShowSubStatusWarning(true);
+      return;
+    }
+    setDropdownType("SUB");
+  };
+
   const submitHandler = useCallback(() => {
     if (!caseStatus) {
       Alert.alert("Error", "Please select a case status");
@@ -356,29 +355,60 @@ const UpdateStatusScreen = () => {
     }
 
     setIsLoading(true);
-
     handleUpdate();
   }, [caseStatus, subStatus, notes, attachments]);
 
   if (isInitializing) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#00796B" />
-        <Text style={styles.loadingText}>Loading case data...</Text>
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.colorBgPage },
+        ]}
+      >
+        <ActivityIndicator size="large" color={theme.colors.colorPrimary600} />
+        <Text
+          style={[
+            styles.loadingText,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+        >
+          Loading case data...
+        </Text>
       </View>
     );
   }
 
   if (!interactionItem) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={60} color="#ff4444" />
-        <Text style={styles.errorText}>No case data found</Text>
+      <View
+        style={[
+          styles.errorContainer,
+          { backgroundColor: theme.colors.colorBgPage },
+        ]}
+      >
+        <Ionicons
+          name="alert-circle-outline"
+          size={moderateScale(60)}
+          color={theme.colors.colorAccent700}
+        />
+        <Text
+          style={[styles.errorText, { color: theme.colors.colorTextSecondary }]}
+        >
+          No case data found
+        </Text>
         <TouchableOpacity
-          style={styles.backButton}
+          style={[
+            styles.backButton,
+            { backgroundColor: theme.colors.colorPrimary600 },
+          ]}
           onPress={() => router.back()}
         >
-          <Text style={styles.backButtonText}>Go Back</Text>
+          <Text
+            style={[styles.backButtonText, { color: theme.colors.colorBgPage }]}
+          >
+            Go Back
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -386,20 +416,42 @@ const UpdateStatusScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.colors.colorBgPage }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.innerContainer}>
           {/* HEADER */}
-          <View style={styles.header}>
+          <View
+            style={[
+              styles.header,
+              { backgroundColor: theme.colors.colorPrimary600 },
+            ]}
+          >
             <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={24} color="#fff" />
+              <Ionicons
+                name="arrow-back"
+                size={moderateScale(24)}
+                color={theme.colors.colorBgPage}
+              />
             </TouchableOpacity>
             <View style={styles.headerContent}>
-              <Text style={styles.headerTitle}>Update Case {caseId}</Text>
+              <Text
+                style={[
+                  styles.headerTitle,
+                  { color: theme.colors.colorBgPage },
+                ]}
+              >
+                Update Case {caseId}
+              </Text>
               {!!interactionItem.subject && (
-                <Text style={styles.headerSubtitle} numberOfLines={1}>
+                <Text
+                  style={[
+                    styles.headerSubtitle,
+                    { color: `${theme.colors.colorBgPage}CC` },
+                  ]}
+                  numberOfLines={1}
+                >
                   {interactionItem.subject}
                 </Text>
               )}
@@ -412,44 +464,160 @@ const UpdateStatusScreen = () => {
             keyboardShouldPersistTaps="handled"
           >
             {/* STATUS */}
-            <Text style={styles.label}>Select Case Status *</Text>
+            <Text
+              style={[styles.label, { color: theme.colors.colorTextSecondary }]}
+            >
+              Select Case Status *
+            </Text>
             <TouchableOpacity
-              style={styles.dropdown}
+              style={[
+                styles.dropdown,
+                {
+                  backgroundColor: theme.colors.colorBgSurface,
+                  borderColor: theme.colors.colorBorder,
+                },
+              ]}
               onPress={() => setDropdownType("CASE")}
             >
-              <Text style={caseStatus ? styles.value : styles.placeholder}>
+              <Text
+                style={[
+                  caseStatus ? styles.value : styles.placeholder,
+                  {
+                    color: caseStatus
+                      ? theme.colors.colorTextPrimary
+                      : theme.colors.inputPlaceholder,
+                    fontWeight: caseStatus ? "500" : "400",
+                  },
+                ]}
+              >
                 {caseStatus?.name || "Select Case Status"}
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#777" />
+              <Ionicons
+                name="chevron-down"
+                size={moderateScale(20)}
+                color={theme.colors.inputPlaceholder}
+              />
             </TouchableOpacity>
 
-            <Text style={styles.label}>Select Sub Status (Optional)</Text>
-            <TouchableOpacity
-              style={styles.dropdown}
-              disabled={!caseStatus}
-              onPress={() => setDropdownType("SUB")}
-            >
-              <Text style={subStatus ? styles.value : styles.placeholder}>
-                {subStatus?.name || "Select Sub Status"}
+            {/* SUB STATUS */}
+            <View>
+              <Text
+                style={[
+                  styles.label,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                Select Sub Status (Optional)
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#777" />
-            </TouchableOpacity>
 
-            <Text style={styles.label}>Comment *</Text>
+              {showSubStatusWarning && (
+                <View
+                  style={[
+                    styles.warningContainer,
+                    {
+                      backgroundColor: theme.colors.colorAccent500 + "20",
+                      borderColor: theme.colors.colorAccent500 + "40",
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="warning-outline"
+                    size={moderateScale(16)}
+                    color={theme.colors.colorAccent700}
+                  />
+                  <Text
+                    style={[
+                      styles.warningText,
+                      { color: theme.colors.colorAccent700 },
+                    ]}
+                  >
+                    Please select Case Status first
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={[
+                  styles.dropdown,
+                  {
+                    backgroundColor: theme.colors.colorBgSurface,
+                    borderColor: theme.colors.colorBorder,
+                  },
+                  !caseStatus && styles.disabledDropdown,
+                ]}
+                onPress={handleSubStatusPress}
+                disabled={!caseStatus}
+              >
+                <Text
+                  style={[
+                    subStatus ? styles.value : styles.placeholder,
+                    {
+                      color: subStatus
+                        ? theme.colors.colorTextPrimary
+                        : theme.colors.inputPlaceholder,
+                      fontWeight: subStatus ? "500" : "400",
+                    },
+                  ]}
+                >
+                  {subStatus?.name || "Select Sub Status"}
+                </Text>
+                <Ionicons
+                  name="chevron-down"
+                  size={moderateScale(20)}
+                  color={
+                    caseStatus
+                      ? theme.colors.inputPlaceholder
+                      : theme.colors.colorBorder
+                  }
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text
+              style={[styles.label, { color: theme.colors.colorTextSecondary }]}
+            >
+              Comment *
+            </Text>
             <TextInput
               ref={notesInputRef}
-              style={styles.textArea}
+              style={[
+                styles.textArea,
+                {
+                  backgroundColor: theme.colors.colorBgSurface,
+                  borderColor: theme.colors.colorBorder,
+                  color: theme.colors.colorTextPrimary,
+                },
+              ]}
               value={notes}
               onChangeText={setNotes}
               multiline
+              placeholder="Enter your comment..."
+              placeholderTextColor={theme.colors.inputPlaceholder}
             />
 
             <TouchableOpacity
-              style={styles.attachmentBtn}
+              style={[
+                styles.attachmentBtn,
+                {
+                  borderColor: theme.colors.colorPrimary600,
+                  backgroundColor: theme.colors.colorPrimary600 + "10",
+                },
+              ]}
               onPress={addAttachment}
             >
-              <Ionicons name="attach-outline" size={20} color="#00796B" />
-              <Text style={styles.attachmentText}>Add Attachment</Text>
+              <Ionicons
+                name="attach-outline"
+                size={moderateScale(20)}
+                color={theme.colors.colorPrimary600}
+              />
+              <Text
+                style={[
+                  styles.attachmentText,
+                  { color: theme.colors.colorPrimary600 },
+                ]}
+              >
+                Add Attachment
+              </Text>
             </TouchableOpacity>
 
             {attachments.length > 0 && (
@@ -457,24 +625,44 @@ const UpdateStatusScreen = () => {
                 data={attachments}
                 horizontal
                 keyExtractor={(_, i) => i.toString()}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.attachmentsList}
                 renderItem={({ item, index }) => (
-                  <View style={styles.attachmentPreview}>
+                  <View
+                    style={[
+                      styles.attachmentPreview,
+                      {
+                        borderColor: theme.colors.colorBorder,
+                        backgroundColor: theme.colors.colorBgSurface,
+                      },
+                    ]}
+                  >
                     <TouchableOpacity
                       style={styles.removeAttachmentBtn}
                       onPress={() => removeAttachment(index)}
                     >
-                      <Ionicons name="close-circle" size={20} color="#ff4444" />
+                      <Ionicons
+                        name="close-circle"
+                        size={moderateScale(20)}
+                        color={theme.colors.colorAccent700}
+                      />
                     </TouchableOpacity>
                     {item.type === "image" ? (
                       <Image source={{ uri: item.uri }} style={styles.image} />
                     ) : (
                       <Ionicons
                         name="document-text-outline"
-                        size={42}
-                        color="#00796B"
+                        size={moderateScale(42)}
+                        color={theme.colors.colorPrimary600}
                       />
                     )}
-                    <Text style={styles.fileName} numberOfLines={1}>
+                    <Text
+                      style={[
+                        styles.fileName,
+                        { color: theme.colors.colorTextSecondary },
+                      ]}
+                      numberOfLines={1}
+                    >
                       {item.name}
                     </Text>
                   </View>
@@ -483,14 +671,24 @@ const UpdateStatusScreen = () => {
             )}
 
             <TouchableOpacity
-              style={styles.submitBtn}
+              style={[
+                styles.submitBtn,
+                { backgroundColor: theme.colors.colorPrimary600 },
+              ]}
               onPress={submitHandler}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={theme.colors.colorBgPage} />
               ) : (
-                <Text style={styles.submitText}>Update</Text>
+                <Text
+                  style={[
+                    styles.submitText,
+                    { color: theme.colors.colorBgPage },
+                  ]}
+                >
+                  Update
+                </Text>
               )}
             </TouchableOpacity>
           </ScrollView>
@@ -499,29 +697,50 @@ const UpdateStatusScreen = () => {
           <Modal transparent visible={!!dropdownType} animationType="slide">
             <TouchableOpacity
               style={styles.bottomSheetOverlay}
-              onPress={() => setDropdownType(null)}
+              onPress={() => {
+                setDropdownType(null);
+                setShowSubStatusWarning(false);
+              }}
               activeOpacity={1}
             >
-              <View style={styles.bottomSheet}>
+              <View
+                style={[
+                  styles.bottomSheet,
+                  { backgroundColor: theme.colors.colorBgPage },
+                ]}
+              >
                 {(dropdownType === "CASE"
                   ? statusDropdown
                   : subStatusDropdown
                 ).map((item) => (
                   <TouchableOpacity
                     key={item.id}
-                    style={styles.sheetItem}
+                    style={[
+                      styles.sheetItem,
+                      {
+                        borderBottomColor: theme.colors.colorBorder + "30",
+                      },
+                    ]}
                     onPress={() => {
                       if (dropdownType === "CASE") {
                         setCaseStatus(item);
-                        setSubStatus(null); // reset sub-status
-                        fetchSubStatusDropdown(item.id); // 🔥 fetch based on selected status
+                        setSubStatus(null);
+                        setShowSubStatusWarning(false);
+                        fetchSubStatusDropdown(item.id);
                       } else {
                         setSubStatus(item);
                       }
                       setDropdownType(null);
                     }}
                   >
-                    <Text style={styles.sheetItemText}>{item.name}</Text>
+                    <Text
+                      style={[
+                        styles.sheetItemText,
+                        { color: theme.colors.colorTextPrimary },
+                      ]}
+                    >
+                      {item.name}
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -537,86 +756,169 @@ export default UpdateStatusScreen;
 
 /* ================= STYLES ================= */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  container: { flex: 1 },
   innerContainer: { flex: 1 },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loadingText: { marginTop: 10, color: "#666" },
-  errorContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { marginTop: 10, fontSize: 18 },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: verticalScale(10),
+    fontSize: moderateScale(14),
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    marginTop: verticalScale(10),
+    fontSize: moderateScale(18),
+    marginBottom: verticalScale(20),
+  },
   backButton: {
-    marginTop: 20,
-    backgroundColor: "#00796B",
-    padding: 12,
-    borderRadius: 8,
+    paddingHorizontal: moderateScale(24),
+    paddingVertical: verticalScale(12),
+    borderRadius: moderateScale(8),
   },
-  backButtonText: { color: "#fff" },
+  backButtonText: {
+    fontSize: moderateScale(14),
+    fontWeight: "600",
+  },
   header: {
-    backgroundColor: "#00796B",
-    paddingTop: 50,
-    padding: 16,
+    paddingTop: Platform.OS === "ios" ? verticalScale(50) : verticalScale(40),
+    padding: moderateScale(16),
     flexDirection: "row",
+    alignItems: "center",
   },
-  headerContent: { marginLeft: 12 },
-  headerTitle: { color: "#fff", fontSize: 18 },
-  headerSubtitle: { color: "rgba(255,255,255,0.8)" },
-  content: { padding: 16 },
-  label: { marginTop: 12, marginBottom: 6, color: "#444" },
+  headerContent: {
+    marginLeft: moderateScale(12),
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: moderateScale(18),
+    fontWeight: "600",
+  },
+  headerSubtitle: {
+    fontSize: moderateScale(13),
+    marginTop: verticalScale(2),
+  },
+  content: {
+    padding: moderateScale(16),
+    paddingBottom: verticalScale(30),
+  },
+  label: {
+    marginTop: verticalScale(12),
+    marginBottom: verticalScale(6),
+    fontSize: moderateScale(14),
+    fontWeight: "500",
+  },
   dropdown: {
-    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 14,
-    borderRadius: 10,
+    padding: moderateScale(14),
+    borderRadius: moderateScale(10),
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: verticalScale(8),
   },
-  placeholder: { color: "#999" },
-  value: { color: "#000", fontWeight: "500" },
-  textArea: {
-    backgroundColor: "#fff",
+  disabledDropdown: {
+    opacity: 0.6,
+  },
+  warningContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: moderateScale(8),
+    borderRadius: moderateScale(6),
+    marginBottom: verticalScale(6),
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    height: 100,
-    padding: 12,
+  },
+  warningText: {
+    fontSize: moderateScale(12),
+    marginLeft: moderateScale(4),
+    fontWeight: "500",
+  },
+  placeholder: {
+    fontSize: moderateScale(14),
+  },
+  value: {
+    fontSize: moderateScale(14),
+  },
+  textArea: {
+    borderWidth: 1,
+    borderRadius: moderateScale(10),
+    height: verticalScale(100),
+    padding: moderateScale(12),
+    textAlignVertical: "top",
+    fontSize: moderateScale(14),
   },
   attachmentBtn: {
-    marginTop: 50,
+    marginTop: verticalScale(20),
     borderWidth: 1,
-    borderColor: "#00796B",
-    borderRadius: 10,
-    padding: 14,
+    borderRadius: moderateScale(10),
+    padding: moderateScale(14),
     flexDirection: "row",
     justifyContent: "center",
-    gap: 8,
-  },
-  attachmentText: { color: "#00796B", fontWeight: "500" },
-  submitBtn: {
-    marginTop: 24,
-    backgroundColor: "#00796B",
-    padding: 16,
-    borderRadius: 12,
     alignItems: "center",
+    gap: moderateScale(8),
   },
-  submitText: { color: "#fff", fontWeight: "600" },
+  attachmentText: {
+    fontSize: moderateScale(14),
+    fontWeight: "500",
+  },
+  attachmentsList: {
+    paddingVertical: verticalScale(12),
+  },
   attachmentPreview: {
-    width: 100,
-    height: 100,
-    marginRight: 10,
+    width: moderateScale(100),
+    height: moderateScale(100),
+    marginRight: moderateScale(10),
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
+    borderRadius: moderateScale(10),
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
-  image: { width: "100%", height: "100%", borderRadius: 6 },
-  fileName: { fontSize: 11, marginTop: 4 },
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: moderateScale(6),
+  },
+  fileName: {
+    fontSize: moderateScale(11),
+    marginTop: verticalScale(4),
+    paddingHorizontal: moderateScale(4),
+    textAlign: "center",
+  },
   removeAttachmentBtn: {
     position: "absolute",
-    top: -8,
-    right: -8,
+    top: -moderateScale(6),
+    right: -moderateScale(6),
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: moderateScale(12),
+    zIndex: 1,
+  },
+  submitBtn: {
+    marginTop: verticalScale(24),
+    padding: moderateScale(16),
+    borderRadius: moderateScale(12),
+    alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  submitText: {
+    fontSize: moderateScale(16),
+    fontWeight: "600",
   },
   bottomSheetOverlay: {
     position: "absolute",
@@ -627,16 +929,18 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
   },
-
   bottomSheet: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    maxHeight: height * 0.5,
+    borderTopLeftRadius: moderateScale(20),
+    borderTopRightRadius: moderateScale(20),
+    paddingBottom:
+      Platform.OS === "ios" ? verticalScale(30) : verticalScale(20),
   },
   sheetItem: {
-    padding: 16,
+    padding: moderateScale(16),
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
   },
-  sheetItemText: { fontSize: 16 },
+  sheetItemText: {
+    fontSize: moderateScale(16),
+  },
 });

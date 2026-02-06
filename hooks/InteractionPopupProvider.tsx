@@ -54,15 +54,13 @@ export const useInteractionPopupPoller = () => {
         discriptions: address ?? "",
         elderPinLocation: "string",
         froPinLocation: String(address),
-        tikcetNumber: String(id),
-        froStatus: "Online",
         userId: String(authState.userId), // ✅ use passed userId
       };
 
       // console.log("📤 Sending payload:", payload);
 
       const res = await addAndUpdateFROLocation(payload);
-      console.log("✅ Update Ticket:", res);
+      console.log("✅ Update Ticket Location:", res);
     } catch (error) {
       console.error("❌ Location update error:", error);
     }

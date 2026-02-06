@@ -95,7 +95,7 @@ export default function CasesScreen() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      // console.log("Fetched interactions:", res?.data?.interactions);
+      console.log("Fetched interactions:", res?.data?.interactions);
       setInteractions(res?.data?.interactions || []);
     } catch (error) {
       console.error("❌ Failed to fetch cases:", error);
@@ -278,7 +278,7 @@ export default function CasesScreen() {
                   {item.name || "Unnamed Case"}
                 </Text>
                 <Text style={[styles.cardText, styles.infoText]}>
-                  {t("cases.age")}: {item.ageofTheElder || "-"}
+                  {t("cases.age")}: {item.age || "-"}
                 </Text>
                 <Text style={[styles.cardText, styles.infoText]}>
                   {t("cases.category")}: {item.categoryName || "-"}
