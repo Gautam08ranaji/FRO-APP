@@ -684,7 +684,9 @@ export default function CaseDetailScreen() {
             </Text>
           </View>
           <TouchableOpacity
-            onPress={() => console.log("View More Details clicked")}
+            onPress={() => {
+              router.push("/(fro)/(complaints)/ElderDetails");
+            }}
             style={styles.viewMoreBtn}
           >
             <Text

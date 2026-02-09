@@ -134,13 +134,13 @@ const settings: SettingItem[] = [
     id: 4,
     label: "App Settings",
     icon: "settings-3-line",
-     onPress: () => router.push("/(frl)/(profile)/appSetting"),
+    onPress: () => router.push("/(frl)/(profile)/appSetting"),
   },
   {
     id: 5,
     label: "About",
     icon: "information-line",
-     onPress: () => router.push("/(frl)/(profile)/about"),
+    onPress: () => router.push("/(frl)/(profile)/about"),
   },
 ];
 
@@ -151,10 +151,9 @@ export default function ProfileScreen() {
   const authState = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
 
- const antiforgeryToken = useAppSelector(
-  (state) => state.auth.antiforgeryToken
-);
-
+  const antiforgeryToken = useAppSelector(
+    (state) => state.auth.antiforgeryToken,
+  );
 
   console.log(authState.userId);
   // console.log("anttt", antiforgeryToken);
@@ -164,10 +163,10 @@ export default function ProfileScreen() {
       const response = await logoutUser(
         String(authState.userId),
         String(authState.token),
-        String(antiforgeryToken)
+        String(antiforgeryToken),
       );
 
-      console.log("Logout API response:", response);
+      // console.log("Logout API response:", response);
 
       // ✅ Normal logout
       dispatch(logout());
@@ -485,7 +484,7 @@ export default function ProfileScreen() {
           { color: theme.colors.colorTextSecondary },
         ]}
       >
-        Settings 
+        Settings
       </Text>
 
       {settings.map((item) => (

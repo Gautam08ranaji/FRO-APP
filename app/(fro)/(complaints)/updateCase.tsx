@@ -1,789 +1,416 @@
-import {
-  getDropdownByEndpoint,
-  getDropdownByEndpointAndId,
-} from "@/features/fro/dropdownApi";
-import { addAndUpdateFROLocation } from "@/features/fro/froLocationApi";
-import { updateInteraction } from "@/features/fro/interactionApi";
-import { useLocation } from "@/hooks/LocationContext";
+import BodyLayout from "@/components/layout/BodyLayout";
+import { addCommonDocument } from "@/features/fro/complaints/addDocument";
+import { addInteractionActivityHistory } from "@/features/fro/interaction/ActivityHistory";
+import { getUserDataById } from "@/features/fro/profile/getProfile";
+
 import { useAppSelector } from "@/store/hooks";
+import type { Theme } from "@/theme/ThemeContext";
 import { useTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system/legacy";
+import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { t } from "i18next";
+import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
-  Dimensions,
-  Keyboard,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
+  Image,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
-  View
+  View,
 } from "react-native";
 
-type DropdownItem = {
-  id: number;
-  name: string;
-};
-
-/* ================= TYPES ================= */
-type Attachment = {
+/* ---------- TYPES ---------- */
+type SelectedFile = {
   uri: string;
   name: string;
-  type: "image" | "file";
+  type: "image" | "pdf";
 };
 
-type InteractionItem = {
-  id: number;
-  assignToId?: string;
-  caseStatusId?: number;
-  caseStatusName?: string;
-  subStatusId?: number;
-  subStatusName?: string;
-  transactionNumber?: string;
-  categoryName?: string;
-  subCategoryName?: string;
-  subject?: string;
-  name?: string;
-  mobileNo?: string;
-  priority?: string;
-  teamName?: string;
-  agentRemarks?: string;
-  comment?: string;
-  caseDescription?: string;
-};
-
-/* ================= RESPONSIVE SCALING ================= */
-const { width, height } = Dimensions.get("window");
-const scale = (size: number) => (width / 375) * size;
-const verticalScale = (size: number) => (height / 812) * size;
-const moderateScale = (size: number, factor = 0.5) =>
-  size + (scale(size) - size) * factor;
-
-const UpdateStatusScreen = () => {
-  const authState = useAppSelector((state) => state.auth);
+/* ---------- SCREEN ---------- */
+export default function UpdateDocumentScreen() {
   const { theme } = useTheme();
-
+  const styles = createStyles(theme);
+  const authState = useAppSelector((state) => state.auth);
   const params = useLocalSearchParams();
-  const [statusDropdown, setStatusDropdown] = useState<DropdownItem[]>([]);
-  const [subStatusDropdown, setSubStatusDropdown] = useState<DropdownItem[]>(
-    [],
-  );
-
   const caseId = params.caseId ? Number(params.caseId) : null;
-  const itemString = params.item as string;
+  const transactionNumber = (params.transactionNumber as string) || "";
 
-  useEffect(() => {
-    fetchStatusDropdown();
-  }, []);
+  const [description, setDescription] = useState("");
+  const [file, setFile] = useState<SelectedFile | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const fetchStatusDropdown = async () => {
+  /* ---------- SAVE ACTIVITY HISTORY ---------- */
+  const saveActivity = async ({
+    interactionId,
+    documentType,
+    documentName,
+    description: docDescription,
+    activityStatus,
+    transactionNumber,
+  }: {
+    interactionId: number;
+    documentType: string;
+    documentName: string;
+    description: string;
+    activityStatus: string;
+    transactionNumber: string;
+  }) => {
     try {
-      const res = await getDropdownByEndpoint(
-        "GetStatusMasterDropdown",
-        String(authState.token),
-        String(authState.antiforgeryToken),
-      );
-
-      const mapped = (res?.data ?? []).map((item: any) => ({
-        id: item.value,
-        name: item.label,
-      }));
-
-      setStatusDropdown(mapped);
-    } catch (error: any) {
-      const status = error?.response?.status;
-      if (status === 401) {
-        Alert.alert("Session Expired", "Please login again.");
-        router.replace("/login");
-        return;
-      }
-      Alert.alert("Error", "Failed to load status");
-    }
-  };
-
-  const fetchSubStatusDropdown = async (statusId: number) => {
-    try {
-      const res = await getDropdownByEndpointAndId(
-        "GetSubStatusMasterById",
-        statusId,
-        String(authState.token),
-        String(authState.antiforgeryToken),
-      );
-
-      const mapped = (res?.data ?? []).map((item: any) => ({
-        id: item.value,
-        name: item.label,
-      }));
-
-      setSubStatusDropdown(mapped);
-    } catch (e) {
-      Alert.alert("Error", "Failed to load sub status");
-    }
-  };
-
-  const handleUpdate = async () => {
-    if (!caseStatus) {
-      Alert.alert("Validation Error", "Please select a case status");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      const res = await updateInteraction({
-        token: String(authState.token),
-        csrfToken: String(authState.antiforgeryToken),
-        data: {
-          id: Number(caseId),
-          caseStatusId: caseStatus.id,
-          caseStatusName: caseStatus.name,
-          subStatusId: subStatus?.id ?? 0,
-          subStatusName: subStatus?.name ?? "",
-          comment: notes.trim(),
-          callBack: "",
-          assignToId: String(authState.userId),
-        },
+      /* ---------------- FETCH USER DATA FIRST ---------------- */
+      const userRes = await getUserDataById({
+        userId: String(authState?.userId),
+        token: String(authState?.token),
+        csrfToken: String(authState?.antiforgeryToken),
       });
 
-      if (res?.success) {
-        Alert.alert("Case Updated", "Case Updated Successfully", [
-          {
-            text: "OK",
-            onPress: () => router.replace("/(fro)/(complaints)"),
-          },
-        ]);
-        sendLocation(caseId);
-        return;
-      }
+      const firstName = userRes?.data?.firstName || "";
+      const lastName = userRes?.data?.lastName || "";
+      const activityByName = `${firstName} ${lastName}`.trim();
 
-      console.log("update", res);
-    } catch (error: any) {
-      console.error("❌ Update failed:", error);
+      /* ---------------- BUILD ACTIVITY DESCRIPTION ---------------- */
+      const activityDescription = `${documentType} "${documentName}" uploaded with comment: "${docDescription}"`;
 
-      const status = error?.response?.status;
-      const message =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        "Something went wrong. Please try again.";
-
-      if (status === 401) {
-        Alert.alert("Session Expired", "Please login again.", [
-          {
-            text: "OK",
-            onPress: () => router.replace("/login"),
-          },
-        ]);
-        return;
-      }
-
-      if (status === 400) {
-        Alert.alert("Update Failed", message);
-        return;
-      }
-
-      if (!error?.response) {
-        Alert.alert(
-          "Network Error",
-          "Please check your internet connection and try again.",
-        );
-        return;
-      }
-
-      Alert.alert("Error", message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const interactionItem = React.useMemo<InteractionItem | null>(() => {
-    if (!itemString) return null;
-    try {
-      return JSON.parse(itemString);
-    } catch {
-      return null;
-    }
-  }, [itemString]);
-
-  const [caseStatus, setCaseStatus] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
-  const [subStatus, setSubStatus] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
-  const [notes, setNotes] = useState("");
-  const [dropdownType, setDropdownType] = useState<"CASE" | "SUB" | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [showSubStatusWarning, setShowSubStatusWarning] = useState(false);
-  const { hasPermission, fetchLocation, address } = useLocation();
-
-  const scrollViewRef = useRef<ScrollView>(null);
-  const notesInputRef = useRef<TextInput>(null);
-  const initializedRef = useRef(false);
-
-  useEffect(() => {
-    if (!interactionItem || initializedRef.current) {
-      setIsInitializing(false);
-      return;
-    }
-
-    if (interactionItem.caseStatusId && interactionItem.caseStatusName) {
-      setCaseStatus({
-        id: interactionItem.caseStatusId,
-        name: interactionItem.caseStatusName,
-      });
-      fetchSubStatusDropdown(interactionItem.caseStatusId);
-    }
-
-    if (interactionItem.subStatusId && interactionItem.subStatusName) {
-      setSubStatus({
-        id: interactionItem.subStatusId,
-        name: interactionItem.subStatusName,
-      });
-    }
-
-    if (interactionItem.comment) setNotes(interactionItem.comment);
-
-    initializedRef.current = true;
-    setIsInitializing(false);
-  }, [interactionItem]);
-
-  const sendLocation = async (id: any) => {
-    try {
-      const location = await fetchLocation();
-      if (!location) return;
-
-      const { latitude, longitude } = location.coords;
+      /* ---------------- ACTIVITY PAYLOAD ---------------- */
       const payload = {
-        name: address ?? "Unknown location",
-        latitute: latitude.toString(),
-        longititute: longitude.toString(),
-        discriptions: address ?? "",
-        elderPinLocation: "string",
-        froPinLocation: String(address),
-        userId: String(authState.userId),
+        activityTime: new Date().toISOString(),
+        activityInteractionId: interactionId,
+        activityActionName: "INSERT",
+        activityDescription,
+        activityStatus,
+        activityById: String(authState?.userId),
+        activityByName,
+        activityRelatedTo: "CAS",
+        activityRelatedToId: interactionId,
+        activityRelatedToName: transactionNumber,
       };
 
-      const res = await addAndUpdateFROLocation(payload);
-      // console.log("✅ Update Ticket:", res);
+      console.log("📤 Document Activity Payload:", payload);
+
+      const response = await addInteractionActivityHistory({
+        token: String(authState?.token),
+        csrfToken: String(authState?.antiforgeryToken),
+        body: payload,
+      });
+
+      console.log("✅ Document Activity Response:", response);
+    } catch (err) {
+      console.error("❌ Document Activity save error:", err);
+    }
+  };
+
+  /* ---------- BASE64 ---------- */
+  const fileToBase64 = async (uri: string) => {
+    return await FileSystem.readAsStringAsync(uri, {
+      encoding: "base64",
+    });
+  };
+
+  /* ---------- CAMERA ---------- */
+  const openCamera = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission required", "Camera access is required");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setFile({
+        uri: result.assets[0].uri,
+        name: "Camera Image.jpg",
+        type: "image",
+      });
+    }
+  };
+
+  /* ---------- GALLERY ---------- */
+  const openGallery = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setFile({
+        uri: result.assets[0].uri,
+        name: "Gallery Image.jpg",
+        type: "image",
+      });
+    }
+  };
+
+  /* ---------- PDF ---------- */
+  const openPdf = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "application/pdf",
+      copyToCacheDirectory: true,
+    });
+
+    if (result.assets?.length) {
+      setFile({
+        uri: result.assets[0].uri,
+        name: result.assets[0].name ?? "Document.pdf",
+        type: "pdf",
+      });
+    }
+  };
+
+  /* ---------- SUBMIT ---------- */
+  const onSubmit = async () => {
+    if (!description.trim()) {
+      Alert.alert("Validation", "Please enter description");
+      return;
+    }
+
+    if (!file) {
+      Alert.alert("Validation", "Please attach a document");
+      return;
+    }
+
+    if (!caseId) {
+      Alert.alert("Error", "Case ID not found");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const base64 = await fileToBase64(file.uri);
+
+      const payload = {
+        relatedTo: "CAS",
+        relatedToId: Number(caseId),
+        documentType: file.type === "pdf" ? "PDF" : "Image",
+        documentName: file.name,
+        documentDescription: description,
+        fileName: file.name,
+        fileData: base64,
+        createdBy: String(authState?.userId),
+      };
+
+      const res = await addCommonDocument(payload);
+
+      // Save activity history after successful upload
+      await saveActivity({
+        interactionId: Number(caseId),
+        documentType: file.type === "pdf" ? "PDF Document" : "Image",
+        documentName: file.name,
+        description: description,
+        activityStatus: "SUCCESS",
+        transactionNumber: transactionNumber,
+      });
+
+      Alert.alert("Success", res.message || "Document uploaded successfully");
+      router.push({
+        pathname: "/(fro)/(complaints)/DocumentListScreen",
+        params: { caseId },
+      });
+      setDescription("");
+      setFile(null);
     } catch (error) {
-      console.error("❌ Location update error:", error);
+      console.log("err", error);
+
+      // Save failed activity
+
+      // ❌ DO NOTHING
+      // Global interceptor already shows error alert
+    } finally {
+      setLoading(false);
     }
   };
-
-  const handleSubStatusPress = () => {
-    if (!caseStatus) {
-      setShowSubStatusWarning(true);
-      return;
-    }
-    setDropdownType("SUB");
-  };
-
-  const submitHandler = useCallback(() => {
-    if (!caseStatus) {
-      Alert.alert("Error", "Please select a case status");
-      return;
-    }
-
-    if (!notes.trim()) {
-      Alert.alert("Error", "Please enter notes");
-      return;
-    }
-
-    setIsLoading(true);
-    handleUpdate();
-  }, [caseStatus, subStatus, notes]);
-
-  if (isInitializing) {
-    return (
-      <View
-        style={[
-          styles.loadingContainer,
-          { backgroundColor: theme.colors.colorBgPage },
-        ]}
-      >
-        <ActivityIndicator size="large" color={theme.colors.colorPrimary600} />
-        <Text
-          style={[
-            styles.loadingText,
-            { color: theme.colors.colorTextSecondary },
-          ]}
-        >
-          Loading case data...
-        </Text>
-      </View>
-    );
-  }
-
-  if (!interactionItem) {
-    return (
-      <View
-        style={[
-          styles.errorContainer,
-          { backgroundColor: theme.colors.colorBgPage },
-        ]}
-      >
-        <Ionicons
-          name="alert-circle-outline"
-          size={moderateScale(60)}
-          color={theme.colors.colorAccent700}
-        />
-        <Text
-          style={[styles.errorText, { color: theme.colors.colorTextSecondary }]}
-        >
-          No case data found
-        </Text>
-        <TouchableOpacity
-          style={[
-            styles.backButton,
-            { backgroundColor: theme.colors.colorPrimary600 },
-          ]}
-          onPress={() => router.back()}
-        >
-          <Text
-            style={[styles.backButtonText, { color: theme.colors.colorBgPage }]}
-          >
-            Go Back
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: theme.colors.colorBgPage }]}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <BodyLayout
+      type="screen"
+      screenName={t("addPhoto.screenTitle")}
+      scrollContentStyle={{ paddingHorizontal: 20 }}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.innerContainer}>
-          {/* HEADER */}
-          <View
-            style={[
-              styles.header,
-              { backgroundColor: theme.colors.colorPrimary600 },
-            ]}
-          >
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons
-                name="arrow-back"
-                size={moderateScale(24)}
-                color={theme.colors.colorBgPage}
-              />
-            </TouchableOpacity>
-            <View style={styles.headerContent}>
-              <Text
-                style={[
-                  styles.headerTitle,
-                  { color: theme.colors.colorBgPage },
-                ]}
-              >
-                Update Case {caseId}
-              </Text>
-              {!!interactionItem.subject && (
-                <Text
-                  style={[
-                    styles.headerSubtitle,
-                    { color: `${theme.colors.colorBgPage}CC` },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {interactionItem.subject}
-                </Text>
-              )}
-            </View>
-          </View>
+      {/* ---------- DESCRIPTION ---------- */}
+      <Text style={styles.label}>Description</Text>
+      <TextInput
+        style={styles.textArea}
+        placeholder="Enter document description"
+        placeholderTextColor={theme.colors.inputPlaceholder}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+      />
 
-          <ScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-          >
-            {/* STATUS */}
-            <Text
-              style={[styles.label, { color: theme.colors.colorTextSecondary }]}
-            >
-              Select Case Status *
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.dropdown,
-                {
-                  backgroundColor: theme.colors.colorBgSurface,
-                  borderColor: theme.colors.colorBorder,
-                },
-              ]}
-              onPress={() => setDropdownType("CASE")}
-            >
-              <Text
-                style={[
-                  caseStatus ? styles.value : styles.placeholder,
-                  {
-                    color: caseStatus
-                      ? theme.colors.colorTextPrimary
-                      : theme.colors.inputPlaceholder,
-                    fontWeight: caseStatus ? "500" : "400",
-                  },
-                ]}
-              >
-                {caseStatus?.name || "Select Case Status"}
-              </Text>
-              <Ionicons
-                name="chevron-down"
-                size={moderateScale(20)}
-                color={theme.colors.inputPlaceholder}
-              />
-            </TouchableOpacity>
+      {/* ---------- ATTACH ---------- */}
+      <Text style={styles.label}>Attach Document</Text>
 
-            {/* SUB STATUS */}
-            <View>
-              <Text
-                style={[
-                  styles.label,
-                  { color: theme.colors.colorTextSecondary },
-                ]}
-              >
-                Select Sub Status (Optional)
-              </Text>
+      <View style={styles.row}>
+        <ActionButton icon="camera" label="Camera" onPress={openCamera} />
+        <ActionButton icon="image" label="Gallery" onPress={openGallery} />
+        <ActionButton icon="document" label="PDF" onPress={openPdf} />
+      </View>
 
-              {showSubStatusWarning && (
-                <View
-                  style={[
-                    styles.warningContainer,
-                    {
-                      backgroundColor: theme.colors.colorAccent500 + "20",
-                      borderColor: theme.colors.colorAccent500 + "40",
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name="warning-outline"
-                    size={moderateScale(16)}
-                    color={theme.colors.colorAccent700}
-                  />
-                  <Text
-                    style={[
-                      styles.warningText,
-                      { color: theme.colors.colorAccent700 },
-                    ]}
-                  >
-                    Please select Case Status first
-                  </Text>
-                </View>
-              )}
-
-              <TouchableOpacity
-                style={[
-                  styles.dropdown,
-                  {
-                    backgroundColor: theme.colors.colorBgSurface,
-                    borderColor: theme.colors.colorBorder,
-                  },
-                  !caseStatus && styles.disabledDropdown,
-                ]}
-                onPress={handleSubStatusPress}
-                disabled={!caseStatus}
-              >
-                <Text
-                  style={[
-                    subStatus ? styles.value : styles.placeholder,
-                    {
-                      color: subStatus
-                        ? theme.colors.colorTextPrimary
-                        : theme.colors.inputPlaceholder,
-                      fontWeight: subStatus ? "500" : "400",
-                    },
-                  ]}
-                >
-                  {subStatus?.name || "Select Sub Status"}
-                </Text>
+      {
+        /* ---------- PREVIEW ---------- */
+        file && (
+          <View style={styles.previewCard}>
+            {file.type === "image" ? (
+              <Image source={{ uri: file.uri }} style={styles.previewImage} />
+            ) : (
+              <View style={styles.pdfPreview}>
                 <Ionicons
-                  name="chevron-down"
-                  size={moderateScale(20)}
-                  color={
-                    caseStatus
-                      ? theme.colors.inputPlaceholder
-                      : theme.colors.colorBorder
-                  }
+                  name="document-text"
+                  size={40}
+                  color={theme.colors.colorPrimary500}
                 />
-              </TouchableOpacity>
-            </View>
-
-            <Text
-              style={[styles.label, { color: theme.colors.colorTextSecondary }]}
-            >
-              Comment *
-            </Text>
-            <TextInput
-              ref={notesInputRef}
-              style={[
-                styles.textArea,
-                {
-                  backgroundColor: theme.colors.colorBgSurface,
-                  borderColor: theme.colors.colorBorder,
-                  color: theme.colors.colorTextPrimary,
-                },
-              ]}
-              value={notes}
-              onChangeText={setNotes}
-              multiline
-              placeholder="Enter your comment..."
-              placeholderTextColor={theme.colors.inputPlaceholder}
-            />
-
-            <TouchableOpacity
-              style={[
-                styles.submitBtn,
-                { backgroundColor: theme.colors.colorPrimary600 },
-              ]}
-              onPress={submitHandler}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color={theme.colors.colorBgPage} />
-              ) : (
-                <Text
-                  style={[
-                    styles.submitText,
-                    { color: theme.colors.colorBgPage },
-                  ]}
-                >
-                  Update
-                </Text>
-              )}
-            </TouchableOpacity>
-          </ScrollView>
-
-          {/* BOTTOM SHEET */}
-          <Modal transparent visible={!!dropdownType} animationType="slide">
-            <TouchableOpacity
-              style={styles.bottomSheetOverlay}
-              onPress={() => {
-                setDropdownType(null);
-                setShowSubStatusWarning(false);
-              }}
-              activeOpacity={1}
-            >
-              <View
-                style={[
-                  styles.bottomSheet,
-                  { backgroundColor: theme.colors.colorBgPage },
-                ]}
-              >
-                {(dropdownType === "CASE"
-                  ? statusDropdown
-                  : subStatusDropdown
-                ).map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={[
-                      styles.sheetItem,
-                      {
-                        borderBottomColor: theme.colors.colorBorder + "30",
-                      },
-                    ]}
-                    onPress={() => {
-                      if (dropdownType === "CASE") {
-                        setCaseStatus(item);
-                        setSubStatus(null);
-                        setShowSubStatusWarning(false);
-                        fetchSubStatusDropdown(item.id);
-                      } else {
-                        setSubStatus(item);
-                      }
-                      setDropdownType(null);
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.sheetItemText,
-                        { color: theme.colors.colorTextPrimary },
-                      ]}
-                    >
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                <Text style={styles.pdfName}>{file.name}</Text>
               </View>
+            )}
+
+            <TouchableOpacity
+              style={styles.removeBtn}
+              onPress={() => setFile(null)}
+            >
+              <Ionicons
+                name="close"
+                size={18}
+                color={theme.colors.colorTextInverse}
+              />
             </TouchableOpacity>
-          </Modal>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+          </View>
+        )
+      }
+
+      {/* ---------- SUBMIT ---------- */}
+      <TouchableOpacity
+        style={[styles.submitBtn, loading && { opacity: 0.6 }]}
+        onPress={onSubmit}
+        disabled={loading}
+      >
+        <Text style={styles.submitText}>
+          {loading ? "Uploading..." : "Update Document"}
+        </Text>
+      </TouchableOpacity>
+    </BodyLayout>
+  );
+}
+
+/* ---------- REUSABLE BUTTON ---------- */
+const ActionButton = ({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: any;
+  label: string;
+  onPress: () => void;
+}) => {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
+  return (
+    <TouchableOpacity style={styles.actionBtn} onPress={onPress}>
+      <Ionicons name={icon} size={22} color={theme.colors.colorPrimary500} />
+      <Text style={styles.actionText}>{label}</Text>
+    </TouchableOpacity>
   );
 };
 
-export default UpdateStatusScreen;
+/* ---------- STYLES ---------- */
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    label: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: theme.colors.colorTextPrimary,
+      marginBottom: 6,
+    },
 
-/* ================= STYLES ================= */
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  innerContainer: { flex: 1 },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: verticalScale(10),
-    fontSize: moderateScale(14),
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    marginTop: verticalScale(10),
-    fontSize: moderateScale(18),
-    marginBottom: verticalScale(20),
-  },
-  backButton: {
-    paddingHorizontal: moderateScale(24),
-    paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(8),
-  },
-  backButtonText: {
-    fontSize: moderateScale(14),
-    fontWeight: "600",
-  },
-  header: {
-    paddingTop: Platform.OS === "ios" ? verticalScale(50) : verticalScale(40),
-    padding: moderateScale(16),
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerContent: {
-    marginLeft: moderateScale(12),
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: "600",
-  },
-  headerSubtitle: {
-    fontSize: moderateScale(13),
-    marginTop: verticalScale(2),
-  },
-  content: {
-    padding: moderateScale(16),
-    paddingBottom: verticalScale(30),
-  },
-  label: {
-    marginTop: verticalScale(12),
-    marginBottom: verticalScale(6),
-    fontSize: moderateScale(14),
-    fontWeight: "500",
-  },
-  dropdown: {
-    borderWidth: 1,
-    padding: moderateScale(14),
-    borderRadius: moderateScale(10),
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: verticalScale(8),
-  },
-  disabledDropdown: {
-    opacity: 0.6,
-  },
-  warningContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: moderateScale(8),
-    borderRadius: moderateScale(6),
-    marginBottom: verticalScale(6),
-    borderWidth: 1,
-  },
-  warningText: {
-    fontSize: moderateScale(12),
-    marginLeft: moderateScale(4),
-    fontWeight: "500",
-  },
-  placeholder: {
-    fontSize: moderateScale(14),
-  },
-  value: {
-    fontSize: moderateScale(14),
-  },
-  textArea: {
-    borderWidth: 1,
-    borderRadius: moderateScale(10),
-    height: verticalScale(100),
-    padding: moderateScale(12),
-    textAlignVertical: "top",
-    fontSize: moderateScale(14),
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    borderRadius: moderateScale(6),
-  },
-  fileName: {
-    fontSize: moderateScale(11),
-    marginTop: verticalScale(4),
-    paddingHorizontal: moderateScale(4),
-    textAlign: "center",
-  },
-  removeAttachmentBtn: {
-    position: "absolute",
-    top: -moderateScale(6),
-    right: -moderateScale(6),
-    backgroundColor: "#fff",
-    borderRadius: moderateScale(12),
-    zIndex: 1,
-  },
-  submitBtn: {
-    marginTop: verticalScale(24),
-    padding: moderateScale(16),
-    borderRadius: moderateScale(12),
-    alignItems: "center",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  submitText: {
-    fontSize: moderateScale(16),
-    fontWeight: "600",
-  },
-  bottomSheetOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 110,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  bottomSheet: {
-    maxHeight: height * 0.5,
-    borderTopLeftRadius: moderateScale(20),
-    borderTopRightRadius: moderateScale(20),
-    paddingBottom:
-      Platform.OS === "ios" ? verticalScale(30) : verticalScale(20),
-  },
-  sheetItem: {
-    padding: moderateScale(16),
-    borderBottomWidth: 1,
-  },
-  sheetItemText: {
-    fontSize: moderateScale(16),
-  },
-});
+    textArea: {
+      backgroundColor: theme.colors.inputBg,
+      borderRadius: 12,
+      padding: 12,
+      minHeight: 100,
+      textAlignVertical: "top",
+      marginBottom: 16,
+      color: theme.colors.inputText,
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+    },
+
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 16,
+    },
+
+    actionBtn: {
+      flex: 1,
+      backgroundColor: theme.colors.btnSecondaryBg,
+      borderRadius: 10,
+      paddingVertical: 14,
+      alignItems: "center",
+      marginHorizontal: 4,
+      borderWidth: 1,
+      borderColor: theme.colors.btnSecondaryBorder,
+    },
+
+    actionText: {
+      fontSize: 12,
+      color: theme.colors.colorPrimary500,
+      marginTop: 4,
+      fontWeight: "600",
+    },
+
+    previewCard: {
+      backgroundColor: theme.colors.colorBgSurface,
+      borderRadius: 14,
+      padding: 10,
+      marginBottom: 20,
+      position: "relative",
+      borderWidth: 1,
+      borderColor: theme.colors.colorBorder,
+    },
+
+    previewImage: {
+      width: "100%",
+      height: 200,
+      borderRadius: 10,
+    },
+
+    pdfPreview: {
+      alignItems: "center",
+      paddingVertical: 30,
+    },
+
+    pdfName: {
+      marginTop: 8,
+      fontSize: 13,
+      color: theme.colors.colorTextPrimary,
+    },
+
+    removeBtn: {
+      position: "absolute",
+      top: 8,
+      right: 8,
+      backgroundColor: theme.colors.btnSosBg,
+      borderRadius: 14,
+      padding: 4,
+    },
+
+    submitBtn: {
+      backgroundColor: theme.colors.btnPrimaryBg,
+      paddingVertical: 16,
+      borderRadius: 12,
+      alignItems: "center",
+    },
+
+    submitText: {
+      color: theme.colors.btnPrimaryText,
+      fontSize: 16,
+      fontWeight: "700",
+    },
+  });

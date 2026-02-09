@@ -1,5 +1,8 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { addNotesRecord } from "@/features/fro/complaints/addNoteApi";
+import { addInteractionActivityHistory } from "@/features/fro/interaction/ActivityHistory";
+import { getUserDataById } from "@/features/fro/profile/getProfile";
+
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -33,10 +36,71 @@ export default function AddNoteScreen() {
 
   const [showSheet, setShowSheet] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const params = useLocalSearchParams();
   const caseId = params.caseId ? Number(params.caseId) : null;
-  const transactionNumber = params.transactionNumber as string | undefined;
+  const transactionNumber = (params.transactionNumber as string) || "";
+
+  /* ---------- SAVE ACTIVITY HISTORY ---------- */
+  const saveActivity = async ({
+    interactionId,
+    noteType,
+    noteDescription,
+    followUpDate,
+    activityStatus,
+    transactionNumber,
+  }: {
+    interactionId: number;
+    noteType: string;
+    noteDescription: string;
+    followUpDate: Date;
+    activityStatus: string;
+    transactionNumber: string;
+  }) => {
+    try {
+      /* ---------------- FETCH USER DATA FIRST ---------------- */
+      const userRes = await getUserDataById({
+        userId: String(authState?.userId),
+        token: String(authState?.token),
+        csrfToken: String(authState?.antiforgeryToken),
+      });
+
+      const firstName = userRes?.data?.firstName || "";
+      const lastName = userRes?.data?.lastName || "";
+      const activityByName = `${firstName} ${lastName}`.trim();
+
+      /* ---------------- BUILD ACTIVITY DESCRIPTION ---------------- */
+      const formattedDate = followUpDate.toLocaleDateString();
+      const activityDescription = `${noteType} note added: "${noteDescription}" with follow-up date: ${formattedDate}`;
+
+      /* ---------------- ACTIVITY PAYLOAD ---------------- */
+      const payload = {
+        activityTime: new Date().toISOString(),
+        activityInteractionId: interactionId,
+        activityActionName: "INSERT",
+        activityDescription,
+        activityStatus,
+        activityById: String(authState?.userId),
+        activityByName,
+        activityRelatedTo: "CAS",
+        activityRelatedToId: interactionId,
+        activityRelatedToName: transactionNumber,
+      };
+
+      console.log("📤 Note Activity Payload:", payload);
+
+      const response = await addInteractionActivityHistory({
+        token: String(authState?.token),
+        csrfToken: String(authState?.antiforgeryToken),
+        body: payload,
+      });
+
+      console.log("✅ Note Activity Response:", response);
+    } catch (err) {
+      console.error("❌ Note Activity save error:", err);
+    }
+  };
 
   /* ---------- TOMORROW ONLY ---------- */
   const getTomorrow = () => {
@@ -63,6 +127,13 @@ export default function AddNoteScreen() {
       return;
     }
 
+    if (!caseId) {
+      Alert.alert("Error", "Case ID not found");
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const payload = {
         relatedTo: "CAS",
@@ -82,9 +153,21 @@ export default function AddNoteScreen() {
         },
       });
 
+      // Save activity history after successful note addition
+      await saveActivity({
+        interactionId: Number(caseId),
+        noteType: noteType,
+        noteDescription: description,
+        followUpDate: followUpDate,
+        activityStatus: "Busy",
+        transactionNumber: transactionNumber,
+      });
+
       Alert.alert("Success", "Note added successfully");
       router.back();
     } catch (error: any) {
+      console.log("❌ Note addition error:", error);
+
       const status = error?.response?.status;
       const message =
         error?.response?.data?.message ||
@@ -102,6 +185,8 @@ export default function AddNoteScreen() {
       }
 
       Alert.alert("Error", message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,8 +246,14 @@ export default function AddNoteScreen() {
         />
 
         {/* ---------- SAVE BUTTON ---------- */}
-        <TouchableOpacity style={styles.saveButton} onPress={submitNote}>
-          <Text style={styles.saveText}>Save Note</Text>
+        <TouchableOpacity
+          style={[styles.saveButton, loading && { opacity: 0.6 }]}
+          onPress={submitNote}
+          disabled={loading}
+        >
+          <Text style={styles.saveText}>
+            {loading ? "Adding Note..." : "Save Note"}
+          </Text>
         </TouchableOpacity>
       </View>
 

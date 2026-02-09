@@ -1,5 +1,8 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { addCommonDocument } from "@/features/fro/complaints/addDocument";
+import { addInteractionActivityHistory } from "@/features/fro/interaction/ActivityHistory";
+import { getUserDataById } from "@/features/fro/profile/getProfile";
+
 import { useAppSelector } from "@/store/hooks";
 import type { Theme } from "@/theme/ThemeContext";
 import { useTheme } from "@/theme/ThemeContext";
@@ -34,12 +37,72 @@ export default function UpdateDocumentScreen() {
   const authState = useAppSelector((state) => state.auth);
   const params = useLocalSearchParams();
   const caseId = params.caseId ? Number(params.caseId) : null;
+  const transactionNumber = (params.transactionNumber as string) || "";
 
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<SelectedFile | null>(null);
   const [loading, setLoading] = useState(false);
 
   // console.log("nav case", caseId);
+
+  /* ---------- SAVE ACTIVITY HISTORY ---------- */
+  const saveActivity = async ({
+    interactionId,
+    documentType,
+    documentName,
+    description: docDescription,
+    activityStatus,
+    transactionNumber,
+  }: {
+    interactionId: number;
+    documentType: string;
+    documentName: string;
+    description: string;
+    activityStatus: string;
+    transactionNumber: string;
+  }) => {
+    try {
+      /* ---------------- FETCH USER DATA FIRST ---------------- */
+      const userRes = await getUserDataById({
+        userId: String(authState?.userId),
+        token: String(authState?.token),
+        csrfToken: String(authState?.antiforgeryToken),
+      });
+
+      const firstName = userRes?.data?.firstName || "";
+      const lastName = userRes?.data?.lastName || "";
+      const activityByName = `${firstName} ${lastName}`.trim();
+
+      /* ---------------- BUILD ACTIVITY DESCRIPTION ---------------- */
+      const activityDescription = `${documentType} "${documentName}" uploaded with comment: "${docDescription}"`;
+
+      /* ---------------- ACTIVITY PAYLOAD ---------------- */
+      const payload = {
+        activityTime: new Date().toISOString(),
+        activityInteractionId: interactionId,
+        activityActionName: "INSERT",
+        activityDescription,
+        activityStatus,
+        activityById: String(authState?.userId),
+        activityByName,
+        activityRelatedTo: "CAS",
+        activityRelatedToId: interactionId,
+        activityRelatedToName: transactionNumber,
+      };
+
+      console.log("📤 Document Activity Payload:", payload);
+
+      const response = await addInteractionActivityHistory({
+        token: String(authState?.token),
+        csrfToken: String(authState?.antiforgeryToken),
+        body: payload,
+      });
+
+      console.log("✅ Document Activity Response:", response);
+    } catch (err) {
+      console.error("❌ Document Activity save error:", err);
+    }
+  };
 
   /* ---------- BASE64 ---------- */
   const fileToBase64 = async (uri: string) => {
@@ -114,6 +177,11 @@ export default function UpdateDocumentScreen() {
       return;
     }
 
+    if (!caseId) {
+      Alert.alert("Error", "Case ID not found");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -137,6 +205,16 @@ export default function UpdateDocumentScreen() {
       const res = await addCommonDocument(payload);
       // console.log("res", res);
 
+      // Save activity history after successful upload
+      await saveActivity({
+        interactionId: Number(caseId),
+        documentType: file.type === "pdf" ? "PDF Document" : "Image",
+        documentName: file.name,
+        description: description,
+        activityStatus: "Busy",
+        transactionNumber: transactionNumber,
+      });
+
       Alert.alert("Success", res.message || "Document uploaded successfully");
       router.push({
         pathname: "/(fro)/(complaints)/DocumentListScreen",
@@ -146,6 +224,18 @@ export default function UpdateDocumentScreen() {
       setFile(null);
     } catch (error) {
       console.log("err", error);
+
+      // Save failed activity
+      if (caseId && file) {
+        await saveActivity({
+          interactionId: Number(caseId),
+          documentType: file.type === "pdf" ? "PDF Document" : "Image",
+          documentName: file.name,
+          description: description,
+          activityStatus: "FAILED",
+          transactionNumber: transactionNumber,
+        });
+      }
 
       // ❌ DO NOTHING
       // Global interceptor already shows error alert

@@ -31,7 +31,7 @@ export const useInteractionPopupPoller = () => {
   const [current, setCurrent] = useState<any | null>(null);
   const [visible, setVisible] = useState(false);
 
-  console.log("current", current);
+  // console.log("current", current);
 
   const [showRemarkModal, setShowRemarkModal] = useState(false);
   const [showAcceptedStatusModal, setShowAcceptedStatusModal] = useState(false);
