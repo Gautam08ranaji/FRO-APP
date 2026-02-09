@@ -6,25 +6,21 @@ import React from "react";
 export default function Index() {
   const { token, role } = useAppSelector((state) => state.auth);
 
-  // ⏳ Wait until redux-persist rehydrates
-  if (token === undefined) {
-    return null;
-  }
+  // Wait until redux persist rehydrates
+  if (token === undefined) return null;
 
-  // ❌ Not logged in
-  if (!token) {
-    return <Redirect href="/(onboarding)" />;
-  }
+  // Not logged in
+  if (!token) return <Redirect href="/(onboarding)" />;
 
-  // ✅ Logged in → role based redirect
-  if (role === "FRO") {
-    return <Redirect href="/(fro)/(dashboard)" />;
-  }
+  // Role-based redirect
+  switch (role) {
+    case "FRO":
+      return <Redirect href="/(fro)/(dashboard)" />;
 
-  if (role === "FRL") {
-    return <Redirect href="/(frl)/(dashboard)" />;
-  }
+    case "FRL":
+      return <Redirect href="/(frl)/(dashboard)" />;
 
-  // Safety fallback
-  return <Redirect href="/(onboarding)" />;
+    default:
+      return <Redirect href="/(onboarding)" />;
+  }
 }

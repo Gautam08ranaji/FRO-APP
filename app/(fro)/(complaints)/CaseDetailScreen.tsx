@@ -113,7 +113,7 @@ export default function CaseDetailScreen() {
         relatedToId: String(caseId),
       });
 
-      console.log("res notes", res?.data);
+      // console.log("res notes", res?.data);
 
       if (res?.data?.notesList && Array.isArray(res.data.notesList)) {
         setNotes(res.data.notesList);

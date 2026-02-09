@@ -1,3 +1,4 @@
+import userReducer from "@/redux/slices/userSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from "redux-persist";
@@ -15,7 +16,8 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  antiForgery: antiForgeryReducer, // ✅ REGISTER HERE
+  antiForgery: antiForgeryReducer,
+  user: userReducer, // ✅ ADD THIS
   [authApi.reducerPath]: authApi.reducer,
   [availabilityApi.reducerPath]: availabilityApi.reducer,
 });

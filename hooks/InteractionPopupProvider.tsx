@@ -10,7 +10,9 @@ import {
   updateInteraction,
 } from "@/features/fro/interactionApi";
 import { getUserDataById } from "@/features/fro/profile/getProfile";
-import { useAppSelector } from "@/store/hooks";
+import { updateFROLatLong } from "@/features/fro/updateFROLatLongApi";
+import { setUser } from "@/redux/slices/userSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
@@ -23,7 +25,10 @@ import { useLocation } from "./LocationContext";
 let pollerStarted = false;
 
 export const useInteractionPopupPoller = () => {
+  const userNameRef = useRef("");
   const authState = useAppSelector((state) => state.auth);
+  const user = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
   const { theme } = useTheme();
   const { fetchLocation, address } = useLocation();
 
@@ -31,12 +36,15 @@ export const useInteractionPopupPoller = () => {
   const [current, setCurrent] = useState<any | null>(null);
   const [visible, setVisible] = useState(false);
 
+  // console.log("user", user?.name);
+
   // console.log("current", current);
 
   const [showRemarkModal, setShowRemarkModal] = useState(false);
   const [showAcceptedStatusModal, setShowAcceptedStatusModal] = useState(false);
   const [showDeclinedStatusModal, setShowDeclinedStatusModal] = useState(false);
-
+  const locationIntervalRef = useRef<any>(null);
+  const activeTicketRef = useRef<string | null>(null);
   const seenIdsRef = useRef<Set<number>>(new Set());
   const intervalRef = useRef<number | null>(null);
 
@@ -44,12 +52,44 @@ export const useInteractionPopupPoller = () => {
     fetchUserData();
   }, []);
 
+  useEffect(() => {
+    userNameRef.current = user?.name || "User";
+  }, [user?.name]);
+
+  /* ================= RESTORE TRACKING ================= */
+
+  useEffect(() => {
+    const restoreTracking = async () => {
+      try {
+        const res = await getInteractionsListByAssignToId({
+          assignToId: String(authState.userId),
+          pageNumber: 1,
+          pageSize: 100,
+          token: String(authState.token),
+          csrfToken: String(authState.antiforgeryToken),
+        });
+
+        const interactions = res?.data?.interactions || [];
+
+        const activeTicket = interactions.find(
+          (item: any) => item.caseStatusId === 2 && item.subStatusId === 22,
+        );
+
+        if (activeTicket && !locationIntervalRef.current) {
+          console.log("🔄 Restart tracking:", activeTicket.transactionNumber);
+          startLatLongTracking(activeTicket.transactionNumber);
+        }
+      } catch (err) {
+        console.log("Restore tracking error:", err);
+      }
+    };
+
+    if (authState.token) restoreTracking();
+  }, [authState.token]);
+
   /* ================= LOCATION ================= */
 
   const fetchUserData = async () => {
-    // console.log("authState.userId", authState.userId);
-    // console.log("authState.token", authState.token);
-
     try {
       const response = await getUserDataById({
         userId: String(authState.userId),
@@ -57,15 +97,22 @@ export const useInteractionPopupPoller = () => {
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      // console.log("ussse Data", response);
+      const user = response?.data;
+
+      dispatch(
+        setUser({
+          name: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim(),
+          email: user?.email,
+          phone: user?.phone,
+          loginId: user?.loginId,
+        }),
+      );
     } catch (error) {
       console.error("User fetch error:", error);
-      alert(
-        "Failed to fetch user data. " +
-          (error instanceof Error ? error?.message : "Unknown error"),
-      );
     }
   };
+
+  // console.log("user", user);
 
   const sendLocation = async (id: any) => {
     try {
@@ -216,6 +263,75 @@ export const useInteractionPopupPoller = () => {
 
   /* ================= ACCEPT ================= */
 
+  const startLatLongTracking = (ticketNumber: string) => {
+    if (!ticketNumber || locationIntervalRef.current) return;
+    if (!user?.name) {
+      console.log("User not loaded yet, delaying tracking...");
+      setTimeout(() => startLatLongTracking(ticketNumber), 2000);
+      return;
+    }
+
+    activeTicketRef.current = ticketNumber;
+
+    locationIntervalRef.current = setInterval(async () => {
+      try {
+        /* 🔎 CHECK CURRENT TICKET STATUS FIRST */
+        const res = await getInteractionsListByAssignToId({
+          assignToId: String(authState.userId),
+          pageNumber: 1,
+          pageSize: 100,
+          token: String(authState.token),
+          csrfToken: String(authState.antiforgeryToken),
+        });
+
+        const interactions = res?.data?.interactions || [];
+
+        const currentTicket = interactions.find(
+          (i: any) => i.transactionNumber === ticketNumber,
+        );
+
+        // 🛑 STOP if closed
+        if (
+          currentTicket?.caseStatusId === 4 &&
+          currentTicket?.subStatusId === 8
+        ) {
+          console.log("🛑 Ticket closed. Stop tracking.");
+          stopLatLongTracking();
+          return;
+        }
+
+        /* 📍 OTHERWISE SEND LOCATION */
+        const location = await fetchLocation();
+        if (!location) return;
+
+        const { latitude, longitude } = location.coords;
+
+        const updateRes = await updateFROLatLong({
+          ticketNumber,
+          latitude: latitude.toString(),
+          longitude: longitude.toString(),
+          token: String(authState.token),
+          csrfToken: String(authState.antiforgeryToken),
+          name: userNameRef.current || "User",
+          userId: String(authState.userId), // ✅ THIS MUST BE GUID
+        });
+
+        // console.log("📍 LatLong Updated", updateRes);
+      } catch (err) {
+        console.log("Tracking error:", err);
+      }
+    }, 10000);
+  };
+
+  const stopLatLongTracking = () => {
+    if (locationIntervalRef.current) {
+      clearInterval(locationIntervalRef.current);
+      locationIntervalRef.current = null;
+      activeTicketRef.current = null;
+      console.log("🛑 Tracking stopped");
+    }
+  };
+
   const handleAccept = async () => {
     if (!current) return;
 
@@ -246,7 +362,7 @@ export const useInteractionPopupPoller = () => {
         activityStatus: "Busy",
         transactionNumber: current?.transactionNumber,
       });
-
+      startLatLongTracking(current.transactionNumber);
       sendLocation(current.id);
       closePopup();
       setShowAcceptedStatusModal(true);
