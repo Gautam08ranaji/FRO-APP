@@ -9,11 +9,11 @@ import { router } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import RemixIcon, { IconName } from "react-native-remix-icon";
 import { useSelector } from "react-redux";

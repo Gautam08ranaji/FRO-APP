@@ -69,7 +69,7 @@ export default function HomeScreen() {
   /* ================= API ================= */
 
   const fetchUserData = async () => {
-    console.log("authState.userId", authState.userId);
+    console.log("authState.userId", authState.antiforgeryToken);
     console.log("authState.token", authState.token);
 
     try {

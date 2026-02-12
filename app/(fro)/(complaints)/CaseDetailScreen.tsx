@@ -41,6 +41,7 @@ export default function CaseDetailScreen() {
   const elderName = item?.name || item?.contactName;
   const age = item?.age;
   const gender = item?.gender;
+  const ContactId = item?.contactId;
 
   const phone = item?.mobileNo;
   const emergencyPhone = item?.alternateNo || item?.contactAmbulance;
@@ -685,7 +686,13 @@ export default function CaseDetailScreen() {
           </View>
           <TouchableOpacity
             onPress={() => {
-              router.push("/(fro)/(complaints)/ElderDetails");
+              router.push({
+                pathname: "/(fro)/(complaints)/ElderDetails",
+                params: {
+                  ContactId: String(ContactId),
+                  caseId: String(caseId),
+                },
+              });
             }}
             style={styles.viewMoreBtn}
           >

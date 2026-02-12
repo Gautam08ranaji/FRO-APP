@@ -15,7 +15,6 @@ import { setUser } from "@/redux/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert } from "react-native";
 import { useLocation } from "./LocationContext";
 
 /**
@@ -231,14 +230,14 @@ export const useInteractionPopupPoller = () => {
         console.error("❌ Interaction polling failed:", error);
 
         if (error?.status === 440 || error?.status === 401) {
-          Alert.alert("Session Expired", "Please login again.");
+          // Alert.alert("Session Expired", "Please login again.");
           router.replace("/(onboarding)/login");
         }
       }
     };
 
-    fetchInteractions();
-    intervalRef.current = setInterval(fetchInteractions, 1000);
+    // fetchInteractions();
+    // intervalRef.current = setInterval(fetchInteractions, 1000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
