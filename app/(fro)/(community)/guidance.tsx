@@ -1,46 +1,48 @@
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
 const knowledgeBaseData = [
   {
     id: 1,
-    title: "Legal",
-    subtitle: "Personal/Family Legal Issues, Right and Protection",
+    titleKey: "guidanceTab.legalTitle",
+    subtitleKey: "guidanceTab.legalSubtitle",
     type: "Legal",
   },
   {
     id: 2,
-    title: "Dispute Resolution",
-    subtitle: "Property/Neighbourhood disputes, Mediation process",
+    titleKey: "guidanceTab.disputeTitle",
+    subtitleKey: "guidanceTab.disputeSubtitle",
     type: "Dispute",
   },
   {
     id: 3,
-    title: "Financial",
-    subtitle: "Financial help, Investment guidance, Medical emergency",
+    titleKey: "guidanceTab.financialTitle",
+    subtitleKey: "guidanceTab.financialSubtitle",
     type: "Financial",
   },
   {
     id: 4,
-    title: "Pension-related",
-    subtitle: "Eligibility, Application process, Pension issue resolution",
+    titleKey: "guidanceTab.pensionTitle",
+    subtitleKey: "guidanceTab.pensionSubtitle",
     type: "Pension",
   },
   {
     id: 5,
-    title: "Government Schemes",
-    subtitle: "Central govt schemes, State govt schemes, How to apply",
+    titleKey: "guidanceTab.schemesTitle",
+    subtitleKey: "guidanceTab.schemesSubtitle",
     type: "Schemes",
   },
 ];
 
 export default function GuidanceTab({ search = "" }) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   // ===============================
-  // THEME UI MAP (Same structure as previous tabs)
+  // THEME UI MAP
   // ===============================
   const uiMap: any = {
     Financial: {
@@ -79,10 +81,10 @@ export default function GuidanceTab({ search = "" }) {
 
     return knowledgeBaseData.filter(
       (item) =>
-        item.title.toLowerCase().includes(search.toLowerCase()) ||
-        item.subtitle.toLowerCase().includes(search.toLowerCase())
+        t(item.titleKey).toLowerCase().includes(search.toLowerCase()) ||
+        t(item.subtitleKey).toLowerCase().includes(search.toLowerCase()),
     );
-  }, [search]);
+  }, [search, t]);
 
   return (
     <FlatList
@@ -92,6 +94,8 @@ export default function GuidanceTab({ search = "" }) {
       contentContainerStyle={{ paddingBottom: 40 }}
       renderItem={({ item }) => {
         const ui = uiMap[item.type];
+        const title = t(item.titleKey);
+        const subtitle = t(item.subtitleKey);
 
         return (
           <View style={[styles.card, { backgroundColor: ui.bg }]}>
@@ -112,7 +116,7 @@ export default function GuidanceTab({ search = "" }) {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {item.title}
+                {title}
               </Text>
 
               <Text
@@ -121,16 +125,12 @@ export default function GuidanceTab({ search = "" }) {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {item.subtitle}
+                {subtitle}
               </Text>
             </View>
 
             {/* ARROW */}
-            <RemixIcon
-              name="arrow-right-up-line"
-              size={20}
-              color={ui.iconBg}
-            />
+            <RemixIcon name="arrow-right-up-line" size={20} color={ui.iconBg} />
           </View>
         );
       }}

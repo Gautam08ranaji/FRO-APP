@@ -464,6 +464,198 @@
 
     "conclusionText": "This scheme aims to support citizens by providing essential services, financial aid, and guidance for a better quality of life."
   },
+  "detailCardScreen": {
+    "tabs": {
+      "hospitals": "Hospitals",
+      "diagnosticCentres": "Diagnostic Centres",
+      "psychiatricClinic": "Psychiatric Clinic",
+      "palliativeCare": "Palliative Care",
+      "bloodBanks": "Blood Banks",
+      "organDonationOrgs": "Organ Donation Organizations",
+      "elderHomes": "Elder Homes",
+      "dayCareCentres": "Day Care Centres",
+      "caregivers": "Caregivers",
+      "elderFriendlyProducts": "Elder-friendly Products",
+      "counsellingCentres": "Counselling Centres",
+      "ngos": "NGOs",
+      "faqs": "FAQs"
+    },
+    "allStates": "All States",
+    "allDistricts": "All Districts",
+    "selectState": "Select State",
+    "selectDistrict": "Select District",
+    "totalNationwide": "Total Nationwide",
+    "facilitiesInState": "Facilities in {{state}}",
+    "inDistrict": "In {{district}}",
+    "loading": "Loading...",
+    "open": "Open",
+    "closed": "Closed",
+    "viewDetails": "View Details",
+    "call": "Call",
+    "searchPlaceholder": "Search {{category}}...",
+    "searchFAQPlaceholder": "Search FAQs...",
+    "loadingFacilities": "Loading facilities...",
+    "loadingFAQs": "Loading FAQs...",
+    "noResults": "No results found",
+    "noFAQsFound": "No FAQs found",
+    "adjustSearch": "Try adjusting your search",
+    "distanceAway": "{{distance}} km away"
+  },  "info": {
+    "tabs": {
+      "all": "All",
+      "housing": "Housing",
+      "legal": "Legal Rights",
+      "support": "Support"
+    },
+    "viewMore": "View full details",
+    "items": {
+      "item1": {
+        "title": "New update in health benefits",
+        "tag": "Health",
+        "desc": "New discounts and assistance have been added to health schemes for senior citizens."
+      },
+      "item2": {
+        "title": "New updates in housing support",
+        "tag": "Housing",
+        "desc": "Improved housing support including rental relief and process updates."
+      },
+      "item3": {
+        "title": "Improvement in legal support",
+        "tag": "Legal Aid",
+        "desc": "Legal assistance made simpler with faster case hearings for senior citizens."
+      },
+      "item4": {
+        "title": "New rights improvements for senior citizens",
+        "tag": "Rights",
+        "desc": "New legal and financial support rules added for senior citizens."
+      }
+    }
+  },
+  "article": {
+    "title": "Health Benefits and Facilities for Senior Citizens",
+    "tag": "Health Benefits",
+    "watchVideo": "Watch Video:",
+    "features": "Key Features:",
+    "point1": "Medical insurance schemes tailored for senior citizens.",
+    "point2": "Free medical check-ups at government hospitals.",
+    "point3": "Free medicines for common illnesses.",
+    "point4": "Dedicated support helpline for senior citizens.",
+    "howToUse": "How to avail benefits:",
+    "step1": "Register at the nearest health center.",
+    "step2": "Get details from government hospitals.",
+    "step3": "Attend regular check-ups and follow medical advice.",
+    "conclusionTitle": "Conclusion:",
+    "conclusionText": "These government health programs aim to improve the safety and well-being of senior citizens. Regular checkups and timely support can ensure a healthier life."
+  },
+  "informationTab": {
+    "healthTitle": "Health",
+    "healthSubtitle": "Awareness, Diagnostics, Treatment",
+    "shelterTitle": "Shelter, Old Age Homes",
+    "shelterSubtitle": "Govt homes, Private homes, Admission & Eligibility",
+    "nutritionTitle": "Nutrition",
+    "nutritionSubtitle": "Nutrition for health, Diet charts, Govt nutrition programs",
+    "daycareTitle": "Day-care Centres",
+    "daycareSubtitle": "Centre list, Activities, Timing/Fees",
+    "elderProductsTitle": "Elderly-friendly Products",
+    "elderProductsSubtitle": "Mobility aids, Daily living aids, Safety aids",
+    "culturalTitle": "Cultural, Spiritual, Art",
+    "culturalSubtitle": "Cultural / Spiritual programs, Art workshops, Recreational events",
+    "companionshipTitle": "Companionship",
+    "companionshipSubtitle": "Community groups, Social groups, Volunteer companionship"
+  },
+   "hospitalScreen": {
+    "searchPlaceholder": "Search ",
+    "allStates": "All States",
+    "allDistricts": "All Districts",
+    "selectState": "Select State",
+    "selectDistrict": "Select District",
+    "totalNationwide": "Total hospitals nationwide",
+    "hospitalsInState": "Hospitals in {{state}}",
+    "inDistrict": "In {{district}}",
+    "nearestHospital": "Nearest hospital to you • 2.4 km Away",
+    "distanceAway": "{{distance}} km Away",
+    "distanceKm": "Distance: {{distance}} km Away",
+    "open": "Open",
+    "closed": "Closed",
+    "learnMore": "Learn More",
+    "viewDetails": "View Details",
+    "call": "Call",
+    "noResults": "No results found",
+    "adjustSearch": "Try adjusting your search or filters",
+    "tabs": {
+      "hospitals": "Hospitals",
+      "diagnostics": "Diagnostic Centres",
+      "treatment": "Treatment",
+      "awareness": "Awareness"
+    },
+    "awareness": {
+      "covidTitle": "COVID-19 Vaccination: What to Know",
+      "covidSummary": "Eligibility, nearest centres, documents required and safety tips.",
+      "strokeTitle": "Recognising Stroke Symptoms",
+      "strokeSummary": "FAST: Face, Arms, Speech, Time — act fast and call emergency services.",
+      "agingTitle": "Healthy Ageing Tips",
+      "agingSummary": "Simple daily habits to improve mobility, nutrition and mental health."
+    }},
+    "guidanceTab": {
+    "legalTitle": "Legal",
+    "legalSubtitle": "Personal/Family Legal Issues, Right and Protection",
+    "disputeTitle": "Dispute Resolution",
+    "disputeSubtitle": "Property/Neighbourhood disputes, Mediation process",
+    "financialTitle": "Financial",
+    "financialSubtitle": "Financial help, Investment guidance, Medical emergency",
+    "pensionTitle": "Pension-related",
+    "pensionSubtitle": "Eligibility, Application process, Pension issue resolution",
+    "schemesTitle": "Government Schemes",
+    "schemesSubtitle": "Central govt schemes, State govt schemes, How to apply"
+  },
+   "fieldInterventionTab": {
+    "directSupportTitle": "Direct Support",
+    "directSupportSubtitle": "Abused Elderly, Missing/Homeless, Engagement Opportunities",
+    "indirectSupportTitle": "Indirect Support",
+    "indirectSupportSubtitle": "Wish Fulfilment, Charity/donation, Product, Service Needs, Other"
+  },
+  "emotionalSupportTab": {
+    "anxietyTitle": "Anxiety Resolution",
+    "anxietySubtitle": "Stress handling, Panic episodes, Emotional reassurance",
+    "lifeTitle": "Life Management",
+    "lifeSubtitle": "Time/stress/anger management, Documentation prior to death",
+    "deathTitle": "Death-related Support",
+    "deathSubtitle": "Preparing for death, Last rites guidance",
+    "bereavementTitle": "Bereavement",
+    "bereavementSubtitle": "Grief support, Coping mechanisms",
+    "relationshipTitle": "Relationship Management",
+    "relationshipSubtitle": "Family conflict, Communication support"
+  },
+  "documentsTab": {
+  "tabs": {
+    "policy": "Policy",
+    "actRules": "Act & Rules",
+    "documents": "Documents",
+    "pressRelease": "Press Release"
+  },
+  "policyTitle": "National Housing Policy Guidelines",
+  "policyDesc": "Overview of housing schemes, eligibility criteria, and benefits under government initiatives.",
+
+  "actTitle": "Senior Citizen Welfare Act",
+  "actDesc": "Legal provisions, rights, and protections available for senior citizens.",
+
+  "documentsTitle": "Application & Reference Documents",
+  "documentsDesc": "Official documents, forms, and references required for public services.",
+
+  "pressTitle": "Latest Government Press Release",
+  "pressDesc": "Recent announcements and official press releases issued by the department.",
+
+  "viewDocument": "View Document"
+},
+
+ "infoTabs": {
+    "scheme": "Articles",
+    "information": "Information",
+    "guidance": "Guidance",
+    "fieldIntervention": "Field Intervention",
+    "emotionalSupport": "Emotional Support",
+    "documents": "Documents"
+  },
 
   "frl": {
     "home": {

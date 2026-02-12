@@ -1,43 +1,45 @@
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
 const knowledgeBaseData = [
   {
     id: 1,
-    title: "Anxiety Resolution",
-    subtitle: "Stress handling, Panic episodes, Emotional reassurance",
+    titleKey: "emotionalSupportTab.anxietyTitle",
+    subtitleKey: "emotionalSupportTab.anxietySubtitle",
     type: "Anxiety",
   },
   {
     id: 2,
-    title: "Life Management",
-    subtitle: "Time/stress/anger management, Documentation prior to death",
+    titleKey: "emotionalSupportTab.lifeTitle",
+    subtitleKey: "emotionalSupportTab.lifeSubtitle",
     type: "Life",
   },
   {
     id: 3,
-    title: "Death-related Support",
-    subtitle: "Preparing for death, Last rites guidance",
+    titleKey: "emotionalSupportTab.deathTitle",
+    subtitleKey: "emotionalSupportTab.deathSubtitle",
     type: "Death",
   },
   {
     id: 4,
-    title: "Bereavement",
-    subtitle: "Grief support, Coping mechanisms",
+    titleKey: "emotionalSupportTab.bereavementTitle",
+    subtitleKey: "emotionalSupportTab.bereavementSubtitle",
     type: "Bereavement",
   },
   {
     id: 5,
-    title: "Relationship Management",
-    subtitle: "Family conflict, Communication support",
+    titleKey: "emotionalSupportTab.relationshipTitle",
+    subtitleKey: "emotionalSupportTab.relationshipSubtitle",
     type: "Relationship",
   },
 ];
 
 export default function EmotionalSupportTab({ search = "" }) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   // ===============================
   // THEME-BASED UI COLOR MAPPING
@@ -75,10 +77,10 @@ export default function EmotionalSupportTab({ search = "" }) {
 
     return knowledgeBaseData.filter(
       (item) =>
-        item.title.toLowerCase().includes(search.toLowerCase()) ||
-        item.subtitle.toLowerCase().includes(search.toLowerCase())
+        t(item.titleKey).toLowerCase().includes(search.toLowerCase()) ||
+        t(item.subtitleKey).toLowerCase().includes(search.toLowerCase()),
     );
-  }, [search]);
+  }, [search, t]);
 
   return (
     <FlatList
@@ -88,6 +90,8 @@ export default function EmotionalSupportTab({ search = "" }) {
       contentContainerStyle={{ paddingBottom: 40 }}
       renderItem={({ item }) => {
         const ui = uiMap[item.type];
+        const title = t(item.titleKey);
+        const subtitle = t(item.subtitleKey);
 
         return (
           <View style={[styles.card, { backgroundColor: ui.bg }]}>
@@ -108,7 +112,7 @@ export default function EmotionalSupportTab({ search = "" }) {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {item.title}
+                {title}
               </Text>
               <Text
                 style={[
@@ -116,16 +120,12 @@ export default function EmotionalSupportTab({ search = "" }) {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {item.subtitle}
+                {subtitle}
               </Text>
             </View>
 
             {/* ARROW */}
-            <RemixIcon
-              name="arrow-right-up-line"
-              size={20}
-              color={ui.iconBg}
-            />
+            <RemixIcon name="arrow-right-up-line" size={20} color={ui.iconBg} />
           </View>
         );
       }}

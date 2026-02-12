@@ -1,38 +1,40 @@
 import { useTheme } from "@/theme/ThemeContext";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
 const knowledgeBaseData = [
   {
     id: 1,
-    title: "Direct Support",
-    subtitle: "Abused Elderly, Missing/Homeless, Engagement Opportunities",
+    titleKey: "fieldInterventionTab.directSupportTitle",
+    subtitleKey: "fieldInterventionTab.directSupportSubtitle",
     type: "Support",
   },
   {
     id: 2,
-    title: "Indirect Support",
-    subtitle: "Wish Fulfilment, Charity/donation, Product, Service Needs, Other",
+    titleKey: "fieldInterventionTab.indirectSupportTitle",
+    subtitleKey: "fieldInterventionTab.indirectSupportSubtitle",
     type: "Indirect",
   },
 ];
 
 export default function FieldInterventionTab({ search = "" }) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   // ===============================
   // THEME-BASED UI COLOR MAPPING
   // ===============================
   const uiMap: any = {
     Support: {
-      bg: theme.colors.validationInfoBg,        // light blue bg
+      bg: theme.colors.validationInfoBg, // light blue bg
       iconBg: theme.colors.validationInfoText, // deep blue icon bg
       icon: "group-line",
     },
 
     Indirect: {
-      bg: theme.colors.validationWarningBg,         // light orange bg
+      bg: theme.colors.validationWarningBg, // light orange bg
       iconBg: theme.colors.validationWarningText, // deep orange icon bg
       icon: "shake-hands-line",
     },
@@ -43,10 +45,10 @@ export default function FieldInterventionTab({ search = "" }) {
 
     return knowledgeBaseData.filter(
       (item) =>
-        item.title.toLowerCase().includes(search.toLowerCase()) ||
-        item.subtitle.toLowerCase().includes(search.toLowerCase())
+        t(item.titleKey).toLowerCase().includes(search.toLowerCase()) ||
+        t(item.subtitleKey).toLowerCase().includes(search.toLowerCase()),
     );
-  }, [search]);
+  }, [search, t]);
 
   return (
     <FlatList
@@ -56,18 +58,29 @@ export default function FieldInterventionTab({ search = "" }) {
       contentContainerStyle={{ paddingBottom: 40 }}
       renderItem={({ item }) => {
         const ui = uiMap[item.type];
+        const title = t(item.titleKey);
+        const subtitle = t(item.subtitleKey);
 
         return (
           <View style={[styles.card, { backgroundColor: ui.bg }]}>
             {/* ICON BOX */}
             <View style={[styles.iconBox, { backgroundColor: ui.iconBg }]}>
-              <RemixIcon name={ui.icon} size={20} color={theme.colors.colorBgSurface} />
+              <RemixIcon
+                name={ui.icon}
+                size={20}
+                color={theme.colors.colorBgSurface}
+              />
             </View>
 
             {/* TEXTS */}
             <View style={{ flex: 1 }}>
-              <Text style={[styles.title, { color: theme.colors.colorTextSecondary }]}>
-                {item.title}
+              <Text
+                style={[
+                  styles.title,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                {title}
               </Text>
               <Text
                 style={[
@@ -75,16 +88,12 @@ export default function FieldInterventionTab({ search = "" }) {
                   { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                {item.subtitle}
+                {subtitle}
               </Text>
             </View>
 
             {/* ARROW */}
-            <RemixIcon
-              name="arrow-right-up-line"
-              size={20}
-              color={ui.iconBg}
-            />
+            <RemixIcon name="arrow-right-up-line" size={20} color={ui.iconBg} />
           </View>
         );
       }}

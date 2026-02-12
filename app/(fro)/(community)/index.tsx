@@ -1,20 +1,16 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { useTheme } from "@/theme/ThemeContext";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Dimensions,
-  LayoutAnimation,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  UIManager,
   View,
 } from "react-native";
 
-// IMPORT ALL TAB SCREENS
+// TAB SCREENS
 import InformationTab from "./InformationTabs";
 import DocumentsTab from "./documents";
 import EmotionalSupportTab from "./emotionalSupport";
@@ -22,45 +18,34 @@ import FieldInterventionTab from "./fieldIntervention";
 import GuidanceTab from "./guidance";
 import SchemeTab from "./scheme";
 
-// ENABLE ANDROID LAYOUT ANIMATION
-if (Platform.OS === "android") {
-  UIManager.setLayoutAnimationEnabledExperimental?.(true);
-}
-
-const SCREEN_HEIGHT = Dimensions.get("window").height;
+type TabKey =
+  | "scheme"
+  | "information"
+  | "guidance"
+  | "field_intervention"
+  | "emotional_support"
+  | "documents";
 
 export default function InfoScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
 
-  const headerHeightRef = useRef(0);
-  const [contentHeight, setContentHeight] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<TabKey>("information");
 
-  const [activeTab, setActiveTab] = useState<
-    | "scheme"
-    | "information"
-    | "guidance"
-    | "field_intervention"
-    | "emotional_support"
-    | "Documents"
-  >("information");
-
-  const tabs = useMemo(
-    () => [
-      { key: "scheme", label: "Article" },
-      { key: "information", label: "Information" },
-      { key: "guidance", label: "Guidance"},
-      { key: "field_intervention", label: "Field Intervention" },
-      { key: "emotional_support", label: "Emotional Support" },
-      { key: "Documents", label: "Documents" },
-    ],
-    [t]
-  );
-
-  const handleTabChange = (key: typeof activeTab) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setActiveTab(key);
-  };
+  const tabs: { key: TabKey; label: string }[] = [
+    { key: "scheme", label: t("infoTabs.scheme") },
+    { key: "information", label: t("infoTabs.information") },
+    { key: "guidance", label: t("infoTabs.guidance") },
+    {
+      key: "field_intervention",
+      label: t("infoTabs.fieldIntervention"),
+    },
+    {
+      key: "emotional_support",
+      label: t("infoTabs.emotionalSupport"),
+    },
+    { key: "documents", label: t("infoTabs.documents") },
+  ];
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -74,7 +59,7 @@ export default function InfoScreen() {
         return <EmotionalSupportTab />;
       case "scheme":
         return <SchemeTab />;
-      case "Documents":
+      case "documents":
         return <DocumentsTab />;
       default:
         return null;
@@ -82,32 +67,36 @@ export default function InfoScreen() {
   };
 
   return (
-    <BodyLayout type="screen" screenName="Community">
-      {/* TABS HEADER */}
+    <BodyLayout
+      type="screen"
+      screenName="jwgfd"
+      scrollContentStyle={{
+        paddingHorizontal: 0,
+        paddingBottom: 0,
+        flex: 1,
+      }}
+    >
+      {/* FIXED TABS HEADER - NOT SCROLLING */}
       <View
-        onLayout={(e) => {
-          headerHeightRef.current = e.nativeEvent.layout.height;
-          setContentHeight(SCREEN_HEIGHT - headerHeightRef.current - 100);
-        }}
+        style={[
+          styles.tabsContainer,
+          {
+            backgroundColor: theme.colors.colorPrimary50,
+            borderColor: theme.colors.btnPrimaryBg,
+          },
+        ]}
       >
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={[
-            styles.scrollTabs,
-            {
-              backgroundColor: theme.colors.colorPrimary50,
-              borderColor: theme.colors.btnPrimaryBg,
-            },
-          ]}
+          contentContainerStyle={styles.scrollTabs}
         >
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key;
-
             return (
               <TouchableOpacity
                 key={tab.key}
-                onPress={() => handleTabChange(tab.key as typeof activeTab)}
+                onPress={() => setActiveTab(tab.key)}
                 style={[
                   styles.tab,
                   { borderColor: theme.colors.btnPrimaryBg },
@@ -115,12 +104,13 @@ export default function InfoScreen() {
                 ]}
               >
                 <Text
-                  numberOfLines={1}
                   style={[
                     styles.tabText,
                     { color: theme.colors.colorPrimary600 },
                     isActive && { color: theme.colors.btnPrimaryText },
                   ]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                 >
                   {tab.label}
                 </Text>
@@ -130,23 +120,19 @@ export default function InfoScreen() {
         </ScrollView>
       </View>
 
-      {/* 🔒 FIXED HEIGHT CONTENT */}
-      {contentHeight && (
-        <View style={[styles.contentContainer, { height: contentHeight }]}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {renderTabContent()}
-          </ScrollView>
-        </View>
-      )}
+      {/* CONTENT - NO SCROLLVIEW, LET BODYLAYOUT HANDLE SCROLLING */}
+      <View style={styles.contentWrapper}>{renderTabContent()}</View>
     </BodyLayout>
   );
 }
 
 const styles = StyleSheet.create({
+  tabsContainer: {
+    borderBottomWidth: 2,
+  },
   scrollTabs: {
     flexDirection: "row",
-    paddingTop: 6,
-    borderBottomWidth: 2,
+    // paddingTop: 6,
   },
   tab: {
     paddingVertical: 10,
@@ -157,7 +143,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     maxWidth: 140,
   },
-  contentContainer: {
-    padding: 16,
+  contentWrapper: {
+    flex: 1,
+    marginTop: 20,
   },
 });

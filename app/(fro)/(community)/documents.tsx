@@ -1,69 +1,77 @@
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
+/* ------------ TAB CONFIG ------------ */
+const tabs = [
+  { key: "policy", labelKey: "policy" },
+  { key: "act", labelKey: "actRules" },
+  { key: "documents", labelKey: "documents" },
+  { key: "press", labelKey: "pressRelease" },
+];
+
+/* ------------ DATA CONFIG ------------ */
+const data = [
+  {
+    id: 1,
+    titleKey: "policyTitle",
+    descKey: "policyDesc",
+    category: "policy",
+  },
+  {
+    id: 2,
+    titleKey: "actTitle",
+    descKey: "actDesc",
+    category: "act",
+  },
+  {
+    id: 3,
+    titleKey: "documentsTitle",
+    descKey: "documentsDesc",
+    category: "documents",
+  },
+  {
+    id: 4,
+    titleKey: "pressTitle",
+    descKey: "pressDesc",
+    category: "press",
+  },
+];
+
 export default function DocumentsTab() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
-  const tabs = ["Policy", "Act & Rules", "Documents", "Press Release"];
-  const [activeTab, setActiveTab] = useState("Policy");
+  const [activeTab, setActiveTab] = useState("policy");
 
-  const data = [
-    {
-      id: 1,
-      title: "National Housing Policy Guidelines",
-      desc:
-        "Overview of housing schemes, eligibility criteria, and benefits under government initiatives.",
-      category: "Policy",
-    },
-    {
-      id: 2,
-      title: "Senior Citizen Welfare Act",
-      desc:
-        "Legal provisions, rights, and protections available for senior citizens.",
-      category: "Act & Rules",
-    },
-    {
-      id: 3,
-      title: "Application & Reference Documents",
-      desc:
-        "Official documents, forms, and references required for public services.",
-      category: "Documents",
-    },
-    {
-      id: 4,
-      title: "Latest Government Press Release",
-      desc:
-        "Recent announcements and official press releases issued by the department.",
-      category: "Press Release",
-    },
-  ];
-
-  const filteredData = data.filter(
-    (item) => item.category === activeTab
-  );
+  /* ------------ FILTER ------------ */
+  const filteredData = useMemo(() => {
+    return data.filter((item) => item.category === activeTab);
+  }, [activeTab]);
 
   return (
     <View>
+      {/* ---------- TABS ---------- */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.tabContainer}
       >
-        {tabs.map((label) => {
-          const isActive = activeTab === label;
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.key;
 
           return (
             <TouchableOpacity
-              key={label}
+              key={tab.key}
               style={[
                 styles.tabButton,
                 {
@@ -75,7 +83,7 @@ export default function DocumentsTab() {
                     : theme.colors.colorBorder,
                 },
               ]}
-              onPress={() => setActiveTab(label)}
+              onPress={() => setActiveTab(tab.key)}
               activeOpacity={0.8}
             >
               <Text
@@ -88,7 +96,7 @@ export default function DocumentsTab() {
                   },
                 ]}
               >
-                {label}
+                {t(`documentsTab.tabs.${tab.labelKey}`)}
               </Text>
             </TouchableOpacity>
           );
@@ -107,14 +115,8 @@ export default function DocumentsTab() {
             },
           ]}
         >
-          {/* Title */}
-          <Text
-            style={[
-              styles.title,
-              { color: theme.colors.colorPrimary600 },
-            ]}
-          >
-            {item.title}
+          <Text style={[styles.title, { color: theme.colors.colorPrimary600 }]}>
+            {t(`documentsTab.${item.titleKey}`)}
           </Text>
 
           <Text
@@ -123,7 +125,7 @@ export default function DocumentsTab() {
               { color: theme.colors.colorTextSecondary },
             ]}
           >
-            {item.desc}
+            {t(`documentsTab.${item.descKey}`)}
           </Text>
 
           <TouchableOpacity
@@ -145,7 +147,7 @@ export default function DocumentsTab() {
                 { color: theme.colors.btnPrimaryText },
               ]}
             >
-              View Document
+              {t("documentsTab.viewDocument")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -154,6 +156,7 @@ export default function DocumentsTab() {
   );
 }
 
+/* ------------ STYLES ------------ */
 const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",

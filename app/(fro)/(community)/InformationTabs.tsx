@@ -1,8 +1,9 @@
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -10,55 +11,77 @@ import {
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
+/* ------------ DATA ------------ */
 const knowledgeBaseData = [
-  {
-    id: 1,
-    title: "Health",
-    subtitle: "Awareness, Diagnostics, Treatment",
-    type: "health",
-  },
-  {
-    id: 2,
-    title: "Shelter, Old Age Homes",
-    subtitle: "Govt homes, Private homes, Admission & Eligibility",
-    type: "shelter",
-  },
-  {
-    id: 3,
-    title: "Nutrition",
-    subtitle: "Nutrition for health, Diet charts, Govt nutrition programs",
-    type: "nutrition",
-  },
-  {
-    id: 4,
-    title: "Day-care Centres",
-    subtitle: "Centre list, Activities, Timing/Fees",
-    type: "dayCare",
-  },
-  {
-    id: 5,
-    title: "Elderly-friendly Products",
-    subtitle: "Mobility aids, Daily living aids, Safety aids",
-    type: "elder",
-  },
-  {
-    id: 6,
-    title: "Cultural, Spiritual, Art",
-    subtitle:
-      "Cultural / Spiritual programs, Art workshops, Recreational events",
-    type: "cultural",
-  },
-  {
-    id: 7,
-    title: "Companionship",
-    subtitle: "Community groups, Social groups, Volunteer companionship",
-    type: "companionship",
-  },
+  { id: 1, type: "health", category: "health" },
+  { id: 2, type: "shelter", category: "shelter" },
+  { id: 3, type: "nutrition", category: "nutrition" },
+  { id: 4, type: "dayCare", category: "dayCare" },
+  { id: 5, type: "elder", category: "elder" },
+  { id: 6, type: "cultural", category: "cultural" },
+  { id: 7, type: "companionship", category: "companionship" },
 ];
+
+/* ------------ i18n KEY MAP ------------ */
+const i18nKeyMap: any = {
+  health: {
+    title: "healthTitle",
+    subtitle: "healthSubtitle",
+  },
+  shelter: {
+    title: "shelterTitle",
+    subtitle: "shelterSubtitle",
+  },
+  nutrition: {
+    title: "nutritionTitle",
+    subtitle: "nutritionSubtitle",
+  },
+  dayCare: {
+    title: "daycareTitle",
+    subtitle: "daycareSubtitle",
+  },
+  elder: {
+    title: "elderProductsTitle",
+    subtitle: "elderProductsSubtitle",
+  },
+  cultural: {
+    title: "culturalTitle",
+    subtitle: "culturalSubtitle",
+  },
+  companionship: {
+    title: "companionshipTitle",
+    subtitle: "companionshipSubtitle",
+  },
+};
+
+/* ------------ CATEGORY TABS MAPPING ------------ */
+const CATEGORY_TABS: { [key: string]: { id: string; label: string }[] } = {
+  health: [
+    { id: "AddHospitalMaster", label: "Hospitals" },
+    { id: "AddDiagnosticCentre", label: "Diagnostic Centres" },
+    { id: "AddPsychiatricClinics", label: "Psychiatric Clinic" },
+    { id: "AddPalliativeCares", label: "Palliative Care" },
+    { id: "AddBloodBank", label: "Blood Banks" },
+    { id: "AddOrganDonationOrg", label: "Organ Donation Organizations" },
+  ],
+  shelter: [{ id: "AddCitizenHome", label: "Elder Homes" }],
+  dayCare: [{ id: "AddDayCareCentres", label: "Day Care Centres" }],
+  elder: [
+    { id: "AddCaregiver", label: "Caregivers" },
+    { id: "AddElderFriendlyProducts", label: "Elder-friendly Products" },
+  ],
+  companionship: [
+    { id: "AddCounsellingCentres", label: "Counselling Centres" },
+  ],
+  nutrition: [{ id: "AddNgoMaster", label: "NGOs" }],
+  cultural: [{ id: "AddNgoMaster", label: "NGOs" }],
+};
 
 export default function InformationTab({ search = "" }) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
+  /* ------------ ROUTES ------------ */
   const routeMap: any = {
     health: "/detailCardScreen",
     shelter: "/detailCardScreen",
@@ -69,6 +92,7 @@ export default function InformationTab({ search = "" }) {
     companionship: "/detailCardScreen",
   };
 
+  /* ------------ UI CONFIG ------------ */
   const uiMap: any = {
     health: {
       bg: theme.colors.validationErrorBg,
@@ -85,7 +109,6 @@ export default function InformationTab({ search = "" }) {
       iconBg: theme.colors.validationErrorText,
       icon: "box-2-line",
     },
-
     dayCare: {
       bg: theme.colors.validationInfoBg,
       iconBg: theme.colors.validationInfoText,
@@ -96,13 +119,11 @@ export default function InformationTab({ search = "" }) {
       iconBg: theme.colors.validationInfoText,
       icon: "hotel-line",
     },
-
     companionship: {
       bg: theme.colors.validationWarningBg,
       iconBg: theme.colors.validationWarningText,
       icon: "shake-hands-line",
     },
-
     shelter: {
       bg: theme.colors.validationSuccessBg,
       iconBg: theme.colors.validationSuccessText,
@@ -110,32 +131,47 @@ export default function InformationTab({ search = "" }) {
     },
   };
 
+  /* ------------ SEARCH FILTER ------------ */
   const filteredData = useMemo(() => {
     if (!search.trim()) return knowledgeBaseData;
 
-    return knowledgeBaseData.filter(
-      (item) =>
-        item.title.toLowerCase().includes(search.toLowerCase()) ||
-        item.subtitle.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [search]);
+    return knowledgeBaseData.filter((item) => {
+      const keys = i18nKeyMap[item.type];
+      const title = t(`informationTab.${keys.title}`).toLowerCase();
+      const subtitle = t(`informationTab.${keys.subtitle}`).toLowerCase();
 
+      return (
+        title.includes(search.toLowerCase()) ||
+        subtitle.includes(search.toLowerCase())
+      );
+    });
+  }, [search, t]);
+
+  /* ------------ RENDER ------------ */
   return (
-    <FlatList
-      data={filteredData}
-      keyExtractor={(item) => item.id.toString()}
+    <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      renderItem={({ item }) => {
+      contentContainerStyle={styles.contentContainer}
+    >
+      {filteredData.map((item) => {
         const ui = uiMap[item.type];
+        const keys = i18nKeyMap[item.type];
 
         return (
           <TouchableOpacity
+            key={item.id}
             activeOpacity={0.8}
-            onPress={() => router.push(routeMap[item.type])}
+            onPress={() =>
+              router.push({
+                pathname: routeMap[item.type],
+                params: {
+                  category: item.type,
+                  tabs: JSON.stringify(CATEGORY_TABS[item.type] || []),
+                },
+              })
+            }
           >
             <View style={[styles.card, { backgroundColor: ui.bg }]}>
-              {/* ICON BLOCK */}
               <View style={[styles.iconBox, { backgroundColor: ui.iconBg }]}>
                 <RemixIcon
                   name={ui.icon}
@@ -144,7 +180,6 @@ export default function InformationTab({ search = "" }) {
                 />
               </View>
 
-              {/* TEXT */}
               <View style={{ flex: 1 }}>
                 <Text
                   style={[
@@ -152,7 +187,7 @@ export default function InformationTab({ search = "" }) {
                     { color: theme.colors.colorTextSecondary },
                   ]}
                 >
-                  {item.title}
+                  {t(`informationTab.${keys.title}`)}
                 </Text>
 
                 <Text
@@ -161,11 +196,10 @@ export default function InformationTab({ search = "" }) {
                     { color: theme.colors.colorTextSecondary },
                   ]}
                 >
-                  {item.subtitle}
+                  {t(`informationTab.${keys.subtitle}`)}
                 </Text>
               </View>
 
-              {/* ARROW */}
               <RemixIcon
                 name="arrow-right-up-line"
                 size={20}
@@ -174,20 +208,42 @@ export default function InformationTab({ search = "" }) {
             </View>
           </TouchableOpacity>
         );
-      }}
-    />
+      })}
+
+      {/* Empty State */}
+      {filteredData.length === 0 && (
+        <View style={styles.emptyState}>
+          <RemixIcon
+            name="file-search-line"
+            size={48}
+            color={theme.colors.colorTextTertiary}
+          />
+          <Text
+            style={[
+              styles.emptyStateText,
+              { color: theme.colors.colorTextTertiary },
+            ]}
+          >
+            {t("common.noResultsFound") || "No results found"}
+          </Text>
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
+/* ------------ STYLES ------------ */
 const styles = StyleSheet.create({
+  contentContainer: {
+    paddingBottom: 20,
+  },
   card: {
     flexDirection: "row",
     alignItems: "center",
     padding: 14,
     borderRadius: 16,
-    marginTop: 14,
+    marginBottom: 14, // Changed from marginTop to marginBottom for better spacing
   },
-
   iconBox: {
     width: 44,
     height: 44,
@@ -196,14 +252,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
-
   title: {
     fontSize: 14,
     fontWeight: "700",
   },
-
   subtitle: {
     fontSize: 12,
     marginTop: 2,
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    marginTop: 12,
+    fontSize: 16,
   },
 });
