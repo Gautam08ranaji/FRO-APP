@@ -1,5 +1,7 @@
 // app/_layout.tsx
 
+import "@/i18n"; // ⭐ VERY IMPORTANT → load translations first
+
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -18,7 +20,7 @@ import { LocationProvider } from "@/hooks/LocationContext";
 import { persistor, store } from "@/store";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 
-// Prevent splash auto hide (IMPORTANT)
+// Prevent splash auto hide
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {

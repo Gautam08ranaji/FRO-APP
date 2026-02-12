@@ -1,57 +1,49 @@
 import { useTheme } from "@/theme/ThemeContext";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function SchemeTab() {
   const { theme } = useTheme();
-  const { t } = useTranslation();
 
   /* ---------- TABS ---------- */
-  const tabs = [
-    t("info.tabs.all"),
-    t("info.tabs.housing"),
-    t("info.tabs.legal"),
-    t("info.tabs.support"),
-  ];
-
-  const [activeTab, setActiveTab] = useState(t("info.tabs.all"));
+  const tabs = ["All", "Housing", "Legal", "Support"];
+  const [activeTab, setActiveTab] = useState("All");
 
   /* ---------- DATA ---------- */
   const data = [
     {
       id: 1,
-      title: t("info.items.item1.title"),
-      tag: t("info.items.item1.tag"),
-      desc: t("info.items.item1.desc"),
-      category: t("info.tabs.support"),
+      title: "Government Support Scheme",
+      tag: "Support",
+      desc: "Information about government welfare support schemes available for eligible citizens.",
+      category: "Support",
     },
     {
       id: 2,
-      title: t("info.items.item2.title"),
-      tag: t("info.items.item2.tag"),
-      desc: t("info.items.item2.desc"),
-      category: t("info.tabs.housing"),
+      title: "Affordable Housing Program",
+      tag: "Housing",
+      desc: "Details about housing schemes that help people access affordable homes.",
+      category: "Housing",
     },
     {
       id: 3,
-      title: t("info.items.item3.title"),
-      tag: t("info.items.item3.tag"),
-      desc: t("info.items.item3.desc"),
-      category: t("info.tabs.legal"),
+      title: "Free Legal Aid",
+      tag: "Legal",
+      desc: "Legal assistance programs provided by the government for eligible individuals.",
+      category: "Legal",
     },
     {
       id: 4,
-      title: t("info.items.item4.title"),
-      tag: t("info.items.item4.tag"),
-      desc: t("info.items.item4.desc"),
-      category: t("info.tabs.support"),
+      title: "Community Help Services",
+      tag: "Support",
+      desc: "Local community support initiatives and help services information.",
+      category: "Support",
     },
   ];
 
   const filteredData =
-    activeTab === t("info.tabs.all")
+    activeTab === "All"
       ? data
       : data.filter((item) => item.category === activeTab);
 
@@ -71,22 +63,13 @@ export default function SchemeTab() {
                   backgroundColor: isActive
                     ? theme.colors.colorPrimary50
                     : theme.colors.colorBgPage,
-                  borderColor: isActive
-                    ? theme.colors.colorPrimary600
-                    : theme.colors.colorPrimary600,
+                  borderColor: theme.colors.colorPrimary600,
                 },
               ]}
               onPress={() => setActiveTab(label)}
             >
               <Text
-                style={[
-                  styles.tabText,
-                  {
-                    color: isActive
-                      ? theme.colors.btnPrimaryBg
-                      : theme.colors.btnPrimaryBg,
-                  },
-                ]}
+                style={[styles.tabText, { color: theme.colors.btnPrimaryBg }]}
               >
                 {label}
               </Text>
@@ -110,10 +93,7 @@ export default function SchemeTab() {
           {/* Title + Tag */}
           <View style={styles.titleRow}>
             <Text
-              style={[
-                styles.title,
-                { color: theme.colors.colorPrimary600 },
-              ]}
+              style={[styles.title, { color: theme.colors.colorPrimary600 }]}
             >
               {item.title}
             </Text>
@@ -159,7 +139,7 @@ export default function SchemeTab() {
                 { color: theme.colors.btnPrimaryText },
               ]}
             >
-              Read Article 
+              Read Article
             </Text>
           </TouchableOpacity>
         </View>

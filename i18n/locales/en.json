@@ -414,6 +414,56 @@
 
     "save": "Save"
   },
+  "info": {
+    "tabs": {
+      "all": "All",
+      "housing": "Housing",
+      "legal": "Legal",
+      "support": "Support"
+    },
+    "items": {
+      "item1": {
+        "title": "Government Support Scheme",
+        "tag": "Support",
+        "desc": "Information about government welfare support schemes available for eligible citizens."
+      },
+      "item2": {
+        "title": "Affordable Housing Program",
+        "tag": "Housing",
+        "desc": "Details about housing schemes that help people access affordable homes."
+      },
+      "item3": {
+        "title": "Free Legal Aid",
+        "tag": "Legal",
+        "desc": "Legal assistance programs provided by the government for eligible individuals."
+      },
+      "item4": {
+        "title": "Community Help Services",
+        "tag": "Support",
+        "desc": "Local community support initiatives and help services information."
+      }
+    }
+  },
+  "article": {
+    "title": "Government Welfare Scheme Guide",
+    "tag": "Support",
+
+    "watchVideo": "Watch Video",
+    "features": "Key Features",
+    "howToUse": "How to Use",
+    "conclusionTitle": "Conclusion",
+
+    "point1": "Provides financial assistance to eligible beneficiaries.",
+    "point2": "Easy online application process available.",
+    "point3": "Support available through government offices.",
+    "point4": "Transparent and secure system for tracking applications.",
+
+    "step1": "Check eligibility criteria before applying.",
+    "step2": "Fill out the application form with correct details.",
+    "step3": "Submit documents and track application status online.",
+
+    "conclusionText": "This scheme aims to support citizens by providing essential services, financial aid, and guidance for a better quality of life."
+  },
 
   "frl": {
     "home": {
