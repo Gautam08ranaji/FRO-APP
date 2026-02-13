@@ -6,8 +6,10 @@ import { baseUrl } from "../api/baseUrl.ts";
 /* ---------------- PUBLIC APIs (No Token) ---------------- */
 export const publicBaseQuery = fetchBaseQuery({
   baseUrl,
-  headers: {
-    accept: "application/json",
+  prepareHeaders: (headers) => {
+    headers.set("Accept", "application/json");
+    headers.set("Content-Type", "application/json");
+    return headers;
   },
 });
 
@@ -18,10 +20,12 @@ export const authBaseQuery = fetchBaseQuery({
     const token = (getState() as RootState).auth.token;
 
     if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+      headers.set("Authorization", `Bearer ${token}`);
     }
 
-    headers.set("accept", "application/json");
+    headers.set("Accept", "application/json");
+    headers.set("Content-Type", "application/json");
+
     return headers;
   },
 
