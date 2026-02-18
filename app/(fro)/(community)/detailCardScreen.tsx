@@ -1,1531 +1,1459 @@
 import BodyLayout from "@/components/layout/BodyLayout";
-import { getElderUserMemberList } from "@/features/fro/complaints/ElderMemberList";
+import { ENDPOINTS } from "@/features/api/endpoints";
+import { getMasterListApi } from "@/features/api/masterApi";
+import {
+  districtDropDown,
+  stateDropDown,
+} from "@/features/api/masterApiClient";
+
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
-import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
-
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   FlatList,
   Linking,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import RemixIcon from "react-native-remix-icon";
 
 const { width, height } = Dimensions.get("window");
 
-/* RESPONSIVE SCALE */
-const scale = (size: number) => (width / 375) * size;
-const verticalScale = (size: number) => (height / 812) * size;
-const moderateScale = (size: number, factor = 0.5) =>
-  size + (scale(size) - size) * factor;
-
-interface FamilyMember {
-  id: number;
-  name: string;
-  relatedTo: string;
-  relatedToId: number;
-  relatedToName: string;
-  relationshipName: string;
-  gender: string;
-  profilePhoto: string | null;
-  state: string;
-  city: string;
-  pincode: string;
-  addressLine1: string;
-  addressLine2: string;
-  landmark: string;
-  additionalInfo: string | null;
-  phoneNumber: string;
-  createdDate: string;
+/* ------------ TYPES ------------ */
+interface State {
+  value: number;
+  label: string;
 }
 
-// Relationship color mapping for vibrant cards
-const RELATIONSHIP_COLORS = {
-  Daughter: { bg: "#FFE4E6", text: "#E11D48", icon: "#FB7185" },
-  Son: { bg: "#E0F2FE", text: "#0369A1", icon: "#38BDF8" },
-  Spouse: { bg: "#F1F5F9", text: "#334155", icon: "#64748B" },
-  Father: { bg: "#DCFCE7", text: "#166534", icon: "#4ADE80" },
-  Mother: { bg: "#FCE7F3", text: "#9D174D", icon: "#F472B6" },
-  Brother: { bg: "#FEF3C7", text: "#92400E", icon: "#FBBF24" },
-  Sister: { bg: "#FFEDD5", text: "#9A3412", icon: "#FB923C" },
-  Grandson: { bg: "#E0F2FE", text: "#075985", icon: "#7DD3FC" },
-  Granddaughter: { bg: "#FCE7F3", text: "#831843", icon: "#F9A8D4" },
-  Caretaker: { bg: "#EDE9FE", text: "#5B21B6", icon: "#A78BFA" },
-  Guardian: { bg: "#CCFBF1", text: "#115E59", icon: "#5EEAD4" },
-  default: { bg: "#F3F4F6", text: "#1F2937", icon: "#6B7280" },
+interface District {
+  value: number;
+  label: string;
+  stateId?: number;
+}
+
+interface Facility {
+  id: number;
+  name: string;
+  descriptions: string;
+  state: string;
+  district: string;
+  stateId: number;
+  districtId: number;
+  latLong: string;
+  address: string;
+  contactName: string;
+  contactPhone: string;
+  contactWebsite: string;
+  contactEmail: string;
+  type?: string;
+  status?: "open" | "closed";
+  distanceLabel?: string;
+}
+
+interface TabItem {
+  id: string;
+  label: string;
+  apiEndpoint: string;
+  i18nKey: string; // Added i18n key for translation
+}
+
+interface FAQItem {
+  id: number;
+  question: string;
+  answer: string;
+  category?: string;
+}
+
+/* ------------ API ENDPOINT MAPPING ------------ */
+const API_ENDPOINT_MAP: { [key: string]: string } = {
+  AddHospitalMaster: "GetHospitalMasterList",
+  AddDiagnosticCentre: "GetDiagnosticCentreList",
+  AddPsychiatricClinics: "GetPsychiatricClinicsList",
+  AddPalliativeCares: "GetPalliativeCaresList",
+  AddBloodBank: "GetBloodBankList",
+  AddOrganDonationOrg: "GetOrganDonationOrgList",
+  AddCitizenHome: "GetCitizenHomeList",
+  AddDayCareCentres: "GetDayCareCentreList",
+  AddCaregiver: "GetCaregiversList",
+  AddElderFriendlyProducts: "GetElderFriendlyProductList",
+  AddCounsellingCentres: "GetCounsellingCentresList",
+  AddNgoMaster: "GetNgoMasterList",
+  AddFaq: "GetFaqList",
 };
 
-export default function CustomerDetailScreen() {
-  const params = useLocalSearchParams();
-  const contactId = params?.ContactId as string;
+/* ------------ DATA KEY MAPPING ------------ */
+const DATA_KEY_MAP: { [key: string]: string } = {
+  GetHospitalMasterList: "hospitalMasterList",
+  GetDiagnosticCentreList: "diagnosticCentres",
+  GetPsychiatricClinicsList: "psychiatricClinics",
+  GetPalliativeCaresList: "palliativeCares",
+  GetBloodBankList: "bloodBanks",
+  GetOrganDonationOrgList: "organDonationOrgs",
+  GetCitizenHomeList: "citizenHomeList",
+  GetDayCareCentreList: "dayCareCentres",
+  GetCaregiversList: "caregivers",
+  GetElderFriendlyProductList: "elderFriendlyProducts",
+  GetCounsellingCentresList: "counsellingCentres",
+  GetNgoMasterList: "ngoMasterList",
+  GetFaqList: "faqList",
+};
+
+/* ------------ I18N KEY MAPPING FOR TABS ------------ */
+const TAB_I18N_KEYS: { [key: string]: string } = {
+  Hospitals: "tabs.hospitals",
+  "Diagnostic Centres": "tabs.diagnosticCentres",
+  "Psychiatric Clinic": "tabs.psychiatricClinic",
+  "Palliative Care": "tabs.palliativeCare",
+  "Blood Banks": "tabs.bloodBanks",
+  "Organ Donation Organizations": "tabs.organDonationOrgs",
+  "Elder Homes": "tabs.elderHomes",
+  "Day Care Centres": "tabs.dayCareCentres",
+  Caregivers: "tabs.caregivers",
+  "Elder-friendly Products": "tabs.elderFriendlyProducts",
+  "Counselling Centres": "tabs.counsellingCentres",
+  NGOs: "tabs.ngos",
+  FAQs: "tabs.faqs",
+};
+
+export default function DetailCardScreen() {
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState(0);
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
-  const [loading, setLoading] = useState(false);
+  const auth = useAppSelector((state) => state.auth);
+  const { t } = useTranslation();
+  const params = useLocalSearchParams();
+
+  // Get category and tabs from params
+  const category = params.category as string;
+  const tabsFromParams = params.tabs as string;
+  const availableTabs: TabItem[] = tabsFromParams
+    ? JSON.parse(tabsFromParams)
+    : [];
+
+  // If no tabs provided, use default based on category with API endpoints
+  const defaultTabs: { [key: string]: TabItem[] } = {
+    health: [
+      {
+        id: "AddHospitalMaster",
+        label: "Hospitals",
+        apiEndpoint: "GetHospitalMasterList",
+        i18nKey: "tabs.hospitals",
+      },
+      {
+        id: "AddDiagnosticCentre",
+        label: "Diagnostic Centres",
+        apiEndpoint: "GetDiagnosticCentreList",
+        i18nKey: "tabs.diagnosticCentres",
+      },
+      {
+        id: "AddPsychiatricClinics",
+        label: "Psychiatric Clinic",
+        apiEndpoint: "GetPsychiatricClinicsList",
+        i18nKey: "tabs.psychiatricClinic",
+      },
+      {
+        id: "AddPalliativeCares",
+        label: "Palliative Care",
+        apiEndpoint: "GetPalliativeCaresList",
+        i18nKey: "tabs.palliativeCare",
+      },
+      {
+        id: "AddBloodBank",
+        label: "Blood Banks",
+        apiEndpoint: "GetBloodBankList",
+        i18nKey: "tabs.bloodBanks",
+      },
+      {
+        id: "AddOrganDonationOrg",
+        label: "Organ Donation Organizations",
+        apiEndpoint: "GetOrganDonationOrgList",
+        i18nKey: "tabs.organDonationOrgs",
+      },
+    ],
+    shelter: [
+      {
+        id: "AddCitizenHome",
+        label: "Elder Homes",
+        apiEndpoint: "GetCitizenHomeList",
+        i18nKey: "tabs.elderHomes",
+      },
+    ],
+    dayCare: [
+      {
+        id: "AddDayCareCentres",
+        label: "Day Care Centres",
+        apiEndpoint: "GetDayCareCentreList",
+        i18nKey: "tabs.dayCareCentres",
+      },
+    ],
+    elder: [
+      {
+        id: "AddCaregiver",
+        label: "Caregivers",
+        apiEndpoint: "GetCaregiversList",
+        i18nKey: "tabs.caregivers",
+      },
+      {
+        id: "AddElderFriendlyProducts",
+        label: "Elder-friendly Products",
+        apiEndpoint: "GetElderFriendlyProductList",
+        i18nKey: "tabs.elderFriendlyProducts",
+      },
+    ],
+    companionship: [
+      {
+        id: "AddCounsellingCentres",
+        label: "Counselling Centres",
+        apiEndpoint: "GetCounsellingCentresList",
+        i18nKey: "tabs.counsellingCentres",
+      },
+    ],
+    nutrition: [
+      {
+        id: "AddNgoMaster",
+        label: "NGOs",
+        apiEndpoint: "GetNgoMasterList",
+        i18nKey: "tabs.ngos",
+      },
+      {
+        id: "AddFaq",
+        label: "FAQs",
+        apiEndpoint: "GetFaqList",
+        i18nKey: "tabs.faqs",
+      },
+    ],
+    cultural: [
+      {
+        id: "AddNgoMaster",
+        label: "NGOs",
+        apiEndpoint: "GetNgoMasterList",
+        i18nKey: "tabs.ngos",
+      },
+      {
+        id: "AddFaq",
+        label: "FAQs",
+        apiEndpoint: "GetFaqList",
+        i18nKey: "tabs.faqs",
+      },
+    ],
+  };
+
+  // Map the incoming tabs to include API endpoints and i18n keys
+  const tabs =
+    availableTabs.length > 0
+      ? availableTabs.map((tab) => ({
+          ...tab,
+          apiEndpoint: API_ENDPOINT_MAP[tab.id] || "GetNgoMasterList",
+          i18nKey: TAB_I18N_KEYS[tab.label] || `tabs.${tab.id}`,
+        }))
+      : defaultTabs[category] || [];
+
+  const [activeTab, setActiveTab] = useState(tabs[0]?.label || "");
+  const [allData, setAllData] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [currentTabData, setCurrentTabData] = useState<Facility[] | FAQItem[]>(
+    [],
+  );
+
+  // Filter states
+  const [selectedStateId, setSelectedStateId] = useState<number | "all">("all");
+  const [selectedDistrictId, setSelectedDistrictId] = useState<number | "all">(
+    "all",
+  );
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
   const authState = useAppSelector((state) => state.auth);
+  // Modal states
+  const [showStateModal, setShowStateModal] = useState(false);
+  const [showDistrictModal, setShowDistrictModal] = useState(false);
 
-  /* MOCK DATA (Replace API later) */
-  const customer = {
-    name: "Rahul Sharma",
-    age: 72,
-    gender: "Male",
-    phone: "9876543210",
-    emergency: "9123456780",
-    address: "Delhi, India",
-    id: "CUST-1023",
+  // Dynamic data from API
+  const [states, setStates] = useState<State[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [filteredDistricts, setFilteredDistricts] = useState<District[]>([]);
+  const [isLoadingStates, setIsLoadingStates] = useState(false);
+  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
+
+  // Get current tab's API endpoint
+  const getCurrentApiEndpoint = () => {
+    const currentTab = tabs.find((tab) => tab.label === activeTab);
+    return currentTab?.apiEndpoint || "GetNgoMasterList";
   };
 
-  const medical = {
-    bloodGroup: "B+",
-    conditions: "Diabetes, Hypertension",
-    allergies: "Penicillin",
-    doctor: "Dr. Mehta",
-    lastCheckup: "15 Feb 2026",
-    insurance: "Star Health - Gold Plan",
+  // Check if current tab is FAQs
+  const isFAQTab = () => {
+    return activeTab === "FAQs";
   };
 
-  const activity = [
-    { date: "12 Feb", title: "Home Visit Completed", status: "completed" },
-    { date: "15 Feb", title: "Medication Delivered", status: "completed" },
-    { date: "20 Feb", title: "Follow-up Call Done", status: "pending" },
-    { date: "25 Feb", title: "Doctor Appointment", status: "upcoming" },
-  ];
+  // Get category title for i18n
+  const getCategoryTitle = () => {
+    const categoryMap: { [key: string]: string } = {
+      health: "healthTitle",
+      shelter: "shelterTitle",
+      nutrition: "nutritionTitle",
+      dayCare: "daycareTitle",
+      elder: "elderProductsTitle",
+      cultural: "culturalTitle",
+      companionship: "companionshipTitle",
+    };
+    return t(`informationTab.${categoryMap[category] || "healthTitle"}`);
+  };
 
-  const tabs = [
-    "Family Details",
-    "Medical Details",
-    "Activity History",
-    "Documents",
-  ];
+  // Get translated tab label
+  const getTranslatedTabLabel = (tab: TabItem) => {
+    return t(`detailCardScreen.${tab.i18nKey}`) || tab.label;
+  };
 
+  // Get translated active tab label
+  const getTranslatedActiveTabLabel = () => {
+    const currentTab = tabs.find((tab) => tab.label === activeTab);
+    return currentTab ? getTranslatedTabLabel(currentTab) : activeTab;
+  };
+
+  // Fetch data on focus and when dependencies change
+  useFocusEffect(
+    useCallback(() => {
+      if (authState?.userId) {
+        getStateDropDown();
+        fetchData();
+      }
+    }, [authState?.userId, activeTab]),
+  );
+
+  // Fetch data when state/district selection changes
   useEffect(() => {
-    fetchMemberList();
-  }, []);
+    if (authState?.userId && !isFAQTab()) {
+      fetchData();
+    }
+  }, [selectedStateId, selectedDistrictId, authState?.userId, activeTab]);
 
-  const fetchMemberList = async () => {
+  // Filter data when dependencies change
+  useEffect(() => {
+    filterData();
+  }, [activeTab, allData, selectedStateId, selectedDistrictId, searchQuery, t]);
+
+  // Update filtered districts when state changes
+  useEffect(() => {
+    if (selectedStateId === "all") {
+      setFilteredDistricts(districts);
+    } else {
+      setFilteredDistricts(
+        districts.filter((d) => d.stateId === selectedStateId),
+      );
+    }
+  }, [selectedStateId, districts]);
+
+  // Fetch data from API based on current tab
+  const fetchData = async () => {
     try {
-      setLoading(true);
-      const response = await getElderUserMemberList({
-        relatedToId: "1",
-        token: String(authState?.token),
-        csrfToken: String(authState?.antiforgeryToken),
+      setIsLoadingData(true);
+
+      // Logical endpoint key (used for mapping)
+      const endpointKey = getCurrentApiEndpoint();
+
+      // Real backend URL
+      const endpointUrl =
+        endpointKey === "GetBloodBankList" ? "GetBloodBank/list" : endpointKey;
+
+      const fullApiUrl = `${ENDPOINTS.COMMON.COMMON_API}${endpointUrl}`;
+
+      const data = await getMasterListApi(fullApiUrl, {
         pageNumber: 1,
-        pageSize: 11,
+        pageSize: 100,
       });
 
-      if (response?.data?.elderUserMemberList) {
-        setFamilyMembers(response.data.elderUserMemberList);
+      console.log(`API Response for ${endpointKey}:`, data?.data);
+
+      if (data?.success) {
+        // Correct data key lookup
+        const dataKey = DATA_KEY_MAP[endpointKey] || "data";
+        const dataList = data.data?.[dataKey] || [];
+
+        // FAQ handling
+        if (endpointKey === "GetFaqList") {
+          const faqs: FAQItem[] = dataList.map((item: any) => ({
+            id: item.id,
+            question: item.question || "",
+            answer: item.answer || "",
+            category: item.category || "",
+          }));
+
+          setAllData(faqs);
+          setCurrentTabData(faqs);
+        } else {
+          // Facility handling (including Blood Bank)
+          const facilities: Facility[] = dataList.map((item: any) => ({
+            id: item.id,
+            name:
+              item.name ||
+              item.hospitalName ||
+              item.centreName ||
+              item.productName ||
+              "",
+            descriptions:
+              item.discriptions ||
+              item.description ||
+              item.productDescription ||
+              "",
+            state: item.state || "",
+            district: item.distrinct || item.district || "",
+            stateId: item.stateId || 0,
+            districtId: item.distrinctId || item.districtId || 0,
+            latLong: item.latLong || "",
+            address: item.address || "",
+            contactName: item.contactName || "",
+            contactPhone: item.contactPhone || item.phone || "",
+            contactWebsite: item.contactWebsite || item.website || "",
+            contactEmail: item.contactEmail || item.email || "",
+            type: activeTab.toLowerCase(),
+            status: "open",
+            distanceLabel: "hospitalScreen.distanceAway",
+          }));
+
+          setAllData(facilities);
+          setCurrentTabData(facilities);
+        }
+      } else {
+        setAllData([]);
+        setCurrentTabData([]);
       }
     } catch (error) {
-      console.log("Error fetching members:", error);
+      console.error("Error fetching data:", error);
+      setAllData([]);
+      setCurrentTabData([]);
     } finally {
-      setLoading(false);
+      setIsLoadingData(false);
     }
   };
 
-  const handleCall = (phoneNumber: string) => {
-    Linking.openURL(`tel:${phoneNumber}`);
+  const filterData = () => {
+    let result = [];
+
+    if (isFAQTab()) {
+      // Filter FAQs
+      let filtered = [...currentTabData] as FAQItem[];
+
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (faq) =>
+            faq.question.toLowerCase().includes(query) ||
+            faq.answer.toLowerCase().includes(query) ||
+            (faq.category && faq.category.toLowerCase().includes(query)),
+        );
+      }
+
+      result = filtered;
+    } else {
+      // Filter facilities
+      let filtered = [...currentTabData] as Facility[];
+
+      // Filter by state
+      if (selectedStateId !== "all") {
+        filtered = filtered.filter(
+          (facility) => facility.stateId === selectedStateId,
+        );
+      }
+
+      // Filter by district
+      if (selectedDistrictId !== "all") {
+        filtered = filtered.filter(
+          (facility) => facility.districtId === selectedDistrictId,
+        );
+      }
+
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (facility) =>
+            facility.name.toLowerCase().includes(query) ||
+            facility.address.toLowerCase().includes(query) ||
+            facility.descriptions.toLowerCase().includes(query) ||
+            facility.district.toLowerCase().includes(query) ||
+            facility.state.toLowerCase().includes(query) ||
+            facility.contactName.toLowerCase().includes(query) ||
+            facility.contactPhone.toLowerCase().includes(query),
+        );
+      }
+
+      result = filtered;
+    }
+
+    setFilteredData(result);
   };
 
-  const handleMessage = (phoneNumber: string) => {
-    Linking.openURL(`sms:${phoneNumber}`);
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSearchQuery("");
+    if (tab !== "FAQs") {
+      setSelectedStateId("all");
+      setSelectedDistrictId("all");
+    }
   };
 
-  const getRelationshipColors = (relationship: string) => {
+  const handleStateSelect = async (stateId: number | "all") => {
+    setSelectedStateId(stateId);
+    setSelectedDistrictId("all");
+
+    // Load districts if a specific state is selected
+    if (stateId !== "all") {
+      await getDistrictDropDown(stateId);
+    }
+
+    setShowStateModal(false);
+  };
+
+  const handleDistrictSelect = (districtId: number | "all") => {
+    setSelectedDistrictId(districtId);
+    setShowDistrictModal(false);
+  };
+
+  const getSelectedStateName = () => {
+    if (selectedStateId === "all") return t("detailCardScreen.allStates");
+    const state = states.find((s) => s.value === selectedStateId);
+    return state ? state.label : t("detailCardScreen.selectState");
+  };
+
+  const getSelectedDistrictName = () => {
+    if (selectedDistrictId === "all") return t("detailCardScreen.allDistricts");
+    const district = districts.find((d) => d.value === selectedDistrictId);
+    return district ? district.label : t("detailCardScreen.selectDistrict");
+  };
+
+  const handleCall = (number: string) => Linking.openURL(`tel:${number}`);
+  const handleOpen = (url?: string) => {
+    if (!url) return;
+    Linking.openURL(url).catch(() => {
+      // silent fail; optionally show toast
+    });
+  };
+
+  const getStateDropDown = async () => {
+    try {
+      setIsLoadingStates(true);
+      const res = await stateDropDown();
+      if (res?.success && res?.data) {
+        console.log("States loaded:", res.data);
+        setStates(res.data);
+      }
+    } catch (error) {
+      console.log("STATE API ERROR:", error);
+    } finally {
+      setIsLoadingStates(false);
+    }
+  };
+
+  const getDistrictDropDown = async (stateId: number) => {
+    try {
+      setIsLoadingDistricts(true);
+      const res = await districtDropDown(stateId);
+      if (res?.success && res?.data) {
+        console.log("Districts loaded:", res.data);
+        const districtsWithStateId = res.data.map((district: District) => ({
+          ...district,
+          stateId,
+        }));
+        setDistricts((prevDistricts) => {
+          const filtered = prevDistricts.filter((d) => d.stateId !== stateId);
+          return [...filtered, ...districtsWithStateId];
+        });
+      }
+    } catch (error) {
+      console.log("DISTRICT API ERROR:", error);
+    } finally {
+      setIsLoadingDistricts(false);
+    }
+  };
+
+  const renderStats = () => {
+    if (isFAQTab()) return null;
+
+    const totalInState =
+      selectedStateId === "all"
+        ? allData.length
+        : allData.filter(
+            (f: Facility) => (f as Facility).stateId === selectedStateId,
+          ).length;
+
+    const totalInDistrict =
+      selectedDistrictId === "all"
+        ? selectedStateId === "all"
+          ? allData.length
+          : allData.filter(
+              (f: Facility) => (f as Facility).stateId === selectedStateId,
+            ).length
+        : allData.filter(
+            (f: Facility) => (f as Facility).districtId === selectedDistrictId,
+          ).length;
+
     return (
-      RELATIONSHIP_COLORS[relationship as keyof typeof RELATIONSHIP_COLORS] ||
-      RELATIONSHIP_COLORS.default
-    );
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const renderFamilyMember = ({
-    item,
-    index,
-  }: {
-    item: FamilyMember;
-    index: number;
-  }) => {
-    const colors = getRelationshipColors(item.relationshipName);
-
-    return (
-      <View style={[styles.memberCard, { marginTop: index === 0 ? 0 : 12 }]}>
-        {/* Card Header with Relationship Badge */}
-        <View style={styles.memberCardHeader}>
-          <View
-            style={[styles.relationshipBadge, { backgroundColor: colors.bg }]}
-          >
-            <Text style={[styles.relationshipText, { color: colors.text }]}>
-              {item.relationshipName}
-            </Text>
-          </View>
-
-          {item.additionalInfo && (
-            <View
-              style={[
-                styles.primaryBadge,
-                { backgroundColor: theme.colors.colorPrimary50 },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.primaryText,
-                  { color: theme.colors.colorPrimary600 },
-                ]}
-              >
-                Primary Contact
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Member Info Row */}
-        <View style={styles.memberInfoRow}>
-          {/* Avatar with gradient-like background */}
-          <View style={[styles.memberAvatar, { backgroundColor: colors.bg }]}>
-            {item.profilePhoto ? (
-              // Add Image component here when profile photos are available
-              <Text style={[styles.avatarInitials, { color: colors.text }]}>
-                {getInitials(item.name)}
-              </Text>
-            ) : (
-              <RemixIcon
-                name={item.gender === "Male" ? "user-3-fill" : "user-3-line"}
-                size={28}
-                color={colors.icon}
-              />
-            )}
-          </View>
-
-          <View style={styles.memberMainInfo}>
-            <Text
-              style={[
-                styles.memberName,
-                { color: theme.colors.colorTextPrimary },
-              ]}
-            >
-              {item.name}
-            </Text>
-            <View style={styles.memberMetaRow}>
-              <View style={styles.genderChip}>
-                <RemixIcon
-                  name={item.gender === "Male" ? "male-line" : "female-line"}
-                  size={14}
-                  color={item.gender === "Male" ? "#3B82F6" : "#EC4899"}
-                />
-                <Text style={styles.genderText}>{item.gender}</Text>
-              </View>
-              <Text style={styles.memberSince}>
-                Member since {new Date(item.createdDate).getFullYear()}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Contact Information Section */}
-        <View style={styles.contactSection}>
-          <View style={styles.contactItem}>
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: colors.bg + "40" },
-              ]}
-            >
-              <RemixIcon name="phone-line" size={16} color={colors.text} />
-            </View>
-            <View style={styles.contactDetails}>
-              <Text style={styles.contactLabel}>Phone</Text>
-              <Text
-                style={[
-                  styles.contactValue,
-                  { color: theme.colors.colorTextPrimary },
-                ]}
-              >
-                {item.phoneNumber}
-              </Text>
-            </View>
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: colors.bg }]}
-                onPress={() => handleCall(item.phoneNumber)}
-              >
-                <RemixIcon name="phone-fill" size={16} color={colors.text} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: colors.bg }]}
-                onPress={() => handleMessage(item.phoneNumber)}
-              >
-                <RemixIcon name="chat-1-fill" size={16} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* Address Section */}
-        <View style={styles.addressSection}>
-          <View style={styles.locationHeader}>
-            <RemixIcon
-              name="map-pin-line"
-              size={16}
-              color={theme.colors.colorTextSecondary}
-            />
-            <Text style={styles.addressLabel}>Address</Text>
-          </View>
-
+      <View style={styles.statsRow}>
+        <View
+          style={[
+            styles.statsCard,
+            { backgroundColor: theme.colors.colorPrimary50 },
+          ]}
+        >
           <Text
             style={[
-              styles.addressText,
-              { color: theme.colors.colorTextPrimary },
+              styles.statsTitle,
+              { color: theme.colors.colorTextSecondary },
             ]}
           >
-            {[item.addressLine1, item.addressLine2].filter(Boolean).join(", ")}
+            {selectedStateId === "all"
+              ? t("detailCardScreen.totalNationwide")
+              : t("detailCardScreen.facilitiesInState", {
+                  state: getSelectedStateName(),
+                })}
           </Text>
+          <Text style={[styles.statsValue, { color: theme.colors.primary }]}>
+            {totalInState}
+          </Text>
+        </View>
 
-          <View style={styles.locationTags}>
-            <View
-              style={[
-                styles.locationTag,
-                { backgroundColor: theme.colors.colorPrimary50 },
-              ]}
-            >
-              <RemixIcon
-                name="building-line"
-                size={12}
-                color={theme.colors.colorPrimary600}
-              />
-              <Text
-                style={[
-                  styles.locationTagText,
-                  { color: theme.colors.colorPrimary600 },
-                ]}
-              >
-                {item.city}
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.locationTag,
-                { backgroundColor: theme.colors.colorPrimary50 },
-              ]}
-            >
-              <RemixIcon
-                name="flag-line"
-                size={12}
-                color={theme.colors.colorPrimary600}
-              />
-              <Text
-                style={[
-                  styles.locationTagText,
-                  { color: theme.colors.colorPrimary600 },
-                ]}
-              >
-                {item.state}
-              </Text>
-            </View>
-
-            {item.landmark && (
-              <View
-                style={[styles.locationTag, { backgroundColor: "#FEF3C7" }]}
-              >
-                <RemixIcon name="navigation-line" size={12} color="#92400E" />
-                <Text style={[styles.locationTagText, { color: "#92400E" }]}>
-                  {item.landmark}
-                </Text>
-              </View>
-            )}
-
-            <View style={[styles.locationTag, { backgroundColor: "#F1F5F9" }]}>
-              <RemixIcon name="mail-line" size={12} color="#475569" />
-              <Text style={[styles.locationTagText, { color: "#475569" }]}>
-                {item.pincode}
-              </Text>
-            </View>
-          </View>
+        <View
+          style={[
+            styles.statsCard,
+            { backgroundColor: theme.colors.colorPrimary50 },
+          ]}
+        >
+          <Text
+            style={[
+              styles.statsTitle,
+              { color: theme.colors.colorTextSecondary },
+            ]}
+          >
+            {selectedDistrictId === "all"
+              ? t("detailCardScreen.allDistricts")
+              : t("detailCardScreen.inDistrict", {
+                  district: getSelectedDistrictName(),
+                })}
+          </Text>
+          <Text style={[styles.statsValue, { color: theme.colors.primary }]}>
+            {totalInDistrict}
+          </Text>
         </View>
       </View>
     );
   };
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 0:
-        return (
-          <View style={styles.tabContent}>
-            {loading ? (
-              <View style={styles.loadingContainer}>
-                <View
-                  style={[
-                    styles.loadingCard,
-                    { backgroundColor: theme.colors.colorBgSurface },
-                  ]}
-                >
-                  <RemixIcon
-                    name="loader-4-line"
-                    size={40}
-                    color={theme.colors.colorPrimary600}
-                  />
-                  <Text
-                    style={[
-                      styles.loadingText,
-                      { color: theme.colors.colorTextSecondary },
-                    ]}
-                  >
-                    Loading family members...
-                  </Text>
-                </View>
-              </View>
-            ) : familyMembers.length > 0 ? (
-              <View>
-                <View style={styles.familySummary}>
-                  <View
-                    style={[
-                      styles.summaryCard,
-                      { backgroundColor: theme.colors.colorPrimary50 },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.summaryNumber,
-                        { color: theme.colors.colorPrimary600 },
-                      ]}
-                    >
-                      {familyMembers.length}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.summaryLabel,
-                        { color: theme.colors.colorTextSecondary },
-                      ]}
-                    >
-                      Family Members
-                    </Text>
-                  </View>
-                  <View
-                    style={[styles.summaryCard, { backgroundColor: "#FEF3C7" }]}
-                  >
-                    <Text style={[styles.summaryNumber, { color: "#92400E" }]}>
-                      {
-                        familyMembers.filter(
-                          (m) =>
-                            m.relationshipName === "Daughter" ||
-                            m.relationshipName === "Son",
-                        ).length
-                      }
-                    </Text>
-                    <Text style={[styles.summaryLabel, { color: "#92400E" }]}>
-                      Children
-                    </Text>
-                  </View>
-                </View>
+  const renderFilterModal = (modalType: "state" | "district") => {
+    const isStateModal = modalType === "state";
+    const items = isStateModal
+      ? [{ value: "all", label: t("detailCardScreen.allStates") }, ...states]
+      : [
+          { value: "all", label: t("detailCardScreen.allDistricts") },
+          ...filteredDistricts,
+        ];
+    const isVisible = isStateModal ? showStateModal : showDistrictModal;
+    const onSelect = isStateModal ? handleStateSelect : handleDistrictSelect;
+    const currentId = isStateModal ? selectedStateId : selectedDistrictId;
+    const isLoading = isStateModal ? isLoadingStates : isLoadingDistricts;
 
-                <FlatList
-                  data={familyMembers}
-                  renderItem={renderFamilyMember}
-                  keyExtractor={(item) => item.id.toString()}
-                  scrollEnabled={false}
-                  showsVerticalScrollIndicator={false}
-                />
-              </View>
-            ) : (
-              <View style={styles.emptyContainer}>
-                <View
-                  style={[
-                    styles.emptyCard,
-                    { backgroundColor: theme.colors.colorBgSurface },
-                  ]}
-                >
-                  <RemixIcon
-                    name="group-line"
-                    size={60}
-                    color={theme.colors.colorTextSecondary}
-                  />
-                  <Text
-                    style={[
-                      styles.emptyTitle,
-                      { color: theme.colors.colorTextPrimary },
-                    ]}
-                  >
-                    No family members found
-                  </Text>
-                  <Text
-                    style={[
-                      styles.emptySubtext,
-                      { color: theme.colors.colorTextSecondary },
-                    ]}
-                  >
-                    Add family members to keep track of your loved ones
-                  </Text>
-                  <TouchableOpacity
-                    style={[
-                      styles.addButton,
-                      { backgroundColor: theme.colors.colorPrimary600 },
-                    ]}
-                  >
-                    <RemixIcon name="add-line" size={20} color="#fff" />
-                    <Text style={styles.addButtonText}>Add Family Member</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          </View>
-        );
-
-      case 1:
-        return (
-          <View style={styles.medicalContainer}>
-            <View style={[styles.vitalCard, { backgroundColor: "#FEF2F2" }]}>
-              <View style={styles.vitalHeader}>
-                <RemixIcon name="heart-pulse-line" size={24} color="#DC2626" />
-                <Text style={styles.vitalTitle}>Blood Group</Text>
-              </View>
-              <Text style={styles.vitalValue}>{medical.bloodGroup}</Text>
-            </View>
-
-            <View style={[styles.vitalCard, { backgroundColor: "#EFF6FF" }]}>
-              <View style={styles.vitalHeader}>
-                <RemixIcon name="stethoscope-line" size={24} color="#2563EB" />
-                <Text style={styles.vitalTitle}>Medical Conditions</Text>
-              </View>
-              <Text style={styles.vitalValue}>{medical.conditions}</Text>
-            </View>
-
-            <View style={[styles.vitalCard, { backgroundColor: "#FEFCE8" }]}>
-              <View style={styles.vitalHeader}>
-                <RemixIcon name="alert-line" size={24} color="#CA8A04" />
-                <Text style={styles.vitalTitle}>Allergies</Text>
-              </View>
-              <Text style={styles.vitalValue}>{medical.allergies}</Text>
-            </View>
-
-            <View
-              style={[
-                styles.infoGrid,
-                { backgroundColor: theme.colors.colorBgSurface },
-              ]}
-            >
-              <View style={styles.infoRow}>
-                <View style={styles.infoItem}>
-                  <RemixIcon
-                    name="user-star-line"
-                    size={18}
-                    color={theme.colors.colorTextSecondary}
-                  />
-                  <Text style={styles.infoLabel}>Primary Doctor</Text>
-                  <Text
-                    style={[
-                      styles.infoValue,
-                      { color: theme.colors.colorTextPrimary },
-                    ]}
-                  >
-                    {medical.doctor}
-                  </Text>
-                </View>
-
-                <View style={styles.infoItem}>
-                  <RemixIcon
-                    name="calendar-check-line"
-                    size={18}
-                    color={theme.colors.colorTextSecondary}
-                  />
-                  <Text style={styles.infoLabel}>Last Checkup</Text>
-                  <Text
-                    style={[
-                      styles.infoValue,
-                      { color: theme.colors.colorTextPrimary },
-                    ]}
-                  >
-                    {medical.lastCheckup}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.infoDivider} />
-
-              <View style={styles.infoItem}>
-                <RemixIcon
-                  name="shield-star-line"
-                  size={18}
-                  color={theme.colors.colorTextSecondary}
-                />
-                <Text style={styles.infoLabel}>Insurance</Text>
-                <Text
-                  style={[
-                    styles.infoValue,
-                    { color: theme.colors.colorTextPrimary },
-                  ]}
-                >
-                  {medical.insurance}
-                </Text>
-              </View>
-            </View>
-          </View>
-        );
-
-      case 2:
-        return (
-          <View style={styles.activityContainer}>
-            {activity.map((item, i) => (
+    return (
+      <Modal
+        visible={isVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() =>
+          isStateModal ? setShowStateModal(false) : setShowDistrictModal(false)
+        }
+      >
+        <TouchableWithoutFeedback
+          onPress={() =>
+            isStateModal
+              ? setShowStateModal(false)
+              : setShowDistrictModal(false)
+          }
+        >
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
               <View
-                key={i}
                 style={[
-                  styles.timelineCard,
+                  styles.modalContent,
                   { backgroundColor: theme.colors.colorBgSurface },
                 ]}
               >
-                <View style={styles.timelineRow}>
-                  <View style={styles.timelineLeft}>
-                    <View
-                      style={[
-                        styles.timelineDot,
-                        item.status === "completed" && {
-                          backgroundColor: "#22C55E",
-                        },
-                        item.status === "pending" && {
-                          backgroundColor: "#F59E0B",
-                        },
-                        item.status === "upcoming" && {
-                          backgroundColor: "#3B82F6",
-                        },
-                      ]}
-                    />
-                    {i < activity.length - 1 && (
-                      <View style={styles.timelineLine} />
-                    )}
-                  </View>
+                <Text
+                  style={[
+                    styles.modalTitle,
+                    { color: theme.colors.colorTextPrimary },
+                  ]}
+                >
+                  {isStateModal
+                    ? t("detailCardScreen.selectState")
+                    : t("detailCardScreen.selectDistrict")}
+                </Text>
 
-                  <View style={styles.timelineContent}>
-                    <View style={styles.timelineHeader}>
-                      <Text
+                {isLoading ? (
+                  <View style={styles.loadingContainer}>
+                    <Text style={{ color: theme.colors.colorTextSecondary }}>
+                      {t("detailCardScreen.loading")}
+                    </Text>
+                  </View>
+                ) : (
+                  <FlatList
+                    data={items}
+                    keyExtractor={(item) => item.value.toString()}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
                         style={[
-                          styles.timelineTitle,
-                          { color: theme.colors.colorTextPrimary },
-                        ]}
-                      >
-                        {item.title}
-                      </Text>
-                      <View
-                        style={[
-                          styles.statusPill,
-                          item.status === "completed" && {
-                            backgroundColor: "#DCFCE7",
-                          },
-                          item.status === "pending" && {
-                            backgroundColor: "#FEF3C7",
-                          },
-                          item.status === "upcoming" && {
-                            backgroundColor: "#DBEAFE",
+                          styles.modalItem,
+                          item.value === currentId && {
+                            backgroundColor: theme.colors.colorPrimary100,
                           },
                         ]}
+                        onPress={() => onSelect(item.value as any)}
                       >
                         <Text
                           style={[
-                            styles.statusPillText,
-                            item.status === "completed" && { color: "#166534" },
-                            item.status === "pending" && { color: "#92400E" },
-                            item.status === "upcoming" && { color: "#1E40AF" },
+                            styles.modalItemText,
+                            { color: theme.colors.colorTextPrimary },
                           ]}
                         >
-                          {item.status.charAt(0).toUpperCase() +
-                            item.status.slice(1)}
+                          {item.label}
                         </Text>
-                      </View>
-                    </View>
-                    <View style={styles.timelineMeta}>
-                      <RemixIcon
-                        name="calendar-line"
-                        size={14}
-                        color={theme.colors.colorTextSecondary}
-                      />
-                      <Text
-                        style={[
-                          styles.timelineDate,
-                          { color: theme.colors.colorTextSecondary },
-                        ]}
-                      >
-                        {item.date}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
+                        {item.value === currentId && (
+                          <RemixIcon
+                            name="check-line"
+                            size={20}
+                            color={theme.colors.primary}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  />
+                )}
               </View>
-            ))}
+            </TouchableWithoutFeedback>
           </View>
-        );
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
+  };
 
-      case 3:
-        return (
-          <View style={styles.documentsContainer}>
+  const renderFAQItem = (item: FAQItem) => {
+    return (
+      <View
+        key={item.id}
+        style={[
+          styles.faqCard,
+          { backgroundColor: theme.colors.colorBgSurface },
+        ]}
+      >
+        <Text
+          style={[styles.faqQuestion, { color: theme.colors.colorTextPrimary }]}
+        >
+          {item.question}
+        </Text>
+
+        <Text
+          style={[styles.faqAnswer, { color: theme.colors.colorTextSecondary }]}
+        >
+          {item.answer}
+        </Text>
+
+        {item.category && (
+          <View style={styles.faqCategory}>
+            <Text
+              style={[
+                styles.faqCategoryText,
+                { color: theme.colors.colorTextTertiary },
+              ]}
+            >
+              {item.category}
+            </Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderFacilityItem = (item: Facility) => {
+    return (
+      <View
+        key={item.id}
+        style={[styles.card, { backgroundColor: theme.colors.colorBgSurface }]}
+      >
+        {/* Card Header */}
+        <View style={styles.cardHeader}>
+          <Text
+            style={[styles.cardTitle, { color: theme.colors.colorTextPrimary }]}
+          >
+            {item.name}
+          </Text>
+
+          {item.status ? (
             <View
               style={[
-                styles.documentCard,
-                { backgroundColor: theme.colors.colorBgSurface },
+                item.status === "open"
+                  ? {
+                      backgroundColor: theme.colors.validationWarningBg,
+                    }
+                  : {
+                      backgroundColor: theme.colors.validationErrorBg,
+                    },
+                styles.statusBadge,
               ]}
             >
-              <View style={styles.documentIcon}>
-                <RemixIcon name="file-pdf-line" size={32} color="#DC2626" />
-              </View>
-              <View style={styles.documentInfo}>
-                <Text
-                  style={[
-                    styles.documentName,
-                    { color: theme.colors.colorTextPrimary },
-                  ]}
-                >
-                  Medical History.pdf
-                </Text>
-                <Text
-                  style={[
-                    styles.documentSize,
-                    { color: theme.colors.colorTextSecondary },
-                  ]}
-                >
-                  2.4 MB • Uploaded 12 Feb 2026
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.documentAction}>
-                <RemixIcon
-                  name="download-line"
-                  size={20}
-                  color={theme.colors.colorPrimary600}
-                />
-              </TouchableOpacity>
+              <Text
+                style={[
+                  item.status === "open"
+                    ? { color: theme.colors.validationWarningText }
+                    : { color: theme.colors.validationErrorText },
+                  styles.statusText,
+                ]}
+              >
+                {item.status === "open"
+                  ? t("detailCardScreen.open")
+                  : t("detailCardScreen.closed")}
+              </Text>
             </View>
+          ) : null}
+        </View>
 
-            <View
-              style={[
-                styles.documentCard,
-                { backgroundColor: theme.colors.colorBgSurface },
-              ]}
-            >
-              <View style={styles.documentIcon}>
-                <RemixIcon name="file-image-line" size={32} color="#2563EB" />
-              </View>
-              <View style={styles.documentInfo}>
-                <Text
-                  style={[
-                    styles.documentName,
-                    { color: theme.colors.colorTextPrimary },
-                  ]}
-                >
-                  Prescription_Feb2026.jpg
-                </Text>
-                <Text
-                  style={[
-                    styles.documentSize,
-                    { color: theme.colors.colorTextSecondary },
-                  ]}
-                >
-                  1.1 MB • Uploaded 15 Feb 2026
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.documentAction}>
-                <RemixIcon
-                  name="download-line"
-                  size={20}
-                  color={theme.colors.colorPrimary600}
-                />
-              </TouchableOpacity>
-            </View>
+        <Text
+          style={[
+            styles.hospitalType,
+            { color: theme.colors.colorTextSecondary },
+          ]}
+        >
+          {item.descriptions}
+        </Text>
 
-            <TouchableOpacity
-              style={[
-                styles.uploadButton,
-                { borderColor: theme.colors.colorPrimary600 },
-              ]}
-            >
+        {item.address ? (
+          <>
+            <View style={styles.addressRow}>
               <RemixIcon
-                name="upload-2-line"
-                size={20}
-                color={theme.colors.colorPrimary600}
+                name="map-pin-line"
+                size={18}
+                color={theme.colors.colorTextSecondary}
               />
               <Text
                 style={[
-                  styles.uploadButtonText,
-                  { color: theme.colors.colorPrimary600 },
+                  styles.addressText,
+                  { color: theme.colors.colorTextSecondary },
                 ]}
               >
-                Upload New Document
+                {item.address}
+              </Text>
+              <View style={styles.locationTags}>
+                <Text
+                  style={[
+                    styles.locationTag,
+                    { backgroundColor: theme.colors.colorPrimary100 },
+                  ]}
+                >
+                  {item.district}
+                </Text>
+                <Text
+                  style={[
+                    styles.locationTag,
+                    { backgroundColor: theme.colors.colorPrimary100 },
+                  ]}
+                >
+                  {item.state}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.contactRow}>
+              <RemixIcon
+                name="phone-line"
+                size={16}
+                color={theme.colors.colorTextSecondary}
+              />
+              <Text
+                style={[
+                  styles.contactText,
+                  { color: theme.colors.colorTextSecondary },
+                ]}
+              >
+                {item.contactPhone}
+              </Text>
+            </View>
+          </>
+        ) : null}
+
+        <View style={styles.btnRow}>
+          <TouchableOpacity
+            style={[styles.outlineBtn, { borderColor: theme.colors.primary }]}
+            onPress={() => {
+              // Placeholder for view details action
+            }}
+          >
+            <Text
+              style={[styles.outlineBtnText, { color: theme.colors.primary }]}
+            >
+              {t("detailCardScreen.viewDetails")}
+            </Text>
+          </TouchableOpacity>
+
+          {item.contactPhone ? (
+            <TouchableOpacity
+              style={[
+                styles.callBtn,
+                { backgroundColor: theme.colors.primary },
+              ]}
+              onPress={() => handleCall(item.contactPhone)}
+            >
+              <RemixIcon
+                name="phone-line"
+                size={20}
+                color={theme.colors.btnPrimaryText}
+              />
+              <Text
+                style={[
+                  styles.callBtnText,
+                  { color: theme.colors.btnPrimaryText },
+                ]}
+              >
+                {t("detailCardScreen.call")}
               </Text>
             </TouchableOpacity>
-          </View>
-        );
+          ) : null}
+        </View>
+      </View>
+    );
+  };
+
+  const renderItem = (item: any) => {
+    if (isFAQTab()) {
+      return renderFAQItem(item as FAQItem);
+    } else {
+      return renderFacilityItem(item as Facility);
     }
   };
 
   return (
-    <BodyLayout type="screen" screenName="Customer Details">
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* PROFILE CARD */}
+    <BodyLayout type={"screen"} screenName="Detail Screen">
+      {/* Header */}
+      <View style={styles.headerContainer}>
+        <View style={styles.categoryHeader}>
+          <Text style={[styles.categoryTitle, { color: theme.colors.primary }]}>
+            {getCategoryTitle()}
+          </Text>
+        </View>
+
+        {/* Search Bar */}
         <View
           style={[
-            styles.profileCard,
+            styles.searchContainer,
             {
-              backgroundColor: theme.colors.colorPrimary50,
+              backgroundColor: theme.colors.colorBgSurface,
+              borderColor: theme.colors.colorPrimary600,
             },
           ]}
         >
-          <View style={styles.profileHeader}>
-            <View style={styles.profileAvatarWrapper}>
-              <View
-                style={[
-                  styles.profileAvatar,
-                  { backgroundColor: theme.colors.colorPrimary100 },
-                ]}
-              >
-                <RemixIcon
-                  name="user-3-fill"
-                  size={36}
-                  color={theme.colors.colorPrimary600}
-                />
-              </View>
-              <View
-                style={[
-                  styles.profileBadge,
-                  { backgroundColor: theme.colors.colorPrimary600 },
-                ]}
-              >
-                <RemixIcon name="verified-badge-fill" size={16} color="#fff" />
-              </View>
-            </View>
+          <RemixIcon
+            name="search-line"
+            size={20}
+            color={theme.colors.colorTextSecondary}
+          />
+          <TextInput
+            style={[
+              styles.searchInput,
+              { color: theme.colors.colorTextPrimary },
+            ]}
+            placeholder={
+              isFAQTab()
+                ? t("detailCardScreen.searchFAQPlaceholder")
+                : t("detailCardScreen.searchPlaceholder", {
+                    category: getTranslatedActiveTabLabel(),
+                  })
+            }
+            placeholderTextColor={theme.colors.colorTextSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery ? (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <RemixIcon
+                name="close-line"
+                size={20}
+                color={theme.colors.colorTextSecondary}
+              />
+            </TouchableOpacity>
+          ) : null}
+        </View>
 
-            <View style={styles.profileInfo}>
+        {/* Filter Buttons Row - Only show for non-FAQ tabs */}
+        {!isFAQTab() && (
+          <View style={styles.filterRow}>
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                { backgroundColor: theme.colors.colorPrimary50 },
+              ]}
+              onPress={() => setShowStateModal(true)}
+              disabled={isLoadingStates}
+            >
               <Text
                 style={[
-                  styles.profileName,
-                  { color: theme.colors.colorTextPrimary },
+                  styles.filterButtonText,
+                  { color: theme.colors.primary },
                 ]}
               >
-                {customer.name}
+                {isLoadingStates
+                  ? t("detailCardScreen.loading")
+                  : getSelectedStateName()}
               </Text>
+              <RemixIcon
+                name="arrow-down-s-line"
+                size={16}
+                color={theme.colors.primary}
+              />
+            </TouchableOpacity>
 
-              <View style={styles.profileTags}>
-                <View
-                  style={[
-                    styles.profileTag,
-                    { backgroundColor: theme.colors.colorPrimary100 },
-                  ]}
-                >
-                  <RemixIcon
-                    name="cake-line"
-                    size={14}
-                    color={theme.colors.colorPrimary600}
-                  />
-                  <Text
-                    style={[
-                      styles.profileTagText,
-                      { color: theme.colors.colorPrimary600 },
-                    ]}
-                  >
-                    {customer.age} yrs
-                  </Text>
-                </View>
-
-                <View
-                  style={[
-                    styles.profileTag,
-                    { backgroundColor: theme.colors.colorPrimary100 },
-                  ]}
-                >
-                  <RemixIcon
-                    name={
-                      customer.gender === "Male" ? "male-line" : "female-line"
-                    }
-                    size={14}
-                    color={theme.colors.colorPrimary600}
-                  />
-                  <Text
-                    style={[
-                      styles.profileTagText,
-                      { color: theme.colors.colorPrimary600 },
-                    ]}
-                  >
-                    {customer.gender}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.profileContact}>
-                <View style={styles.profileContactItem}>
-                  <RemixIcon
-                    name="phone-line"
-                    size={14}
-                    color={theme.colors.colorTextSecondary}
-                  />
-                  <Text
-                    style={[
-                      styles.profileContactText,
-                      { color: theme.colors.colorTextSecondary },
-                    ]}
-                  >
-                    {customer.phone}
-                  </Text>
-                </View>
-
-                <View style={styles.profileContactItem}>
-                  <RemixIcon
-                    name="map-pin-line"
-                    size={14}
-                    color={theme.colors.colorTextSecondary}
-                  />
-                  <Text
-                    style={[
-                      styles.profileContactText,
-                      { color: theme.colors.colorTextSecondary },
-                    ]}
-                  >
-                    {customer.address}
-                  </Text>
-                </View>
-              </View>
-            </View>
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                { backgroundColor: theme.colors.colorPrimary50 },
+              ]}
+              onPress={() => setShowDistrictModal(true)}
+              disabled={selectedStateId === "all" || isLoadingDistricts}
+            >
+              <Text
+                style={[
+                  styles.filterButtonText,
+                  {
+                    color:
+                      selectedStateId === "all" || isLoadingDistricts
+                        ? theme.colors.colorTextSecondary
+                        : theme.colors.primary,
+                  },
+                ]}
+              >
+                {isLoadingDistricts
+                  ? t("detailCardScreen.loading")
+                  : getSelectedDistrictName()}
+              </Text>
+              <RemixIcon
+                name="arrow-down-s-line"
+                size={16}
+                color={
+                  selectedStateId === "all" || isLoadingDistricts
+                    ? theme.colors.colorTextSecondary
+                    : theme.colors.primary
+                }
+              />
+            </TouchableOpacity>
           </View>
-        </View>
+        )}
 
         {/* TABS */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.tabsWrapper}
-          contentContainerStyle={styles.tabsContent}
+          style={styles.tabsScrollView}
+          contentContainerStyle={styles.tabsContentContainer}
         >
-          {tabs.map((tab, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={() => setActiveTab(index)}
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.label;
+            return (
+              <TouchableOpacity
+                key={tab.id}
+                style={[
+                  styles.tab,
+                  {
+                    borderColor: theme.colors.primary,
+                  },
+                  isActive && {
+                    backgroundColor: theme.colors.primary,
+                  },
+                ]}
+                onPress={() => handleTabChange(tab.label)}
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    { color: theme.colors.primary },
+                    isActive && {
+                      color: theme.colors.btnPrimaryText,
+                    },
+                  ]}
+                >
+                  {getTranslatedTabLabel(tab)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      {/* Content */}
+      <ScrollView
+        style={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.contentContainerStyle}
+      >
+        {isLoadingData && (
+          <View style={styles.loadingContainer}>
+            <Text style={{ color: theme.colors.colorTextSecondary }}>
+              {isFAQTab()
+                ? t("detailCardScreen.loadingFAQs")
+                : t("detailCardScreen.loadingFacilities")}
+            </Text>
+          </View>
+        )}
+
+        {/* STATS - Only show for non-FAQ tabs */}
+        {!isLoadingData && !isFAQTab() && renderStats()}
+
+        {/* DATA CARDS */}
+        {!isLoadingData && filteredData.map((item) => renderItem(item))}
+
+        {/* Empty State */}
+        {!isLoadingData && filteredData.length === 0 && (
+          <View style={styles.emptyState}>
+            <RemixIcon
+              name="search-line"
+              size={60}
+              color={theme.colors.colorTextSecondary}
+            />
+            <Text
               style={[
-                styles.tab,
-                activeTab === index && {
-                  backgroundColor: theme.colors.colorPrimary600,
-                },
+                styles.emptyStateText,
+                { color: theme.colors.colorTextSecondary },
               ]}
             >
+              {isFAQTab()
+                ? t("detailCardScreen.noFAQsFound")
+                : t("detailCardScreen.noResults")}
+            </Text>
+            {searchQuery && (
               <Text
                 style={[
-                  styles.tabText,
+                  styles.emptyStateSubtext,
                   { color: theme.colors.colorTextSecondary },
-                  activeTab === index && { color: "#fff" },
                 ]}
               >
-                {tab}
+                {t("detailCardScreen.adjustSearch")}
               </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+            )}
+          </View>
+        )}
 
-        {/* TAB CONTENT */}
-        <View style={styles.tabContentContainer}>{renderTabContent()}</View>
+        <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Modals */}
+      {renderFilterModal("state")}
+      {renderFilterModal("district")}
     </BodyLayout>
   );
 }
 
-/* STYLES */
+/* ------------ STYLES ------------ */
 const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: verticalScale(30),
-  },
-
-  profileCard: {
-    marginTop: verticalScale(14),
-    marginHorizontal: moderateScale(16),
-    padding: moderateScale(20),
-    borderRadius: 24,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-
-  profileHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  profileAvatarWrapper: {
-    position: "relative",
-    marginRight: 16,
-  },
-
-  profileAvatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  profileBadge: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-
-  profileInfo: {
-    flex: 1,
-  },
-
-  profileName: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 6,
-  },
-
-  profileTags: {
-    flexDirection: "row",
-    marginBottom: 8,
-  },
-
-  profileTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 16,
-    marginRight: 8,
-  },
-
-  profileTagText: {
-    fontSize: 12,
-    fontWeight: "600",
-    marginLeft: 4,
-  },
-
-  profileContact: {
-    gap: 4,
-  },
-
-  profileContactItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  profileContactText: {
-    fontSize: 13,
-    marginLeft: 6,
-  },
-
-  tabsWrapper: {
-    marginTop: 20,
-  },
-
-  tabsContent: {
-    paddingHorizontal: moderateScale(16),
-    gap: 8,
-  },
-
-  tab: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-
-  tabText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-
-  tabContentContainer: {
-    paddingHorizontal: moderateScale(16),
-    marginTop: 20,
-  },
-
-  tabContent: {
-    flex: 1,
-  },
-
-  // Family Summary Styles
-  familySummary: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 20,
-  },
-
-  summaryCard: {
-    flex: 1,
-    padding: moderateScale(16),
-    borderRadius: 16,
-    alignItems: "center",
-  },
-
-  summaryNumber: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-
-  summaryLabel: {
-    fontSize: 13,
-    fontWeight: "500",
-  },
-
-  // Member Card Styles
-  memberCard: {
+  headerContainer: {
     backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: moderateScale(16),
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
   },
-
-  memberCardHeader: {
+  categoryHeader: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  categoryTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  contentContainerStyle: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 40,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 12,
+    borderWidth: 1,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  filterRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    marginHorizontal: 16,
     marginBottom: 12,
+    gap: 10,
   },
-
-  relationshipBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+  filterButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    minHeight: 44,
+  },
+  filterButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  tabsScrollView: {
+    marginHorizontal: 16,
+  },
+  tabsContentContainer: {
+    paddingRight: 16,
+  },
+  tab: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
-  },
-
-  relationshipText: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-
-  primaryBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-
-  primaryText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-
-  memberInfoRow: {
-    flexDirection: "row",
-    marginBottom: 16,
-  },
-
-  memberAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 14,
-  },
-
-  avatarInitials: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-
-  memberMainInfo: {
-    flex: 1,
-    justifyContent: "center",
-  },
-
-  memberName: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 6,
-  },
-
-  memberMetaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  genderChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F3F4F6",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    borderWidth: 1,
     marginRight: 8,
+    marginVertical: 4,
+    minHeight: 36,
+    justifyContent: "center",
   },
-
-  genderText: {
-    fontSize: 12,
-    color: "#4B5563",
-    marginLeft: 4,
+  tabText: {
+    fontWeight: "600",
+    fontSize: 14,
   },
-
-  memberSince: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-
-  contactSection: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 16,
-    padding: 12,
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    marginTop: 8,
     marginBottom: 16,
   },
-
-  contactItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-
-  contactDetails: {
-    flex: 1,
-  },
-
-  contactLabel: {
-    fontSize: 11,
-    color: "#6B7280",
-    marginBottom: 2,
-  },
-
-  contactValue: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  actionButtons: {
-    flexDirection: "row",
-    gap: 8,
-  },
-
-  actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  addressSection: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 16,
+  statsCard: {
+    width: width * 0.415,
     padding: 12,
+    borderRadius: 12,
+    marginTop: 8,
+    minHeight: 90,
   },
-
-  locationHeader: {
+  statsTitle: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  statsValue: {
+    fontSize: 24,
+    fontWeight: "700",
+    marginTop: 4,
+  },
+  card: {
+    marginTop: 20,
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  faqCard: {
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  cardHeader: {
     flexDirection: "row",
-    alignItems: "center",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 8,
   },
-
-  addressLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#374151",
-    marginLeft: 6,
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    flex: 1,
+    marginRight: 8,
+    lineHeight: 20,
   },
-
-  addressText: {
+  faqQuestion: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  faqAnswer: {
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 12,
   },
-
+  faqCategory: {
+    marginTop: 8,
+  },
+  faqCategoryText: {
+    fontSize: 12,
+    fontStyle: "italic",
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    minWidth: 60,
+    alignItems: "center",
+  },
+  statusText: {
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  hospitalType: {
+    marginTop: 4,
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  addressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+    flexWrap: "wrap",
+  },
+  addressText: {
+    marginLeft: 6,
+    marginRight: 8,
+    fontSize: 14,
+    flex: 1,
+    lineHeight: 20,
+  },
   locationTags: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    marginLeft: "auto",
   },
-
   locationTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
-  },
-
-  locationTagText: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-
-  // Medical Tab Styles
-  medicalContainer: {
-    gap: 12,
-  },
-
-  vitalCard: {
-    padding: moderateScale(16),
-    borderRadius: 16,
-  },
-
-  vitalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-
-  vitalTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginLeft: 8,
-  },
-
-  vitalValue: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#111827",
-  },
-
-  infoGrid: {
-    padding: moderateScale(16),
-    borderRadius: 16,
-    marginTop: 4,
-  },
-
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-
-  infoItem: {
-    flex: 1,
-  },
-
-  infoLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginTop: 4,
-    marginBottom: 2,
-  },
-
-  infoValue: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  infoDivider: {
-    height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 16,
-  },
-
-  // Activity Tab Styles
-  activityContainer: {
-    gap: 12,
-  },
-
-  timelineCard: {
-    padding: moderateScale(16),
-    borderRadius: 16,
-  },
-
-  timelineRow: {
-    flexDirection: "row",
-  },
-
-  timelineLeft: {
-    alignItems: "center",
-    marginRight: 16,
-  },
-
-  timelineDot: {
-    width: 12,
-    height: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
     borderRadius: 6,
+    fontSize: 10,
+    marginLeft: 4,
     marginTop: 4,
   },
-
-  timelineLine: {
-    width: 2,
-    flex: 1,
-    backgroundColor: "#E5E7EB",
-    marginTop: 4,
+  contactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
   },
-
-  timelineContent: {
-    flex: 1,
+  contactText: {
+    marginLeft: 6,
+    fontSize: 14,
+    lineHeight: 20,
   },
-
-  timelineHeader: {
+  distanceBox: {
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  distanceText: {
+    fontWeight: "500",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  btnRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 6,
+    marginTop: 14,
+    gap: 10,
   },
-
-  timelineTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+  outlineBtn: {
     flex: 1,
-  },
-
-  statusPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-
-  statusPillText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-
-  timelineMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  timelineDate: {
-    fontSize: 13,
-    marginLeft: 6,
-  },
-
-  // Documents Tab Styles
-  documentsContainer: {
-    gap: 12,
-  },
-
-  documentCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: moderateScale(16),
-    borderRadius: 16,
-  },
-
-  documentIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#F3F4F6",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-
-  documentInfo: {
-    flex: 1,
-  },
-
-  documentName: {
-    fontSize: 15,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-
-  documentSize: {
-    fontSize: 12,
-  },
-
-  documentAction: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  uploadButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 14,
-    borderRadius: 12,
     borderWidth: 1,
-    borderStyle: "dashed",
-    marginTop: 8,
-    gap: 8,
-  },
-
-  uploadButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  // Empty States
-  emptyContainer: {
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     alignItems: "center",
+    minHeight: 44,
     justifyContent: "center",
-    paddingVertical: 40,
   },
-
-  emptyCard: {
+  outlineBtnText: {
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  callBtn: {
+    flex: 1,
+    flexDirection: "row",
     alignItems: "center",
-    padding: moderateScale(32),
-    borderRadius: 24,
-    width: "100%",
+    paddingVertical: 12,
+    paddingHorizontal: 22,
+    borderRadius: 10,
+    justifyContent: "center",
+    minHeight: 44,
   },
-
-  emptyTitle: {
+  callBtnText: {
+    marginLeft: 6,
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: width * 0.8,
+    height: height * 0.6,
+    borderRadius: 12,
+    padding: 20,
+  },
+  modalTitle: {
     fontSize: 18,
     fontWeight: "700",
-    marginTop: 16,
-    marginBottom: 8,
+    marginBottom: 16,
   },
-
-  emptySubtext: {
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 24,
-  },
-
-  addButton: {
+  modalItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
+    justifyContent: "space-between",
     paddingVertical: 12,
-    borderRadius: 24,
-    gap: 8,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    minHeight: 48,
   },
-
-  addButtonText: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "600",
+  modalItemText: {
+    fontSize: 16,
+    flex: 1,
   },
-
   loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 40,
   },
-
-  loadingCard: {
+  emptyState: {
     alignItems: "center",
-    padding: moderateScale(32),
-    borderRadius: 24,
+    justifyContent: "center",
+    paddingVertical: 60,
   },
-
-  loadingText: {
-    fontSize: 15,
-    marginTop: 12,
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginTop: 16,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    marginTop: 8,
   },
 });
