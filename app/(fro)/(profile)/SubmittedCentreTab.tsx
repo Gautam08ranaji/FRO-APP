@@ -698,6 +698,7 @@ export default function KnowledgeCenterTab() {
             status: hospital.isActive ? "Open" : "Closed",
             distance: "5 km",
             type: "HOSPITAL",
+            latLong: hospital.latLong,
           })) ?? [];
 
         const palliativeItems: ListItem[] =
@@ -877,6 +878,10 @@ export default function KnowledgeCenterTab() {
     // Implement calling functionality
     // Linking.openURL(`tel:${phoneNumber}`);
   };
+  useEffect(() => {
+    console.log("Selected tab:", filter);
+    console.log("Filtered data:", filteredItems);
+  }, [filter]);
 
   /* ================= UI COMPONENTS ================= */
   const FilterButton = ({ filterType }: { filterType: FilterType }) => {

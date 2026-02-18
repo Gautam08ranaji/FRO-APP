@@ -8,7 +8,7 @@ import {
 
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
-import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -888,9 +888,7 @@ export default function DetailCardScreen() {
         <View style={styles.btnRow}>
           <TouchableOpacity
             style={[styles.outlineBtn, { borderColor: theme.colors.primary }]}
-            onPress={() => {
-              // Placeholder for view details action
-            }}
+            onPress={() => handleViewDetails(item)}
           >
             <Text
               style={[styles.outlineBtnText, { color: theme.colors.primary }]}
@@ -925,6 +923,19 @@ export default function DetailCardScreen() {
         </View>
       </View>
     );
+  };
+
+  const handleViewDetails = (item: any) => {
+    console.log("View details:", item);
+
+    router.push({
+      pathname: "/(fro)/(community)/Viewdetails",
+      params: {
+        item: JSON.stringify(item),
+        tab: activeTab,
+        category,
+      },
+    });
   };
 
   const renderItem = (item: any) => {

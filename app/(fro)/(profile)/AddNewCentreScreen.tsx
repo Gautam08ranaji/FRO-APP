@@ -1,5 +1,6 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { addMobileAppMaster } from "@/features/fro/hospitalMasterApi";
+import { useLocation } from "@/hooks/LocationContext";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { useLocalSearchParams } from "expo-router";
@@ -20,6 +21,8 @@ import {
 export default function AddNewCentreScreen() {
   const params = useLocalSearchParams();
   const authState = useAppSelector((state) => state.auth);
+  const { fetchLocation } = useLocation();
+
   const { theme } = useTheme();
 
   const centreType = Array.isArray(params.centreType)
@@ -71,21 +74,8 @@ export default function AddNewCentreScreen() {
   /* ================= HANDLE SUBMIT ================= */
 
   const handleSubmit = async () => {
-    // Validation
     if (!formData.centreName.trim()) {
       Alert.alert("Error", "Please enter centre name");
-      return;
-    }
-    if (!formData.address1.trim()) {
-      Alert.alert("Error", "Please enter address line 1");
-      return;
-    }
-    if (!formData.district.trim()) {
-      Alert.alert("Error", "Please enter district");
-      return;
-    }
-    if (!formData.primaryPhone.trim()) {
-      Alert.alert("Error", "Please enter primary contact number");
       return;
     }
 
@@ -94,22 +84,23 @@ export default function AddNewCentreScreen() {
       return;
     }
 
-    const endpoint = centreType as string;
-
-    if (!endpoint || typeof endpoint !== "string") {
-      Alert.alert("Error", "Invalid centre type");
-      return;
-    }
-
     try {
       setIsLoading(true);
 
+      // 👉 Fetch current GPS location
+      const location = await fetchLocation();
+
+      const latLong = location?.coords
+        ? `${location.coords.latitude},${location.coords.longitude}`
+        : "";
+
       const res = await addMobileAppMaster({
-        endpoint,
+        endpoint: centreType as string,
         bearerToken: authState.token,
         antiForgeryToken: authState.antiforgeryToken,
         data: {
           ...buildPayload(),
+          latLong, // ⭐ dynamic lat long
           userId: authState.userId,
         },
       });
@@ -118,7 +109,6 @@ export default function AddNewCentreScreen() {
 
       if (res?.success) {
         Alert.alert("Success", res.data?.message || "Centre added");
-        // router.replace("/(fro)/(profile)")
       } else {
         Alert.alert("Failed", "Centre creation failed");
       }

@@ -36,7 +36,7 @@ const getCoordinatesFromItem = (item: any) => {
     };
   }
 
-  // Try latLong field first (from your data structure)
+  // Try latLong string format (from your data)
   if (
     item?.latLong &&
     typeof item.latLong === "string" &&
@@ -52,7 +52,7 @@ const getCoordinatesFromItem = (item: any) => {
     }
   }
 
-  // Try different possible coordinate fields as fallback
+  // Try different possible coordinate fields
   if (item?.latitude && item?.longitude) {
     return {
       latitude: parseFloat(item.latitude),
@@ -206,8 +206,8 @@ export default function HospitalDetailScreen() {
   // Open in external maps app
   const openInMaps = () => {
     const url = Platform.select({
-      ios: `http://maps.apple.com/?ll=${coordinates.latitude},${coordinates.longitude}&q=${encodeURIComponent(item.title || "Location")}`,
-      android: `geo:${coordinates.latitude},${coordinates.longitude}?q=${coordinates.latitude},${coordinates.longitude}(${encodeURIComponent(item.title || "Location")})`,
+      ios: `http://maps.apple.com/?ll=${coordinates.latitude},${coordinates.longitude}&q=${encodeURIComponent(item.name || "Location")}`,
+      android: `geo:${coordinates.latitude},${coordinates.longitude}?q=${coordinates.latitude},${coordinates.longitude}(${encodeURIComponent(item.name || "Location")})`,
       default: `https://www.google.com/maps/search/?api=1&query=${coordinates.latitude},${coordinates.longitude}`,
     });
 
@@ -233,30 +233,29 @@ export default function HospitalDetailScreen() {
       <View style={[styles.card, { backgroundColor: colors.colorBgSurface }]}>
         <View style={styles.headerRow}>
           <Text style={[styles.title, { color: colors.colorTextPrimary }]}>
-            {item.title}
+            {item.name}
           </Text>
 
           <View
             style={[
               styles.openBadge,
-              item.status !== "Open" && { backgroundColor: "#E5E7EB" },
+              item.status !== "open" && { backgroundColor: "#E5E7EB" },
             ]}
           >
             <Text
               style={[
                 styles.openText,
-                item.status !== "Open" && { color: "#6B7280" },
+                item.status !== "open" && { color: "#6B7280" },
               ]}
             >
-              {item.status}
+              {item.status === "open" ? "Open" : item.status}
             </Text>
           </View>
         </View>
 
-        <InfoRow label="Category:" value={item.category} />
-        <InfoRow label="Type:" value={item.type} />
-        <InfoRow label="Hospital Type:" value={item.hospitalType} />
-        <InfoRow label="Distance:" value={item.distance} />
+        <InfoRow label="Category:" value={item.type} />
+        <InfoRow label="Type:" value="Hospital" />
+        <InfoRow label="Hospital Type:" value={item.type} />
         <InfoRow label="Created On:" value={formatDate(item.createdDate)} />
       </View>
 
@@ -265,13 +264,15 @@ export default function HospitalDetailScreen() {
         <Text
           style={[styles.description, { color: colors.colorTextSecondary }]}
         >
-          {item.description || "No description available"}
+          {item.descriptions || "No description available"}
         </Text>
       </Section>
 
       {/* ================= ADDRESS ================= */}
       <Section title="Address">
         <InfoRow label="Location:" value={item.address} />
+        <InfoRow label="District:" value={item.district} />
+        <InfoRow label="State:" value={item.state} />
 
         <View style={styles.coordinateRow}>
           <Text
@@ -322,8 +323,10 @@ export default function HospitalDetailScreen() {
 
       {/* ================= CONTACT INFO ================= */}
       <Section title="Contact Information">
+        <InfoRow label="Contact Person:" value={item.contactName} />
         <InfoRow label="Phone:" value={item.contactPhone} />
         <InfoRow label="Email:" value={item.contactEmail} />
+        <InfoRow label="Website:" value={item.contactWebsite} />
       </Section>
 
       {/* ================= INTERACTIVE MAP ================= */}
@@ -350,7 +353,7 @@ export default function HospitalDetailScreen() {
                 latitude: coordinates.latitude,
                 longitude: coordinates.longitude,
               }}
-              title={item.title}
+              title={item.name}
               description={item.address || "Location"}
             >
               <View style={styles.markerContainer}>
@@ -375,7 +378,7 @@ export default function HospitalDetailScreen() {
                   { color: colors.colorTextPrimary },
                 ]}
               >
-                {coordinates.isStatic ? "Static Location" : item.title}
+                {coordinates.isStatic ? "Static Location" : item.name}
               </Text>
             </View>
             {coordinates.isStatic && (
