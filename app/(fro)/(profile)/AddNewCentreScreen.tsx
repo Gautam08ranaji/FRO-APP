@@ -1,6 +1,7 @@
 import BodyLayout from "@/components/layout/BodyLayout";
 import { addMobileAppMaster } from "@/features/fro/hospitalMasterApi";
 import { useAppSelector } from "@/store/hooks";
+import { useTheme } from "@/theme/ThemeContext";
 import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -14,21 +15,17 @@ import {
   View,
 } from "react-native";
 
-/* ================= ENDPOINT MAP ================= */
-
-
-
 /* ================= SCREEN ================= */
 
 export default function AddNewCentreScreen() {
   const params = useLocalSearchParams();
   const authState = useAppSelector((state) => state.auth);
+  const { theme } = useTheme();
 
   const centreType = Array.isArray(params.centreType)
     ? params.centreType[0]
     : params.centreType;
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [is24x7, setIs24x7] = useState(true);
   const [isEmergency, setIsEmergency] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,9 +55,9 @@ export default function AddNewCentreScreen() {
     name: formData.centreName,
     description: formData.description,
     state: formData.state,
-    stateId: 22,          // ⚠️ replace with selected stateId
+    stateId: 22, //
     district: formData.district,
-    districtId: 22,       // ⚠️ replace with selected districtId
+    districtId: 22, //
     city: "",
     latLong: "",
     address: `${formData.address1} ${formData.address2}`.trim(),
@@ -73,78 +70,87 @@ export default function AddNewCentreScreen() {
 
   /* ================= HANDLE SUBMIT ================= */
 
- const handleSubmit = async () => {
-  if (!authState.userId || !authState.token || !authState.antiforgeryToken) {
-    Alert.alert("Error", "User not authenticated");
-    return;
-  }
-
-  const endpoint = centreType as string;
-
-  // ✅ simple validation only
-  if (!endpoint || typeof endpoint !== "string") {
-    Alert.alert("Error", "Invalid centre type");
-    return;
-  }
-
-  try {
-    setIsLoading(true);
-
-    const res = await addMobileAppMaster({
-      endpoint, // ✅ EXACT value from route param
-      bearerToken: authState.token,
-      antiForgeryToken: authState.antiforgeryToken,
-      data: {
-        ...buildPayload(),
-        userId: authState.userId,
-      },
-    });
-
-    console.log("ADD CENTRE RESPONSE:", res);
-
-    if (res?.success) {
-      Alert.alert("Success", res.data?.message || "Centre added");
-      // router.replace("/(fro)/(profile)")
-    } else {
-      Alert.alert("Failed", "Centre creation failed");
+  const handleSubmit = async () => {
+    // Validation
+    if (!formData.centreName.trim()) {
+      Alert.alert("Error", "Please enter centre name");
+      return;
     }
-  } catch (error: any) {
-    console.error("❌ ADD CENTRE ERROR:", error);
-
-    Alert.alert(
-      "Error",
-      error?.message ||
-        error?.data?.Errors?.[0] ||
-        "Something went wrong. Please try again."
-    );
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-
-  /* ================= HANDLE NEXT STEP ================= */
-
-  const handleNextStep = () => {
-    if (step === 1) {
-      if (!formData.centreName.trim()) {
-        Alert.alert("Error", "Please enter centre name");
-        return;
-      }
-      setStep(2);
-    } else if (step === 2) {
-      if (!formData.address1.trim()) {
-        Alert.alert("Error", "Please enter address line 1");
-        return;
-      }
-      if (!formData.district.trim()) {
-        Alert.alert("Error", "Please enter district");
-        return;
-      }
-      setStep(3);
-    } else {
-      handleSubmit();
+    if (!formData.address1.trim()) {
+      Alert.alert("Error", "Please enter address line 1");
+      return;
     }
+    if (!formData.district.trim()) {
+      Alert.alert("Error", "Please enter district");
+      return;
+    }
+    if (!formData.primaryPhone.trim()) {
+      Alert.alert("Error", "Please enter primary contact number");
+      return;
+    }
+
+    if (!authState.userId || !authState.token || !authState.antiforgeryToken) {
+      Alert.alert("Error", "User not authenticated");
+      return;
+    }
+
+    const endpoint = centreType as string;
+
+    if (!endpoint || typeof endpoint !== "string") {
+      Alert.alert("Error", "Invalid centre type");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const res = await addMobileAppMaster({
+        endpoint,
+        bearerToken: authState.token,
+        antiForgeryToken: authState.antiforgeryToken,
+        data: {
+          ...buildPayload(),
+          userId: authState.userId,
+        },
+      });
+
+      console.log("ADD CENTRE RESPONSE:", res);
+
+      if (res?.success) {
+        Alert.alert("Success", res.data?.message || "Centre added");
+        // router.replace("/(fro)/(profile)")
+      } else {
+        Alert.alert("Failed", "Centre creation failed");
+      }
+    } catch (error: any) {
+      console.error("❌ ADD CENTRE ERROR:", error);
+
+      Alert.alert(
+        "Error",
+        error?.message ||
+          error?.data?.Errors?.[0] ||
+          "Something went wrong. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /* ================= CARD CONFIG ================= */
+
+  const sectionConfig = {
+    basicInfo: {
+      title: "Basic Information",
+    },
+    address: {
+      title: "Address Details",
+    },
+    contact: {
+      title: "Contact Information",
+    },
+    settings: {
+      title: "Settings",
+    },
   };
 
   /* ================= UI ================= */
@@ -152,134 +158,392 @@ export default function AddNewCentreScreen() {
   return (
     <BodyLayout type="screen" screenName="Add New Centre">
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        <View style={styles.container}>
-          <View style={styles.card}>
-            <View style={styles.stepIndicator}>
-              {[1, 2, 3].map((s) => (
-                <View
-                  key={s}
-                  style={[
-                    styles.stepCircle,
-                    step === s && styles.stepCircleActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.stepText,
-                      step === s && styles.stepTextActive,
-                    ]}
-                  >
-                    {s}
-                  </Text>
-                </View>
-              ))}
+        <View
+          style={[
+            styles.container,
+            { backgroundColor: "theme.colors.colorBgPage" },
+          ]}
+        >
+          <View
+            style={[
+              styles.card,
+              {
+                backgroundColor: theme.colors.colorBgSurface,
+                shadowColor: theme.colors.colorShadow,
+                shadowOpacity: 1,
+                elevation: theme.dark ? 4 : 2,
+              },
+            ]}
+          >
+            {/* Basic Information Section */}
+            <Text
+              style={[
+                theme.typography.fontH5,
+                { color: theme.colors.colorHeadingH2, marginBottom: 16 },
+              ]}
+            >
+              {sectionConfig.basicInfo.title}
+            </Text>
+
+            <Text
+              style={[
+                theme.typography.fontLabel,
+                { color: theme.colors.colorTextSecondary, marginBottom: 6 },
+              ]}
+            >
+              Centre Name *
+            </Text>
+            <TextInput
+              value={formData.centreName}
+              onChangeText={(v) => updateField("centreName", v)}
+              style={[
+                styles.input,
+                {
+                  borderColor: theme.colors.inputBorder,
+                  backgroundColor: theme.colors.inputBg,
+                  color: theme.colors.inputText,
+                },
+              ]}
+              placeholder="Enter centre name"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+            />
+
+            <Text
+              style={[
+                theme.typography.fontLabel,
+                {
+                  color: theme.colors.colorTextSecondary,
+                  marginTop: 12,
+                  marginBottom: 6,
+                },
+              ]}
+            >
+              Short Description
+            </Text>
+            <TextInput
+              value={formData.description}
+              onChangeText={(v) => updateField("description", v)}
+              multiline
+              style={[
+                styles.input,
+                styles.textArea,
+                {
+                  borderColor: theme.colors.inputBorder,
+                  backgroundColor: theme.colors.inputBg,
+                  color: theme.colors.inputText,
+                },
+              ]}
+              placeholder="Enter description"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+
+            {/* Address Section */}
+            <Text
+              style={[
+                theme.typography.fontH5,
+                {
+                  color: theme.colors.colorHeadingH2,
+                  marginTop: 24,
+                  marginBottom: 16,
+                },
+              ]}
+            >
+              {sectionConfig.address.title}
+            </Text>
+
+            <Text
+              style={[
+                theme.typography.fontLabel,
+                { color: theme.colors.colorTextSecondary, marginBottom: 6 },
+              ]}
+            >
+              Address Line 1 *
+            </Text>
+            <TextInput
+              value={formData.address1}
+              onChangeText={(v) => updateField("address1", v)}
+              style={[
+                styles.input,
+                {
+                  borderColor: theme.colors.inputBorder,
+                  backgroundColor: theme.colors.inputBg,
+                  color: theme.colors.inputText,
+                },
+              ]}
+              placeholder="Enter address line 1"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+            />
+
+            <Text
+              style={[
+                theme.typography.fontLabel,
+                {
+                  color: theme.colors.colorTextSecondary,
+                  marginTop: 12,
+                  marginBottom: 6,
+                },
+              ]}
+            >
+              Address Line 2
+            </Text>
+            <TextInput
+              value={formData.address2}
+              onChangeText={(v) => updateField("address2", v)}
+              style={[
+                styles.input,
+                {
+                  borderColor: theme.colors.inputBorder,
+                  backgroundColor: theme.colors.inputBg,
+                  color: theme.colors.inputText,
+                },
+              ]}
+              placeholder="Enter address line 2 (optional)"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+            />
+
+            <Text
+              style={[
+                theme.typography.fontLabel,
+                {
+                  color: theme.colors.colorTextSecondary,
+                  marginTop: 12,
+                  marginBottom: 6,
+                },
+              ]}
+            >
+              District *
+            </Text>
+            <TextInput
+              value={formData.district}
+              onChangeText={(v) => updateField("district", v)}
+              style={[
+                styles.input,
+                {
+                  borderColor: theme.colors.inputBorder,
+                  backgroundColor: theme.colors.inputBg,
+                  color: theme.colors.inputText,
+                },
+              ]}
+              placeholder="Enter district"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+            />
+
+            <Text
+              style={[
+                theme.typography.fontLabel,
+                {
+                  color: theme.colors.colorTextSecondary,
+                  marginTop: 12,
+                  marginBottom: 6,
+                },
+              ]}
+            >
+              State
+            </Text>
+            <TextInput
+              value={formData.state}
+              onChangeText={(v) => updateField("state", v)}
+              style={[
+                styles.input,
+                {
+                  borderColor: theme.colors.inputBorder,
+                  backgroundColor: theme.colors.inputBg,
+                  color: theme.colors.inputText,
+                },
+              ]}
+              placeholder="Enter state"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+            />
+
+            {/* Contact Information Section */}
+            <Text
+              style={[
+                theme.typography.fontH5,
+                {
+                  color: theme.colors.colorHeadingH2,
+                  marginTop: 24,
+                  marginBottom: 16,
+                },
+              ]}
+            >
+              {sectionConfig.contact.title}
+            </Text>
+
+            <Text
+              style={[
+                theme.typography.fontLabel,
+                { color: theme.colors.colorTextSecondary, marginBottom: 6 },
+              ]}
+            >
+              Primary Contact Number *
+            </Text>
+            <TextInput
+              value={formData.primaryPhone}
+              onChangeText={(v) => updateField("primaryPhone", v)}
+              keyboardType="phone-pad"
+              style={[
+                styles.input,
+                {
+                  borderColor: theme.colors.inputBorder,
+                  backgroundColor: theme.colors.inputBg,
+                  color: theme.colors.inputText,
+                },
+              ]}
+              placeholder="Enter phone number"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+            />
+
+            <Text
+              style={[
+                theme.typography.fontLabel,
+                {
+                  color: theme.colors.colorTextSecondary,
+                  marginTop: 12,
+                  marginBottom: 6,
+                },
+              ]}
+            >
+              Email
+            </Text>
+            <TextInput
+              value={formData.email}
+              onChangeText={(v) => updateField("email", v)}
+              style={[
+                styles.input,
+                {
+                  borderColor: theme.colors.inputBorder,
+                  backgroundColor: theme.colors.inputBg,
+                  color: theme.colors.inputText,
+                },
+              ]}
+              placeholder="Enter email address"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Text
+              style={[
+                theme.typography.fontLabel,
+                {
+                  color: theme.colors.colorTextSecondary,
+                  marginTop: 12,
+                  marginBottom: 6,
+                },
+              ]}
+            >
+              Website
+            </Text>
+            <TextInput
+              value={formData.website}
+              onChangeText={(v) => updateField("website", v)}
+              style={[
+                styles.input,
+                {
+                  borderColor: theme.colors.inputBorder,
+                  backgroundColor: theme.colors.inputBg,
+                  color: theme.colors.inputText,
+                },
+              ]}
+              placeholder="Enter website URL (optional)"
+              placeholderTextColor={theme.colors.inputPlaceholder}
+              autoCapitalize="none"
+            />
+
+            {/* Settings Section */}
+            <Text
+              style={[
+                theme.typography.fontH5,
+                {
+                  color: theme.colors.colorHeadingH2,
+                  marginTop: 24,
+                  marginBottom: 16,
+                },
+              ]}
+            >
+              {sectionConfig.settings.title}
+            </Text>
+
+            <View
+              style={[
+                styles.switchRow,
+                { borderBottomColor: theme.colors.navDivider },
+              ]}
+            >
+              <Text
+                style={[
+                  theme.typography.fontBody,
+                  { color: theme.colors.colorTextPrimary },
+                ]}
+              >
+                24x7 Available
+              </Text>
+              <Switch
+                value={is24x7}
+                onValueChange={setIs24x7}
+                trackColor={{
+                  false: theme.colors.btnDisabledBg,
+                  true: theme.colors.btnPrimaryBg,
+                }}
+                thumbColor={theme.colors.colorBgSurface}
+              />
             </View>
 
-            {step === 1 && (
-              <>
-                <Text style={styles.label}>Centre Name *</Text>
-                <TextInput
-                  value={formData.centreName}
-                  onChangeText={(v) => updateField("centreName", v)}
-                  style={styles.input}
-                />
-
-                <Text style={styles.label}>Short Description</Text>
-                <TextInput
-                  value={formData.description}
-                  onChangeText={(v) => updateField("description", v)}
-                  multiline
-                  style={[styles.input, styles.textArea]}
-                />
-              </>
-            )}
-
-            {step === 2 && (
-              <>
-                <Text style={styles.label}>Address Line 1 *</Text>
-                <TextInput
-                  value={formData.address1}
-                  onChangeText={(v) => updateField("address1", v)}
-                  style={styles.input}
-                />
-
-                <Text style={styles.label}>Address Line 2</Text>
-                <TextInput
-                  value={formData.address2}
-                  onChangeText={(v) => updateField("address2", v)}
-                  style={styles.input}
-                />
-
-                <Text style={styles.label}>District *</Text>
-                <TextInput
-                  value={formData.district}
-                  onChangeText={(v) => updateField("district", v)}
-                  style={styles.input}
-                />
-
-                <Text style={styles.label}>State</Text>
-                <TextInput
-                  value={formData.state}
-                  onChangeText={(v) => updateField("state", v)}
-                  style={styles.input}
-                />
-              </>
-            )}
-
-            {step === 3 && (
-              <>
-                <Text style={styles.label}>Primary Contact *</Text>
-                <TextInput
-                  value={formData.primaryPhone}
-                  onChangeText={(v) => updateField("primaryPhone", v)}
-                  keyboardType="phone-pad"
-                  style={styles.input}
-                />
-
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  value={formData.email}
-                  onChangeText={(v) => updateField("email", v)}
-                  style={styles.input}
-                />
-
-                <View style={styles.switchRow}>
-                  <Text>24x7 Available</Text>
-                  <Switch value={is24x7} onValueChange={setIs24x7} />
-                </View>
-
-                <View style={styles.switchRow}>
-                  <Text>Emergency Support</Text>
-                  <Switch value={isEmergency} onValueChange={setIsEmergency} />
-                </View>
-              </>
-            )}
+            <View
+              style={[
+                styles.switchRow,
+                { borderBottomColor: theme.colors.navDivider },
+              ]}
+            >
+              <Text
+                style={[
+                  theme.typography.fontBody,
+                  { color: theme.colors.colorTextPrimary },
+                ]}
+              >
+                Emergency Support
+              </Text>
+              <Switch
+                value={isEmergency}
+                onValueChange={setIsEmergency}
+                trackColor={{
+                  false: theme.colors.btnDisabledBg,
+                  true: theme.colors.btnSosBg,
+                }}
+                thumbColor={theme.colors.colorBgSurface}
+              />
+            </View>
           </View>
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        {step > 1 && (
-          <TouchableOpacity
-            style={[styles.button, styles.backButton]}
-            onPress={() => setStep((p) => (p - 1) as 1 | 2 | 3)}
-            disabled={isLoading}
-          >
-            <Text style={styles.backButtonText}>Back</Text>
-          </TouchableOpacity>
-        )}
-
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor: theme.colors.navBg,
+            // borderTopColor: theme.colors.navDivider,
+          },
+        ]}
+      >
         <TouchableOpacity
-          style={[styles.button, isLoading && styles.buttonDisabled]}
-          onPress={handleNextStep}
+          style={[
+            styles.button,
+            { backgroundColor: theme.colors.btnPrimaryBg },
+            isLoading && styles.buttonDisabled,
+          ]}
+          onPress={handleSubmit}
           disabled={isLoading}
         >
-          <Text style={styles.buttonText}>
-            {isLoading
-              ? "Submitting..."
-              : step === 3
-              ? "Submit for Approval"
-              : "Next"}
+          <Text
+            style={[
+              theme.typography.fontButton,
+              { color: theme.colors.btnPrimaryText },
+            ]}
+          >
+            {isLoading ? "Submitting..." : "Submit for Approval"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -290,57 +554,44 @@ export default function AddNewCentreScreen() {
 /* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
-  container: { marginTop: 8, paddingHorizontal: 16 },
-  card: { backgroundColor: "#fff", borderRadius: 16, padding: 16 },
-  stepIndicator: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 20,
-    gap: 8,
+  container: {
+    marginTop: 8,
+    paddingHorizontal: 16,
   },
-  stepCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#E0E0E0",
-    justifyContent: "center",
-    alignItems: "center",
+  card: {
+    borderRadius: 16,
+    padding: 20,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
   },
-  stepCircleActive: { backgroundColor: "#00695C" },
-  stepText: { color: "#616161", fontWeight: "600" },
-  stepTextActive: { color: "#fff" },
-  label: { marginTop: 14, marginBottom: 6, fontWeight: "500" },
   input: {
     borderWidth: 1,
-    borderColor: "#E0E0E0",
     borderRadius: 10,
     padding: 12,
+    fontSize: 16,
   },
-  textArea: { height: 110 },
+  textArea: {
+    height: 100,
+  },
   switchRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 14,
+    alignItems: "center",
+    marginTop: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
   },
   footer: {
     padding: 16,
-    borderTopWidth: 1,
-    borderColor: "#E0E0E0",
-    backgroundColor: "#fff",
+    // borderTopWidth: 1,
   },
   button: {
-    backgroundColor: "#00695C",
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
   },
-  backButton: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#00695C",
-    marginBottom: 8,
+  buttonDisabled: {
+    opacity: 0.6,
   },
-  backButtonText: { color: "#00695C", fontWeight: "600" },
-  buttonText: { color: "#fff", fontWeight: "600" },
-  buttonDisabled: { opacity: 0.6 },
 });

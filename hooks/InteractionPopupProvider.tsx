@@ -212,6 +212,8 @@ export const useInteractionPopupPoller = () => {
           csrfToken: String(authState.antiforgeryToken),
         });
 
+        // console.log("Interaction polling: ", res);
+
         const interactions = res?.data?.interactions || [];
         const matched: any[] = [];
 

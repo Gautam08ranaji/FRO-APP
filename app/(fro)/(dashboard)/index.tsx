@@ -70,7 +70,7 @@ export default function HomeScreen() {
 
   const fetchUserData = async () => {
     console.log("authState.userId", authState.antiforgeryToken);
-    console.log("authState.token", authState.token);
+    console.log("authState.token", authState.userId);
 
     try {
       const response = await getUserDataById({
