@@ -268,7 +268,7 @@ export const useInteractionPopupPoller = () => {
   const startLatLongTracking = (ticketNumber: string) => {
     if (!ticketNumber || locationIntervalRef.current) return;
     if (!user?.name) {
-      console.log("User not loaded yet, delaying tracking...");
+      // console.log("User not loaded yet, delaying tracking...");
       setTimeout(() => startLatLongTracking(ticketNumber), 2000);
       return;
     }

@@ -60,6 +60,8 @@ export default function PunchInCard() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
+      console.log("attlis", res);
+
       const list = Array.isArray(res?.data?.attendanceList)
         ? res.data.attendanceList
         : [];

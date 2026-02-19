@@ -1,14 +1,14 @@
 import ReusableButton from "@/components/reusables/ReusableButton";
 import i18n from "@/i18n";
 import { useTheme } from "@/theme/ThemeContext";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getAttendanceHistory } from "@/features/fro/addAttendance";
 import { addAttendance } from "@/features/fro/addAttendanceStatus";
 import { useAppSelector } from "@/store/hooks";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import Toast from "react-native-toast-message";
 
 /* ================= TYPES ================= */
@@ -193,6 +193,8 @@ export default function AttendanceTab() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
+      console.log("res att", res);
+
       const list = Array.isArray(res?.data?.attendanceList)
         ? res.data.attendanceList
         : [];
@@ -239,9 +241,15 @@ export default function AttendanceTab() {
     }
   };
 
-  useEffect(() => {
-    loadAttendance();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadAttendance();
+
+      return () => {
+        // optional cleanup
+      };
+    }, []),
+  );
 
   /* ================= LIVE TIMER ================= */
 
@@ -283,6 +291,11 @@ export default function AttendanceTab() {
         },
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
+      });
+      console.log("payload", {
+        attendancedate: currentDate,
+        checkintime: action === "start" ? currentDateTime : "",
+        checkouttime: action === "end" ? currentDateTime : "",
       });
 
       console.log("punch in punch out ", res);

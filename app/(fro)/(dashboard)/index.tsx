@@ -79,7 +79,7 @@ export default function HomeScreen() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      console.log("use Data", response);
+      // console.log("use Data", response);
 
       setFirstName(response?.data?.firstName || "User");
       setLastName(response?.data?.lastName || "");
