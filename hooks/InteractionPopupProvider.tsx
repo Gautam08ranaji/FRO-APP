@@ -13,6 +13,7 @@ import { getUserDataById } from "@/features/fro/profile/getProfile";
 import { updateFROLatLong } from "@/features/fro/updateFROLatLongApi";
 import { setUser } from "@/redux/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { Audio } from "expo-av";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
@@ -54,6 +55,9 @@ export const useInteractionPopupPoller = () => {
   const [activeTickets, setActiveTickets] = useState<Ticket[]>([]);
   const [isLoadingTickets, setIsLoadingTickets] = useState(false);
 
+  // Audio reference
+  const soundRef = useRef<Audio.Sound | null>(null);
+
   const locationIntervalRef = useRef<any>(null);
   const activeTicketRef = useRef<string | null>(null);
   const seenIdsRef = useRef<Set<number>>(new Set());
@@ -61,11 +65,89 @@ export const useInteractionPopupPoller = () => {
 
   useEffect(() => {
     fetchUserData();
+
+    // Configure audio mode
+    configureAudioMode();
+
+    // Cleanup audio on unmount
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+    };
   }, []);
 
   useEffect(() => {
     userNameRef.current = user?.name || "User";
   }, [user?.name]);
+
+  /* ================= AUDIO SETUP ================= */
+
+  const configureAudioMode = async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: true, // This keeps audio playing in background
+        playsInSilentModeIOS: true, // This plays even when iPhone is on silent
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+    } catch (error) {
+      console.log("Error configuring audio mode:", error);
+    }
+  };
+
+  const playBuzzerSound = async () => {
+    try {
+      // Unload previous sound if exists
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+      }
+
+      // Load the buzzer sound with looping enabled for continuous playback
+      const { sound } = await Audio.Sound.createAsync(
+        require("@/assets/audio/buzzer.mp3"),
+        {
+          shouldPlay: true,
+          isLooping: true,
+          volume: 1.0,
+        },
+      );
+
+      soundRef.current = sound;
+
+      // Play the sound
+      await sound.playAsync();
+
+      console.log("🔊 Continuous buzzer started");
+
+      // Optional: Just log when loops complete (simplified)
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          console.log("Buzzer loop completed");
+        }
+      });
+    } catch (error) {
+      console.log("Error playing buzzer sound:", error);
+    }
+  };
+
+  const stopBuzzerSound = async () => {
+    try {
+      if (soundRef.current) {
+        // Check status before stopping
+        const status = await soundRef.current.getStatusAsync();
+        if (status.isLoaded) {
+          await soundRef.current.stopAsync();
+          await soundRef.current.unloadAsync();
+          console.log("🔇 Buzzer stopped");
+        }
+        soundRef.current = null;
+      }
+    } catch (error) {
+      console.log("Error stopping buzzer sound:", error);
+    }
+  };
 
   /* ================= RESTORE TRACKING ================= */
 
@@ -241,7 +323,7 @@ export const useInteractionPopupPoller = () => {
     };
 
     fetchInteractions();
-    intervalRef.current = setInterval(fetchInteractions, 30000);
+    intervalRef.current = setInterval(fetchInteractions, 1000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -254,14 +336,19 @@ export const useInteractionPopupPoller = () => {
   useEffect(() => {
     if (!visible && queue.length > 0) {
       setCurrent(queue[0]);
-      setQueue((prev) => prev.slice(1));
       setVisible(true);
+
+      // Play continuous buzzer sound when popup opens
+      playBuzzerSound();
     }
   }, [queue, visible]);
 
   const closePopup = () => {
     setVisible(false);
     setCurrent(null);
+
+    // Stop buzzer sound when popup closes
+    stopBuzzerSound();
   };
 
   /* ================= ACCEPT ================= */
@@ -362,6 +449,9 @@ export const useInteractionPopupPoller = () => {
       sendLocation(current.id);
       closePopup();
       setShowAcceptedStatusModal(true);
+
+      // Stop buzzer sound if it's still playing
+      stopBuzzerSound();
     } catch (error) {
       console.error("❌ Accept failed:", error);
     }
@@ -405,6 +495,9 @@ export const useInteractionPopupPoller = () => {
     const tickets = await fetchActiveTickets();
     setActiveTickets(tickets);
     setShowRemarkModal(true);
+
+    // Stop buzzer sound when reject modal opens
+    stopBuzzerSound();
   };
 
   const submitReject = async (
@@ -468,6 +561,9 @@ export const useInteractionPopupPoller = () => {
 
       // Clear active tickets after modal closes
       setActiveTickets([]);
+
+      // Stop buzzer sound if it's still playing
+      stopBuzzerSound();
     } catch (error) {
       console.error("❌ Reject failed:", error);
       Alert.alert("Error", "Failed to reject case. Please try again.");
@@ -505,6 +601,7 @@ export const useInteractionPopupPoller = () => {
         onClose={() => {
           setShowRemarkModal(false);
           setActiveTickets([]); // Clear tickets when modal closes
+          stopBuzzerSound(); // Stop buzzer if still playing
         }}
         onSubmit={submitReject}
         tickets={activeTickets}
