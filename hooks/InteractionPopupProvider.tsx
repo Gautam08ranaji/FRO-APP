@@ -24,6 +24,16 @@ import { useLocation } from "./LocationContext";
  */
 let pollerStarted = false;
 
+interface Ticket {
+  id: number;
+  transactionNumber: string;
+  name: string;
+  caseStatusId: number;
+  subStatusId: number;
+  caseStatusName?: string;
+  subStatusName?: string;
+}
+
 export const useInteractionPopupPoller = () => {
   const userNameRef = useRef("");
   const authState = useAppSelector((state) => state.auth);
@@ -36,13 +46,14 @@ export const useInteractionPopupPoller = () => {
   const [current, setCurrent] = useState<any | null>(null);
   const [visible, setVisible] = useState(false);
 
-  // console.log("user", user?.name);
-
-  // console.log("current", current);
-
   const [showRemarkModal, setShowRemarkModal] = useState(false);
   const [showAcceptedStatusModal, setShowAcceptedStatusModal] = useState(false);
   const [showDeclinedStatusModal, setShowDeclinedStatusModal] = useState(false);
+
+  // New state for active tickets dropdown
+  const [activeTickets, setActiveTickets] = useState<Ticket[]>([]);
+  const [isLoadingTickets, setIsLoadingTickets] = useState(false);
+
   const locationIntervalRef = useRef<any>(null);
   const activeTicketRef = useRef<string | null>(null);
   const seenIdsRef = useRef<Set<number>>(new Set());
@@ -112,8 +123,6 @@ export const useInteractionPopupPoller = () => {
     }
   };
 
-  // console.log("user", user);
-
   const sendLocation = async (id: any) => {
     try {
       const location = await fetchLocation();
@@ -152,22 +161,16 @@ export const useInteractionPopupPoller = () => {
     transactionNumber,
   }: any) => {
     try {
-      /* ---------------- FETCH USER DATA FIRST ---------------- */
       const userRes = await getUserDataById({
         userId: String(authState?.userId),
         token: String(authState?.token),
         csrfToken: String(authState?.antiforgeryToken),
       });
 
-      // console.log("👤 User Data Response:", userRes);
-
       const firstName = userRes?.data?.firstName || "";
       const lastName = userRes?.data?.lastName || "";
       const activityByName = `${firstName} ${lastName}`.trim();
 
-      // console.log("wdfcfs", firstName, lastName);
-
-      /* ---------------- ACTIVITY PAYLOAD ---------------- */
       const payload = {
         activityTime: new Date().toISOString(),
         activityInteractionId: interactionId,
@@ -212,8 +215,6 @@ export const useInteractionPopupPoller = () => {
           csrfToken: String(authState.antiforgeryToken),
         });
 
-        // console.log("Interaction polling: ", res);
-
         const interactions = res?.data?.interactions || [];
         const matched: any[] = [];
 
@@ -240,7 +241,7 @@ export const useInteractionPopupPoller = () => {
     };
 
     fetchInteractions();
-    intervalRef.current = setInterval(fetchInteractions, 1000);
+    intervalRef.current = setInterval(fetchInteractions, 30000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -268,7 +269,6 @@ export const useInteractionPopupPoller = () => {
   const startLatLongTracking = (ticketNumber: string) => {
     if (!ticketNumber || locationIntervalRef.current) return;
     if (!user?.name) {
-      // console.log("User not loaded yet, delaying tracking...");
       setTimeout(() => startLatLongTracking(ticketNumber), 2000);
       return;
     }
@@ -277,7 +277,6 @@ export const useInteractionPopupPoller = () => {
 
     locationIntervalRef.current = setInterval(async () => {
       try {
-        /* 🔎 CHECK CURRENT TICKET STATUS FIRST */
         const res = await getInteractionsListByAssignToId({
           assignToId: String(authState.userId),
           pageNumber: 1,
@@ -292,7 +291,6 @@ export const useInteractionPopupPoller = () => {
           (i: any) => i.transactionNumber === ticketNumber,
         );
 
-        // 🛑 STOP if closed
         if (
           currentTicket?.caseStatusId === 4 &&
           currentTicket?.subStatusId === 8
@@ -302,23 +300,20 @@ export const useInteractionPopupPoller = () => {
           return;
         }
 
-        /* 📍 OTHERWISE SEND LOCATION */
         const location = await fetchLocation();
         if (!location) return;
 
         const { latitude, longitude } = location.coords;
 
-        const updateRes = await updateFROLatLong({
+        await updateFROLatLong({
           ticketNumber,
           latitude: latitude.toString(),
           longitude: longitude.toString(),
           token: String(authState.token),
           csrfToken: String(authState.antiforgeryToken),
           name: userNameRef.current || "User",
-          userId: String(authState.userId), // ✅ THIS MUST BE GUID
+          userId: String(authState.userId),
         });
-
-        // console.log("📍 LatLong Updated", updateRes);
       } catch (err) {
         console.log("Tracking error:", err);
       }
@@ -353,8 +348,6 @@ export const useInteractionPopupPoller = () => {
         },
       });
 
-      // console.log("✅ Accept Response:", res);
-
       await saveActivity({
         interactionId: current.id,
         oldCaseStatus: current.caseStatusName,
@@ -364,6 +357,7 @@ export const useInteractionPopupPoller = () => {
         activityStatus: "Busy",
         transactionNumber: current?.transactionNumber,
       });
+
       startLatLongTracking(current.transactionNumber);
       sendLocation(current.id);
       closePopup();
@@ -373,15 +367,55 @@ export const useInteractionPopupPoller = () => {
     }
   };
 
-  /* ================= REJECT ================= */
+  /* ================= REJECT WITH TICKET SELECTION ================= */
 
-  const handleReject = () => setShowRemarkModal(true);
+  /**
+   * Fetch active tickets with caseStatusId === 2
+   */
+  const fetchActiveTickets = async (): Promise<Ticket[]> => {
+    try {
+      setIsLoadingTickets(true);
+      const res = await getInteractionsListByAssignToId({
+        assignToId: String(authState.userId),
+        pageNumber: 1,
+        pageSize: 100,
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
 
-  const submitReject = async (remarkText: string) => {
+      const interactions = res?.data?.interactions || [];
+
+      // Filter for tickets with caseStatusId === 2 (In-Progress)
+      // Exclude the current ticket if needed
+      const activeTicketsList = interactions.filter(
+        (item: any) => item.caseStatusId === 2 && item.id !== current?.id, // Exclude current ticket if needed
+      );
+
+      return activeTicketsList;
+    } catch (error) {
+      console.error("Error fetching active tickets:", error);
+      return [];
+    } finally {
+      setIsLoadingTickets(false);
+    }
+  };
+
+  const handleReject = async () => {
+    // Fetch active tickets before showing the modal
+    const tickets = await fetchActiveTickets();
+    setActiveTickets(tickets);
+    setShowRemarkModal(true);
+  };
+
+  const submitReject = async (
+    remarkText: string,
+    selectedTicketId?: number,
+  ) => {
     if (!current) return;
 
     try {
-      const res = await updateInteraction({
+      // First, update the current interaction as rejected
+      const rejectRes = await updateInteraction({
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
         data: {
@@ -392,11 +426,31 @@ export const useInteractionPopupPoller = () => {
           subStatusName: "Rejected By FRO",
           comment: remarkText,
           callBack: "No",
+          // If a ticket was selected, add a note about reassignment
+          ...(selectedTicketId && {
+            notes: `Reassigned to ticket ID: ${selectedTicketId}`,
+          }),
         },
       });
 
-      console.log("✅ Reject Response:", res);
+      console.log("✅ Reject Response:", rejectRes);
 
+      // If a ticket was selected, you might want to update that ticket
+      // with information about the rejection or perform other actions
+      if (selectedTicketId) {
+        const selectedTicket = activeTickets.find(
+          (t) => t.id === selectedTicketId,
+        );
+        console.log(
+          `📋 Ticket ${selectedTicket?.transactionNumber} selected for reassignment context`,
+        );
+
+        // Here you could call another API to update the selected ticket
+        // For example, adding a note that a new case was rejected and linked to this ticket
+        // await updateInteractionNote(selectedTicketId, `Related rejected case: ${current.transactionNumber}`);
+      }
+
+      // Save activity history for the rejection
       await saveActivity({
         interactionId: current.id,
         oldCaseStatus: current.caseStatusName,
@@ -411,8 +465,12 @@ export const useInteractionPopupPoller = () => {
       setShowRemarkModal(false);
       closePopup();
       setShowDeclinedStatusModal(true);
+
+      // Clear active tickets after modal closes
+      setActiveTickets([]);
     } catch (error) {
       console.error("❌ Reject failed:", error);
+      Alert.alert("Error", "Failed to reject case. Please try again.");
     }
   };
 
@@ -444,8 +502,14 @@ export const useInteractionPopupPoller = () => {
         visible={showRemarkModal}
         title="Why You Declined"
         buttonText="Deny"
-        onClose={() => setShowRemarkModal(false)}
+        onClose={() => {
+          setShowRemarkModal(false);
+          setActiveTickets([]); // Clear tickets when modal closes
+        }}
         onSubmit={submitReject}
+        tickets={activeTickets}
+        requireTicketSelection={true}
+        isLoading={isLoadingTickets}
       />
 
       <StatusModal
