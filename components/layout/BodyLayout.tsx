@@ -1,7 +1,8 @@
+import { getInteractionsListByAssignToId } from "@/features/fro/interactionApi";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
-import { useRouter } from "expo-router";
-import React from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback } from "react";
 import {
   Dimensions,
   ScrollView,
@@ -58,7 +59,7 @@ export default function BodyLayout({
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const authState = useAppSelector((state) => state.auth);
-
+  const [notificationCountState, setNotificationCountState] = React.useState(0);
   /* ================= ICON NAVIGATION ================= */
 
   const handleIconPress = (
@@ -76,6 +77,37 @@ export default function BodyLayout({
       } else if (iconType === "escalation") {
         router.push("/escalation");
       }
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchInteractions();
+    }, []),
+  );
+
+  const fetchInteractions = async () => {
+    try {
+      const res = await getInteractionsListByAssignToId({
+        assignToId: String(authState.userId),
+        pageNumber: 1,
+        pageSize: 100,
+        token: String(authState.token),
+        csrfToken: String(authState.antiforgeryToken),
+      });
+
+      const interactions = res?.data?.interactions || [];
+
+      // ✅ count subStatusId = 22
+      const count = interactions.filter(
+        (item: any) => item.subStatusId === 9,
+      ).length;
+
+      setNotificationCountState(count);
+
+      console.log("Notification count:", count);
+    } catch (error) {
+      console.error("❌ Failed to fetch cases:", error);
     }
   };
 
@@ -142,9 +174,11 @@ export default function BodyLayout({
                   color={theme.colors.colorPrimary600}
                 />
 
-                {notificationCount > 0 && (
+                {notificationCountState > 0 && (
                   <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{notificationCount}</Text>
+                    <Text style={styles.badgeText}>
+                      {notificationCountState}
+                    </Text>
                   </View>
                 )}
               </TouchableOpacity>

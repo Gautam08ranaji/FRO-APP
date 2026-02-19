@@ -436,6 +436,7 @@ export const useInteractionPopupPoller = () => {
           onAccept={handleAccept}
           onDeny={handleReject}
           onTimeout={closePopup}
+          onClose={closePopup}
         />
       )}
 

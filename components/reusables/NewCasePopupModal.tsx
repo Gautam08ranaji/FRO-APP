@@ -26,6 +26,7 @@ interface NewCasePopupModalProps {
   onAccept: () => void;
   onDeny: () => void;
   onTimeout?: () => void;
+  onClose?: () => void; // Add onClose prop
 
   stylesOverride?: {
     container?: any;
@@ -38,6 +39,7 @@ interface NewCasePopupModalProps {
     detailValue?: any;
     acceptButton?: any;
     denyButton?: any;
+    closeButton?: any;
   };
 }
 
@@ -55,6 +57,7 @@ export default function NewCasePopupModal({
   onAccept,
   onDeny,
   onTimeout,
+  onClose,
 
   stylesOverride = {},
 }: NewCasePopupModalProps) {
@@ -79,6 +82,10 @@ export default function NewCasePopupModal({
     return () => clearInterval(interval);
   }, [visible, timerSeconds]);
 
+  const handleClose = () => {
+    onClose?.();
+  };
+
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
@@ -89,17 +96,31 @@ export default function NewCasePopupModal({
             stylesOverride.card,
           ]}
         >
-          {/* ---------- HEADER ---------- */}
-          <Text
-            style={[
-              theme.typography.fontH1,
-              styles.title,
-              { color: theme.colors.colorPrimary600 },
-              stylesOverride.title,
-            ]}
-          >
-            {title}
-          </Text>
+          {/* ---------- HEADER WITH CLOSE BUTTON ---------- */}
+          <View style={styles.headerContainer}>
+            <View style={styles.headerLeft} />
+            <Text
+              style={[
+                theme.typography.fontH1,
+                styles.title,
+                { color: theme.colors.colorPrimary600 },
+                stylesOverride.title,
+              ]}
+            >
+              {title}
+            </Text>
+            <TouchableOpacity
+              onPress={handleClose}
+              style={[styles.closeButton, stylesOverride.closeButton]}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <RemixIcon
+                name="close-line"
+                size={24}
+                color={theme.colors.colorTextSecondary}
+              />
+            </TouchableOpacity>
+          </View>
 
           <Text
             style={[
@@ -234,9 +255,26 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
   },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  headerLeft: {
+    width: 32, // Placeholder for balance
+  },
   title: {
     textAlign: "center",
     fontWeight: "700",
+    flex: 1,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
   message: {
     textAlign: "center",
@@ -257,6 +295,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 4,
   },
   urgentBadge: {
     paddingHorizontal: 12,

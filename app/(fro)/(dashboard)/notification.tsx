@@ -80,7 +80,7 @@ export default function NotificationScreen() {
 
   // Get icon based on category or subStatus
   const getNotificationIcon = (interaction: Interaction): IconName => {
-    if (interaction.subStatusId === 22) {
+    if (interaction.subStatusId === 9) {
       return "checkbox-circle-line"; // Pending acceptance
     } else if (interaction.subStatusName?.toLowerCase().includes("accepted")) {
       return "check-line";
@@ -166,7 +166,7 @@ export default function NotificationScreen() {
       `${interaction.transactionNumber} - ${interaction.categoryName}`,
     subtitle: `${t("notifications.ticketNumber")} ${interaction.transactionNumber} • ${interaction.subStatusName}`,
     time: formatTime(interaction.createdDate),
-    isNew: interaction.subStatusId === 22, // Mark as new if pending acceptance
+    isNew: interaction.subStatusId === 9, // Mark as new if pending acceptance
     subStatusId: interaction.subStatusId,
     subStatusName: interaction.subStatusName,
     transactionNumber: interaction.transactionNumber,
@@ -309,7 +309,7 @@ export default function NotificationScreen() {
             <Text style={[styles.time, styles.indented]}>{item.time}</Text>
 
             {/* Show Accept/Reject buttons only for subStatusId 22 */}
-            {item.subStatusId === 22 && (
+            {item.subStatusId === 9 && (
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={[styles.acceptButton, { backgroundColor: "#2E7D32" }]}
@@ -327,7 +327,7 @@ export default function NotificationScreen() {
             )}
 
             {/* Show status for other cases */}
-            {item.subStatusId !== 22 && (
+            {item.subStatusId !== 9 && (
               <View
                 style={[
                   styles.statusBadge,
