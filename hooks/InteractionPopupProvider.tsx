@@ -15,7 +15,7 @@ import { setUser } from "@/redux/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Audio } from "expo-av";
 import { router } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { useLocation } from "./LocationContext";
 
@@ -54,6 +54,7 @@ export const useInteractionPopupPoller = () => {
   // New state for active tickets dropdown
   const [activeTickets, setActiveTickets] = useState<Ticket[]>([]);
   const [isLoadingTickets, setIsLoadingTickets] = useState(false);
+  const [isSubmittingReject, setIsSubmittingReject] = useState(false);
 
   // Audio reference
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -343,13 +344,15 @@ export const useInteractionPopupPoller = () => {
     }
   }, [queue, visible]);
 
-  const closePopup = () => {
+  const closePopup = useCallback(() => {
     setVisible(false);
     setCurrent(null);
+    // Remove the first item from queue
+    setQueue((prev) => prev.slice(1));
 
     // Stop buzzer sound when popup closes
     stopBuzzerSound();
-  };
+  }, []);
 
   /* ================= ACCEPT ================= */
 
@@ -504,7 +507,9 @@ export const useInteractionPopupPoller = () => {
     remarkText: string,
     selectedTicketId?: number,
   ) => {
-    if (!current) return;
+    if (!current || isSubmittingReject) return;
+
+    setIsSubmittingReject(true);
 
     try {
       // First, update the current interaction as rejected
@@ -555,20 +560,55 @@ export const useInteractionPopupPoller = () => {
       });
 
       sendLocation(current.id);
-      setShowRemarkModal(false);
-      closePopup();
-      setShowDeclinedStatusModal(true);
 
-      // Clear active tickets after modal closes
+      // Close remark modal first
+      setShowRemarkModal(false);
+
+      // Clear active tickets
       setActiveTickets([]);
+
+      // Close the main popup
+      closePopup();
+
+      // Show success modal
+      setShowDeclinedStatusModal(true);
 
       // Stop buzzer sound if it's still playing
       stopBuzzerSound();
     } catch (error) {
       console.error("❌ Reject failed:", error);
       Alert.alert("Error", "Failed to reject case. Please try again.");
+    } finally {
+      setIsSubmittingReject(false);
     }
   };
+
+  const handleRemarkModalClose = useCallback(() => {
+    setShowRemarkModal(false);
+    setActiveTickets([]); // Clear tickets when modal closes
+    // Don't stop buzzer here as we might want it to continue if main popup is still visible
+    // Only stop if main popup is not visible
+    if (!visible) {
+      stopBuzzerSound();
+    }
+  }, [visible]);
+
+  const handleStatusModalClose = useCallback(
+    (type: "accepted" | "declined") => {
+      if (type === "accepted") {
+        setShowAcceptedStatusModal(false);
+      } else {
+        setShowDeclinedStatusModal(false);
+      }
+      // Check if there are more items in queue
+      if (queue.length > 0) {
+        setCurrent(queue[0]);
+        setVisible(true);
+        playBuzzerSound();
+      }
+    },
+    [queue],
+  );
 
   /* ================= POPUP UI ================= */
 
@@ -598,15 +638,11 @@ export const useInteractionPopupPoller = () => {
         visible={showRemarkModal}
         title="Why You Declined"
         buttonText="Deny"
-        onClose={() => {
-          setShowRemarkModal(false);
-          setActiveTickets([]); // Clear tickets when modal closes
-          stopBuzzerSound(); // Stop buzzer if still playing
-        }}
+        onClose={handleRemarkModalClose}
         onSubmit={submitReject}
         tickets={activeTickets}
         requireTicketSelection={true}
-        isLoading={isLoadingTickets}
+        isLoading={isLoadingTickets || isSubmittingReject}
       />
 
       <StatusModal
@@ -616,7 +652,7 @@ export const useInteractionPopupPoller = () => {
         iconColor="#00796B"
         iconBgColor="#E0F2F1"
         autoCloseAfter={2000}
-        onClose={() => setShowAcceptedStatusModal(false)}
+        onClose={() => handleStatusModalClose("accepted")}
       />
 
       <StatusModal
@@ -627,7 +663,7 @@ export const useInteractionPopupPoller = () => {
         iconBgColor={theme.colors.validationErrorText + "22"}
         autoCloseAfter={2000}
         titleColor={theme.colors.colorAccent500}
-        onClose={() => setShowDeclinedStatusModal(false)}
+        onClose={() => handleStatusModalClose("declined")}
       />
     </>
   );
