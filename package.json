@@ -77,9 +77,14 @@
     "victory-native": "^41.20.2"
   },
   "devDependencies": {
+    "@react-native-community/cli": "^20.1.1",
+    "@react-native/metro-config": "^0.84.0",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "metro": "^0.83.3",
+    "metro-config": "^0.83.3",
+    "metro-react-native-babel-preset": "^0.77.0",
     "typescript": "~5.9.2"
   },
   "private": true
