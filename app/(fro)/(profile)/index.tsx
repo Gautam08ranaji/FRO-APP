@@ -119,6 +119,7 @@ export default function ProfileScreen() {
     const normalizedPath = photoPath.replace(/\\/g, "/");
     return `${baseUrlApi}/${normalizedPath}`;
   };
+  
 
   const fetchUserData = async () => {
     try {

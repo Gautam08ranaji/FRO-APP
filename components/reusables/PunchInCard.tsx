@@ -60,7 +60,7 @@ export default function PunchInCard() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      console.log("attlis", res);
+      console.log("attlis", res.data);
 
       const list = Array.isArray(res?.data?.attendanceList)
         ? res.data.attendanceList
@@ -165,7 +165,7 @@ export default function PunchInCard() {
       const currentDateTime = now.toISOString();
       const action: "start" | "end" = isPunchedIn ? "end" : "start";
 
-      await addAttendance({
+   const res =   await addAttendance({
         data: {
           attendancedate: formatDateOnly(now),
           checkintime: action === "start" ? currentDateTime : "",
@@ -178,6 +178,22 @@ export default function PunchInCard() {
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
       });
+
+
+      const payload = {
+  attendancedate: formatDateOnly(now),
+  checkintime: action === "start" ? currentDateTime : "",
+  checkouttime: action === "end" ? currentDateTime : "",
+  status: "Present",
+  totalworkinghours:
+    action === "end" ? formatMinutesToTime(workedMinutes) : "0h 0m",
+  userId: String(authState.userId),
+};
+
+console.log("Attendance Payload 👉", payload);
+
+      console.log("add res",res);
+      
 
       if (action === "start") {
         setPunchInTime(now);

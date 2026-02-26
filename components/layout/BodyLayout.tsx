@@ -214,56 +214,7 @@ export default function BodyLayout({
             </View>
           </View>
 
-          {/* ================= DASHBOARD STATS ================= */}
-
-          {type !== "frl" && (
-            <View
-              style={[
-                styles.bottomSection,
-                { backgroundColor: theme.colors.colorPrimary50 },
-              ]}
-            >
-              <View style={styles.row}>
-                <Text
-                  style={[
-                    theme.typography.fontBody,
-                    { color: theme.colors.colorPrimary600 },
-                  ]}
-                >
-                  {"Today's Duty"}
-                </Text>
-
-                <Text
-                  style={[
-                    theme.typography.fontBody,
-                    { color: theme.colors.colorPrimary600 },
-                  ]}
-                >
-                  Total Cases
-                </Text>
-              </View>
-
-              <View style={styles.row}>
-                <Text
-                  style={[
-                    theme.typography.fontH4,
-                    { color: theme.colors.colorPrimary600 },
-                  ]}
-                >
-                  {todaysDutyCount ?? 0}
-                </Text>
-
-                <Text
-                  style={[
-                    theme.typography.fontH4,
-                    { color: theme.colors.colorPrimary600 },
-                  ]}
-                >
-                  {totalCases ?? 0}
-                </Text>
-              </View>
-            </View>
-          )}
+       
         </View>
       ) : (
         /* ================= NORMAL SCREEN HEADER ================= */
