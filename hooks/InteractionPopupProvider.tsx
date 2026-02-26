@@ -444,7 +444,7 @@ export const useInteractionPopupPoller = () => {
         newCaseStatus: "In-Progress",
         oldSubStatus: current.subStatusName,
         newSubStatus: "Case Accepted",
-        activityStatus: "Busy",
+        activityStatus: "S",
         transactionNumber: current?.transactionNumber,
       });
 
@@ -555,7 +555,7 @@ export const useInteractionPopupPoller = () => {
         newCaseStatus: "Open",
         oldSubStatus: current.subStatusName,
         newSubStatus: "Rejected By FRO",
-        activityStatus: "Available",
+        activityStatus: "S",
         transactionNumber: current?.transactionNumber,
       });
 

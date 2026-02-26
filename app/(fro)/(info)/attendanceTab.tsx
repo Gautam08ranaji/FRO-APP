@@ -423,14 +423,18 @@ export default function AttendanceTab() {
         ))}
       </View>
 
-      {filteredData.map((item) => {
+      {/* FIXED: Added unique key generation to prevent duplicate key warning */}
+      {filteredData.map((item, index) => {
         const themeColor = statusTheme[item.status];
         const hours = Math.floor(item.totalMinutes / 60);
         const minutes = item.totalMinutes % 60;
 
+        // Create a unique key using id and index as fallback
+        const uniqueKey = item.id ? `${item.id}-${index}` : `item-${index}-${item.date}-${item.status}`;
+
         return (
           <View
-            key={item.id}
+            key={uniqueKey}
             style={[
               styles.historyCard,
               {

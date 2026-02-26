@@ -82,7 +82,7 @@ export default function UpdateDocumentScreen() {
         activityInteractionId: interactionId,
         activityActionName: "INSERT",
         activityDescription,
-        activityStatus,
+        activityStatus:"P",
         activityById: String(authState?.userId),
         activityByName,
         activityRelatedTo: "CAS",
@@ -211,7 +211,7 @@ export default function UpdateDocumentScreen() {
         documentType: file.type === "pdf" ? "PDF Document" : "Image",
         documentName: file.name,
         description: description,
-        activityStatus: "Busy",
+        activityStatus: "P",
         transactionNumber: transactionNumber,
       });
 
@@ -232,7 +232,7 @@ export default function UpdateDocumentScreen() {
           documentType: file.type === "pdf" ? "PDF Document" : "Image",
           documentName: file.name,
           description: description,
-          activityStatus: "FAILED",
+          activityStatus: "P",
           transactionNumber: transactionNumber,
         });
       }

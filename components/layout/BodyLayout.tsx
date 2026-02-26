@@ -182,7 +182,7 @@ export default function BodyLayout({
                   </View>
                 )}
               </TouchableOpacity>
-
+{/* 
               <TouchableOpacity
                 style={[
                   styles.iconCircle,
@@ -195,7 +195,7 @@ export default function BodyLayout({
                   size={22}
                   color={theme.colors.colorPrimary600}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
               {type !== "frl" && (
                 <TouchableOpacity

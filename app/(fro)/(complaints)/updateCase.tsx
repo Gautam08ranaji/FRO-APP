@@ -218,7 +218,7 @@ const UpdateStatusScreen = () => {
         activityInteractionId: interactionId,
         activityActionName: "UPDATE",
         activityDescription,
-        activityStatus,
+        activityStatus:"S",
         activityById: String(authState?.userId),
         activityByName,
         activityRelatedTo: "CAS",
@@ -280,7 +280,7 @@ const UpdateStatusScreen = () => {
           newSubStatus: subStatus?.name || "",
           oldComment,
           newComment: notes.trim(),
-          activityStatus: "SUCCESS",
+          activityStatus: "S",
           transactionNumber,
         });
 
@@ -303,7 +303,7 @@ const UpdateStatusScreen = () => {
         newSubStatus: subStatus?.name || "",
         oldComment,
         newComment: notes.trim(),
-        activityStatus: res?.status || "FAILED",
+        activityStatus: "S",
         transactionNumber,
       });
 
@@ -320,7 +320,7 @@ const UpdateStatusScreen = () => {
         newSubStatus: subStatus?.name || "",
         oldComment,
         newComment: notes.trim(),
-        activityStatus: "FAILED",
+        activityStatus: "S",
         transactionNumber,
       });
 

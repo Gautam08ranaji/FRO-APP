@@ -80,7 +80,7 @@ export default function AddNoteScreen() {
         activityInteractionId: interactionId,
         activityActionName: "INSERT",
         activityDescription,
-        activityStatus,
+        activityStatus:"P",
         activityById: String(authState?.userId),
         activityByName,
         activityRelatedTo: "CAS",
@@ -159,7 +159,7 @@ export default function AddNoteScreen() {
         noteType: noteType,
         noteDescription: description,
         followUpDate: followUpDate,
-        activityStatus: "Busy",
+        activityStatus: "P",
         transactionNumber: transactionNumber,
       });
 
