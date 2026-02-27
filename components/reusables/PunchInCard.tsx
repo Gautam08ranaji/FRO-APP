@@ -2,8 +2,8 @@ import { getAttendanceHistory } from "@/features/fro/addAttendance";
 import { addAttendance } from "@/features/fro/addAttendanceStatus";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -70,8 +70,11 @@ export default function PunchInCard() {
 
       // 🔍 Find today's attendance
       const todayAttendance = list.find(
-        (item: any) => item.attendancedate === today,
+        (item: any) => item.chartDate === today,
       );
+
+      console.log("today",todayAttendance);
+      
 
       if (!todayAttendance) {
         setIsPunchedIn(false);
@@ -81,11 +84,11 @@ export default function PunchInCard() {
         return;
       }
 
-      const hasCheckIn = isValidDate(todayAttendance.checkintime);
-      const hasCheckOut = isValidDate(todayAttendance.checkouttime);
+      const hasCheckIn = isValidDate(todayAttendance.inTime);
+      const hasCheckOut = isValidDate(todayAttendance.outTime);
 
       if (hasCheckIn && !hasCheckOut) {
-        const checkInDate = new Date(todayAttendance.checkintime);
+        const checkInDate = new Date(todayAttendance.inTime);
 
         setPunchInTime(checkInDate);
         setIsPunchedIn(true);
@@ -132,9 +135,11 @@ export default function PunchInCard() {
     }
   };
 
-  useEffect(() => {
-    loadAttendance();
-  }, []);
+   useFocusEffect(
+      useCallback(() => {
+        loadAttendance();
+      }, []),
+    );
 
   /* ================= TIMER ================= */
 
@@ -165,14 +170,12 @@ export default function PunchInCard() {
       const currentDateTime = now.toISOString();
       const action: "start" | "end" = isPunchedIn ? "end" : "start";
 
-   const res =   await addAttendance({
+      const res = await addAttendance({
         data: {
           attendancedate: formatDateOnly(now),
           checkintime: action === "start" ? currentDateTime : "",
           checkouttime: action === "end" ? currentDateTime : "",
           status: "Present",
-          totalworkinghours:
-            action === "end" ? formatMinutesToTime(workedMinutes) : "0h 0m",
           userId: String(authState.userId),
         },
         token: String(authState.token),
@@ -181,19 +184,17 @@ export default function PunchInCard() {
 
 
       const payload = {
-  attendancedate: formatDateOnly(now),
-  checkintime: action === "start" ? currentDateTime : "",
-  checkouttime: action === "end" ? currentDateTime : "",
-  status: "Present",
-  totalworkinghours:
-    action === "end" ? formatMinutesToTime(workedMinutes) : "0h 0m",
-  userId: String(authState.userId),
-};
+        attendancedate: formatDateOnly(now),
+        checkintime: action === "start" ? currentDateTime : "",
+        checkouttime: action === "end" ? currentDateTime : "",
+        status: "Present",
+        userId: String(authState.userId),
+      };
 
-console.log("Attendance Payload 👉", payload);
+      console.log("Attendance Payload 👉", payload);
 
-      console.log("add res",res);
-      
+      console.log("add res", res);
+
 
       if (action === "start") {
         setPunchInTime(now);

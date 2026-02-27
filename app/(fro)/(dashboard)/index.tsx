@@ -11,7 +11,7 @@ import { useFROLocationUpdater } from "@/hooks/useFROLocationUpdater";
 import { useAppSelector } from "@/store/hooks";
 import { useTheme } from "@/theme/ThemeContext";
 import { router, useFocusEffect } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LineChart } from "react-native-chart-kit";
@@ -63,6 +63,7 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const authState = useAppSelector((state) => state.auth);
   const { Popup } = useInteractionPopupPoller();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -72,11 +73,15 @@ export default function HomeScreen() {
     inProgress: 0,
     tickets: 0,
   });
-  
+
   const [dayPerformanceData, setDayPerformanceData] = useState<DayCasePerformanceResponse | null>(null);
   const [monthPerformanceData, setMonthPerformanceData] = useState<MonthPerformanceResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  
+  const [attendanceData, setAttendanceData] = useState({
+    presentDays: 20,
+    absentDays: 6
+  });
+
   const [dayChartData, setDayChartData] = useState({
     labels: [] as string[],
     datasets: [
@@ -95,8 +100,7 @@ export default function HomeScreen() {
         color: () => '#6A7282',
         strokeWidth: 2
       }
-    ],
-    legend: ['Open', 'In Progress', 'Closed']
+    ]
   });
 
   const [monthChartData, setMonthChartData] = useState({
@@ -117,25 +121,30 @@ export default function HomeScreen() {
         color: () => '#6A7282',
         strokeWidth: 2
       }
-    ],
-    legend: ['Open', 'In Progress', 'Closed']
+    ]
   });
 
-  /* 🔴 Demo Attendance Values (replace with API later) */
-  const presentDays = 20;
-  const absentDays = 6;
+  /* ================= ATTENDANCE CALCULATIONS ================= */
+  // TODO: Replace with actual API data
+  const totalDays = useMemo(() => {
+    return new Date(
+      new Date().getFullYear(),
+      new Date().getMonth() + 1,
+      0,
+    ).getDate();
+  }, []);
 
-  const totalDays = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth() + 1,
-    0,
-  ).getDate();
+  const attendanceRateNum = useMemo(() => {
+    return totalDays > 0 ? (attendanceData.presentDays / totalDays) * 100 : 0;
+  }, [attendanceData.presentDays, totalDays]);
 
-  const attendanceRateNum = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
-
-  /* 🔴 KPI calculation */
-  const completionRate =
-    count.tickets > 0 ? (count.closed / count.tickets) * 100 : 0;
+  /* ================= KPI CALCULATIONS ================= */
+  // Dynamic completion rate calculation based on actual data
+  const completionRate = useMemo(() => {
+    if (count.tickets === 0) return 0;
+    // Round to nearest integer for better display
+    return Math.round((count.closed / count.tickets) * 100);
+  }, [count.closed, count.tickets]);
 
   useFROLocationUpdater(authState?.userId);
 
@@ -169,7 +178,7 @@ export default function HomeScreen() {
       console.error("User fetch error:", error);
       alert(
         "Failed to fetch user data. " +
-          (error instanceof Error ? error?.message : "Unknown error"),
+        (error instanceof Error ? error?.message : "Unknown error"),
       );
     }
   };
@@ -182,11 +191,17 @@ export default function HomeScreen() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
+      console.log("getDashCount", response);
+
       if (response?.success) {
         setCount(response.data);
       }
     } catch (error) {
       console.error("Count fetch error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Failed to fetch dashboard counts",
+      });
     }
   };
 
@@ -197,8 +212,6 @@ export default function HomeScreen() {
       const currentYear = currentDate.getFullYear();
       const currentMonth = currentDate.getMonth() + 1;
 
-      // console.log(`Fetching daily performance for Year: ${currentYear}, Month: ${currentMonth}`);
-
       const response = await getFROCasePerformanceDayWise({
         year: currentYear,
         month: currentMonth,
@@ -206,8 +219,6 @@ export default function HomeScreen() {
         token: String(authState.token),
       });
 
-      // console.log("FRO Day Case Performance:", response?.data);
-      
       if (response?.data) {
         const processedData = processDayPerformanceData(response.data, currentYear, currentMonth);
         setDayPerformanceData(processedData);
@@ -233,8 +244,6 @@ export default function HomeScreen() {
         token: String(authState.token)
       });
 
-      // console.log("Month Case Performance:", response?.data);
-      
       if (response?.data) {
         setMonthPerformanceData(response.data);
         prepareMonthChartData(response.data);
@@ -269,35 +278,28 @@ export default function HomeScreen() {
   const prepareDayChartData = (data: DayCasePerformanceResponse) => {
     const daysToShow = Math.min(data.data.length, 10);
     const interval = Math.ceil(data.data.length / daysToShow);
-    
+
     const labels: string[] = [];
     const openData: number[] = [];
     const inProgressData: number[] = [];
     const closedData: number[] = [];
 
     data.data.forEach((item, index) => {
-      if (index % interval === 0 || index === data.data.length - 1) {
+      // Always show the first and last day's label
+      if (index === 0 || index === data.data.length - 1) {
+        labels.push(item.day?.toString() || '');
+      }
+      // Show label at intervals
+      else if (index % interval === 0) {
         labels.push(item.day?.toString() || '');
       } else {
         labels.push('');
       }
-      
+
       openData.push(item.open);
       inProgressData.push(item.inProgress);
       closedData.push(item.closed);
     });
-
-    // Calculate averages
-    const avgOpen = Math.round(openData.reduce((a, b) => a + b, 0) / openData.filter(v => v > 0).length || 1);
-    const avgInProgress = Math.round(inProgressData.reduce((a, b) => a + b, 0) / inProgressData.filter(v => v > 0).length || 1);
-    const avgClosed = Math.round(closedData.reduce((a, b) => a + b, 0) / closedData.filter(v => v > 0).length || 1);
-
-    // Update legend with averages
-    const legendWithAvg = [
-      `Open: (${avgOpen})`,
-      `In Progress: (${avgInProgress})`,
-      `Closed: (${avgClosed})`
-    ];
 
     setDayChartData({
       labels,
@@ -305,8 +307,7 @@ export default function HomeScreen() {
         { data: openData, color: () => '#00C950', strokeWidth: 2 },
         { data: inProgressData, color: () => '#FFA500', strokeWidth: 2 },
         { data: closedData, color: () => '#6A7282', strokeWidth: 2 }
-      ],
-      legend: legendWithAvg
+      ]
     });
   };
 
@@ -318,33 +319,11 @@ export default function HomeScreen() {
     const closedData: number[] = [];
 
     data.data.forEach((item) => {
-      labels.push(item.monthName);
+      labels.push(item.monthName.substring(0, 3)); // Show first 3 letters of month
       openData.push(item.open);
       inProgressData.push(item.inProgress);
       closedData.push(item.closed);
     });
-
-    // Calculate monthly averages (only for months with data)
-    const activeMonths = data.data.filter(m => m.total > 0).length;
-    const totals = data.data.reduce(
-      (acc, month) => ({
-        open: acc.open + month.open,
-        inProgress: acc.inProgress + month.inProgress,
-        closed: acc.closed + month.closed,
-      }),
-      { open: 0, inProgress: 0, closed: 0 }
-    );
-
-    const avgOpen = activeMonths > 0 ? Math.round(totals.open / activeMonths) : 0;
-    const avgInProgress = activeMonths > 0 ? Math.round(totals.inProgress / activeMonths) : 0;
-    const avgClosed = activeMonths > 0 ? Math.round(totals.closed / activeMonths) : 0;
-
-    // Update legend with averages
-    const legendWithAvg = [
-      `Open:(${avgOpen})`,
-      `In Progress :(${avgInProgress})`,
-      `Closed: (${avgClosed})`
-    ];
 
     setMonthChartData({
       labels,
@@ -352,15 +331,14 @@ export default function HomeScreen() {
         { data: openData, color: () => '#00C950', strokeWidth: 2 },
         { data: inProgressData, color: () => '#FFA500', strokeWidth: 2 },
         { data: closedData, color: () => '#6A7282', strokeWidth: 2 }
-      ],
-      legend: legendWithAvg
+      ]
     });
   };
 
   // Calculate yearly totals
   const calculateYearlyTotals = () => {
     if (!monthPerformanceData?.data) return null;
-    
+
     return monthPerformanceData.data.reduce(
       (acc, month) => ({
         total: acc.total + month.total,
@@ -412,6 +390,23 @@ export default function HomeScreen() {
   };
 
   const screenWidth = Dimensions.get("window").width - 40;
+  // Calculate chart width based on data length for horizontal scrolling
+  const getChartWidth = (dataLength: number, baseWidth: number) => {
+    const minWidth = baseWidth;
+    const itemWidth = 60; // Approximate width per data point
+    const calculatedWidth = dataLength * itemWidth;
+    return Math.max(minWidth, calculatedWidth);
+  };
+
+  const dayChartWidth = useMemo(() =>
+    getChartWidth(dayChartData.labels.length, screenWidth),
+    [dayChartData.labels.length, screenWidth]
+  );
+
+  const monthChartWidth = useMemo(() =>
+    getChartWidth(monthChartData.labels.length, screenWidth),
+    [monthChartData.labels.length, screenWidth]
+  );
 
   /* ================= UI ================= */
 
@@ -427,7 +422,10 @@ export default function HomeScreen() {
         totalCases={count.tickets}
         notificationCount={3}
       >
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          ref={scrollViewRef}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Attendance */}
           <Text
             style={[
@@ -442,8 +440,14 @@ export default function HomeScreen() {
 
           {/* KPI Circular Charts */}
           <View style={styles.kpiRow}>
-            <CircularKPIChart percentage={attendanceRateNum} label="Attendance" />
-            <CircularKPIChart percentage={completionRate} label="Completion Rate" />
+            <CircularKPIChart
+              percentage={attendanceRateNum}
+              label="Attendance"
+            />
+            <CircularKPIChart
+              percentage={completionRate}
+              label="Completion Rate"
+            />
           </View>
 
           {/* Case Overview */}
@@ -529,28 +533,74 @@ export default function HomeScreen() {
               <Text style={[theme.typography.fontH6, { color: theme.colors.colorPrimary600 }]}>
                 Daily Performance - {new Date().toLocaleString('default', { month: 'long' })} {new Date().getFullYear()}
               </Text>
-              
+
               {loading ? (
                 <Text>Loading chart...</Text>
               ) : (
                 <>
-                  <LineChart
-                    data={dayChartData}
-                    width={screenWidth}
-                    height={220}
-                    chartConfig={{
-                      backgroundColor: '#ffffff',
-                      backgroundGradientFrom: '#ffffff',
-                      backgroundGradientTo: '#ffffff',
-                      decimalPlaces: 0,
-                      color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                      labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                      style: { borderRadius: 16 },
-                      propsForDots: { r: '4', strokeWidth: '2' }
-                    }}
-                    bezier
-                    style={styles.chart}
-                  />
+                  <View style={styles.legendContainer}>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#00C950' }]} />
+                      <Text style={styles.legendText}>Open</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#FFA500' }]} />
+                      <Text style={styles.legendText}>In Progress</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#6A7282' }]} />
+                      <Text style={styles.legendText}>Closed</Text>
+                    </View>
+                  </View>
+
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={true}
+                    style={styles.horizontalScrollView}
+                  >
+                    <View style={{ width: dayChartWidth }}>
+                      <LineChart
+                        data={dayChartData}
+                        width={dayChartWidth}
+                        height={220}
+                        chartConfig={{
+                          backgroundColor: '#ffffff',
+                          backgroundGradientFrom: '#ffffff',
+                          backgroundGradientTo: '#ffffff',
+                          decimalPlaces: 0,
+                          color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                          style: {
+                            borderRadius: 16,
+                          },
+                          propsForDots: {
+                            r: '4',
+                            strokeWidth: '2',
+                            stroke: '#fff'
+                          },
+                          formatYLabel: (yValue) => Math.round(Number(yValue)).toString(),
+                        }}
+                        bezier
+                        style={styles.chart}
+                        withVerticalLines={true}
+                        withHorizontalLines={true}
+                        withDots={true}
+                        withShadow={false}
+                        withInnerLines={true}
+                        withOuterLines={true}
+                        withVerticalLabels={true}
+                        withHorizontalLabels={true}
+                        fromZero={true}
+                        yAxisInterval={1}
+                      />
+                    </View>
+                  </ScrollView>
+
+                          {dayChartWidth > screenWidth && (
+                    <Text style={styles.scrollHint}>← Swipe to see more →</Text>
+                  )}
+                  {/* Legend for daily chart */}
+
                 </>
               )}
             </View>
@@ -562,25 +612,68 @@ export default function HomeScreen() {
               <Text style={[theme.typography.fontH6, { color: theme.colors.colorPrimary600 }]}>
                 Monthly Performance - {monthPerformanceData.year}
               </Text>
-              
-              <LineChart
-                data={monthChartData}
-                width={screenWidth}
-                height={220}
-                chartConfig={{
-                  backgroundColor: '#ffffff',
-                  backgroundGradientFrom: '#ffffff',
-                  backgroundGradientTo: '#ffffff',
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                  style: { borderRadius: 16 },
-                  propsForDots: { r: '4', strokeWidth: '2' }
-                }}
-                bezier
-                style={styles.chart}
-              />
 
+              {/* Legend for monthly chart */}
+              <View style={styles.legendContainer}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#00C950' }]} />
+                  <Text style={styles.legendText}>Open</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#FFA500' }]} />
+                  <Text style={styles.legendText}>In Progress</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#6A7282' }]} />
+                  <Text style={styles.legendText}>Closed</Text>
+                </View>
+              </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={true}
+                style={styles.horizontalScrollView}
+              >
+                <View style={{ width: monthChartWidth }}>
+                  <LineChart
+                    data={monthChartData}
+                    width={monthChartWidth}
+                    height={220}
+                    chartConfig={{
+                      backgroundColor: '#ffffff',
+                      backgroundGradientFrom: '#ffffff',
+                      backgroundGradientTo: '#ffffff',
+                      decimalPlaces: 0,
+                      color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                      labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                      style: {
+                        borderRadius: 16,
+                      },
+                      propsForDots: {
+                        r: '4',
+                        strokeWidth: '2',
+                        stroke: '#fff'
+                      },
+                      formatYLabel: (yValue) => Math.round(Number(yValue)).toString(),
+                    }}
+                    bezier
+                    style={styles.chart}
+                    withVerticalLines={true}
+                    withHorizontalLines={true}
+                    withDots={true}
+                    withShadow={false}
+                    withInnerLines={true}
+                    withOuterLines={true}
+                    withVerticalLabels={true}
+                    withHorizontalLabels={true}
+                    fromZero={true}
+                    yAxisInterval={1}
+                  />
+                </View>
+              </ScrollView>
+              {dayChartWidth > screenWidth && (
+                <Text style={styles.scrollHint}>← Swipe to see more →</Text>
+              )}
               {/* Yearly Summary Stats */}
               {yearlyTotals && (
                 <View style={styles.chartStats}>
@@ -636,7 +729,10 @@ const styles = StyleSheet.create({
   },
   chart: {
     marginVertical: 8,
-    borderRadius: 16
+    borderRadius: 16,
+  },
+  horizontalScrollView: {
+    flexGrow: 0,
   },
   chartStats: {
     flexDirection: 'row',
@@ -648,5 +744,37 @@ const styles = StyleSheet.create({
   },
   statCard: {
     alignItems: 'center'
-  }
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 15,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    flexWrap: 'wrap',
+    gap: 20,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  legendText: {
+    fontSize: 12,
+    color: '#333',
+    fontFamily: 'Poppins-Regular',
+  },
+  scrollHint: {
+    textAlign: 'center',
+    color: '#999',
+    fontSize: 12,
+    marginTop: 8,
+    fontFamily: 'Poppins-Regular',
+  },
 });

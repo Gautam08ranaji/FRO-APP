@@ -16,12 +16,12 @@ import Toast from "react-native-toast-message";
 type AttendanceStatus = "Present" | "Absent" | "Leave";
 
 type AttendanceItem = {
-  id: number;
+  chartId: number;
   date: string;
   checkIn: string;
   checkOut: string;
   totalMinutes: number;
-  status: AttendanceStatus;
+  chartModifyFlag: AttendanceStatus;
   rawData: any; // Store original API data
 };
 
@@ -84,8 +84,8 @@ const normalizeStatus = (status?: string): AttendanceStatus => {
 /* ================= API MAPPER ================= */
 
 const mapAttendanceFromApi = (item: any): AttendanceItem => {
-  const checkInDate = item.checkintime ? new Date(item.checkintime) : null;
-  const checkOutDate = item.checkouttime ? new Date(item.checkouttime) : null;
+  const checkInDate = item.inTime ? new Date(item.inTime) : null;
+  const checkOutDate = item.outTime ? new Date(item.outTime) : null;
 
   const totalMinutes =
     checkInDate && checkOutDate
@@ -93,12 +93,12 @@ const mapAttendanceFromApi = (item: any): AttendanceItem => {
       : 0;
 
   return {
-    id: item.id,
-    date: item.attendancedate ?? item.createddate,
+    chartId: item.chartId,
+    date: item.chartDate,
     checkIn: formatTimeAMPM(checkInDate),
     checkOut: formatTimeAMPM(checkOutDate),
     totalMinutes,
-    status: normalizeStatus(item.status),
+    chartModifyFlag: normalizeStatus(item.chartModifyFlag),
     rawData: item, // Store original data for reference
   };
 };
@@ -129,7 +129,7 @@ export default function AttendanceTab() {
   const findCurrentDateAttendance = (data: any[]) => {
     const today = getTodayDateString();
     return data.find((item) => {
-      const itemDate = item.attendancedate || item.createddate?.split("T")[0];
+      const itemDate = item.chartDate;
       return itemDate === today;
     });
   };
@@ -146,12 +146,12 @@ export default function AttendanceTab() {
       return;
     }
 
-    const hasCheckIn = currentData.checkintime;
-    const hasCheckOut = currentData.checkouttime;
+    const hasCheckIn = currentData.inTime;
+    const hasCheckOut = currentData.outTime;
 
     if (hasCheckIn && !hasCheckOut) {
       // User punched in but not out
-      const checkInTime = new Date(currentData.checkintime);
+      const checkInTime = new Date(currentData.inTime);
       setIsPunchedIn(true);
       setPunchInTime(checkInTime);
       setDutyEnded(false);
@@ -161,8 +161,8 @@ export default function AttendanceTab() {
       setWorkedMinutes(Math.floor(diff / 60000));
     } else if (hasCheckIn && hasCheckOut) {
       // User already completed duty today
-      const checkInTime = new Date(currentData.checkintime);
-      const checkOutTime = new Date(currentData.checkouttime);
+      const checkInTime = new Date(currentData.inTime);
+      const checkOutTime = new Date(currentData.outTime);
 
       setIsPunchedIn(false);
       setPunchInTime(checkInTime);
@@ -193,21 +193,31 @@ export default function AttendanceTab() {
         csrfToken: String(authState.antiforgeryToken),
       });
 
-      console.log("res att", res);
-
       const list = Array.isArray(res?.data?.attendanceList)
         ? res.data.attendanceList
         : [];
 
-      // Find today's attendance
-      const todayAttendance = findCurrentDateAttendance(list);
+      // Filter out future dates
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const filteredList = list.filter((item) => {
+        const itemDate = new Date(item.chartDate);
+        itemDate.setHours(0, 0, 0, 0);
+        return itemDate <= today;
+      });
+
+      // Find today's attendance from filtered list
+      const todayAttendance = findCurrentDateAttendance(filteredList);
       setCurrentDateAttendance(todayAttendance);
+
+      console.log("todayAtt", todayAttendance);
 
       // Initialize punch status
       initializePunchStatus(todayAttendance);
 
-      // Map history
-      setAttendanceHistory(list.map(mapAttendanceFromApi));
+      // Map filtered history
+      setAttendanceHistory(filteredList.map(mapAttendanceFromApi));
     } catch (err: any) {
       console.error("Attendance API error:", err);
 
@@ -223,7 +233,6 @@ export default function AttendanceTab() {
               onPress: () => {
                 // Optional: clear auth state here
                 // dispatch(logout());
-
                 router.replace("/(onboarding)/login");
               },
             },
@@ -271,7 +280,7 @@ export default function AttendanceTab() {
   const filteredData =
     activeTab === "all"
       ? attendanceHistory
-      : attendanceHistory.filter((item) => item.status === activeTab);
+      : attendanceHistory.filter((item) => item.chartModifyFlag === activeTab);
 
   const submitAttendanceStatus = async (action: "start" | "end") => {
     try {
@@ -285,13 +294,12 @@ export default function AttendanceTab() {
           checkintime: action === "start" ? currentDateTime : "",
           checkouttime: action === "end" ? currentDateTime : "",
           status: "Present",
-          totalworkinghours:
-            action === "end" ? formatMinutesToTime(workedMinutes) : "00:00",
           userId: String(authState.userId),
         },
         token: String(authState.token),
         csrfToken: String(authState.antiforgeryToken),
       });
+      
       console.log("payload", {
         attendancedate: currentDate,
         checkintime: action === "start" ? currentDateTime : "",
@@ -423,14 +431,23 @@ export default function AttendanceTab() {
         ))}
       </View>
 
-      {/* FIXED: Added unique key generation to prevent duplicate key warning */}
+      {/* Display message when no data */}
+      {filteredData.length === 0 && (
+        <View style={styles.emptyContainer}>
+          <Text style={[styles.emptyText, { color: theme.colors.colorTextSecondary }]}>
+            No attendance records found
+          </Text>
+        </View>
+      )}
+
+      {/* Attendance History List */}
       {filteredData.map((item, index) => {
-        const themeColor = statusTheme[item.status];
+        const themeColor = statusTheme[item.chartModifyFlag];
         const hours = Math.floor(item.totalMinutes / 60);
         const minutes = item.totalMinutes % 60;
 
         // Create a unique key using id and index as fallback
-        const uniqueKey = item.id ? `${item.id}-${index}` : `item-${index}-${item.date}-${item.status}`;
+        const uniqueKey = item.chartId ? `${item.chartId}` : `item-${index}-${item.date}`;
 
         return (
           <View
@@ -444,7 +461,7 @@ export default function AttendanceTab() {
             ]}
           >
             <Text style={{ color: themeColor.text, fontWeight: "700" }}>
-              {formatDate(item.date)} — {item.status}
+              {formatDate(item.date)} — {item.chartModifyFlag}
             </Text>
 
             <Text style={{ color: themeColor.text }}>
@@ -503,5 +520,15 @@ const styles = StyleSheet.create({
     padding: 14,
     borderWidth: 1,
     marginBottom: 12,
+  },
+  
+  emptyContainer: {
+    padding: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    textAlign: "center",
   },
 });
